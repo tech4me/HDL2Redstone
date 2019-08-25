@@ -1,3 +1,6 @@
 [submodule "third_party/libblifparse"]
 	path = third_party/libblifparse
 	url = git@github.com:kmurray/libblifparse.git
+[submodule "third_party/libnbtplusplus"]
+	path = third_party/libnbtplusplus
+	url = git@github.com:ljfa-ag/libnbtplusplus.git
