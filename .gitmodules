@@ -1,0 +1,3 @@
+[submodule "third_party/libblifparse"]
+	path = third_party/libblifparse
+	url = git@github.com:kmurray/libblifparse.git
