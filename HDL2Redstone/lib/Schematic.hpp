@@ -1,0 +1,3 @@
+class Schematic {
+    bool loadSchematic();
+};

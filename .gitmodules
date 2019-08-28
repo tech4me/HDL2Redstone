@@ -4,6 +4,3 @@
 [submodule "third_party/libnbtplusplus"]
 	path = third_party/libnbtplusplus
 	url = git@github.com:ljfa-ag/libnbtplusplus.git
-[submodule "third_party/clangformat-cmake"]
-	path = third_party/clangformat-cmake
-	url = git@github.com:zemasoft/clangformat-cmake.git

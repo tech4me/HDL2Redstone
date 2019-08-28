@@ -1,6 +1,6 @@
 # HDL2Redstone
 
-One Paragraph of project description goes here
+HDL2Redstone is a hardware compiler, it takes HDL(Verilog) files as input and outputs a Minecraft Schematic file. The Schematic file can be then used to import the design into a Minecraft world.
 
 ## Getting Started
 
