@@ -1,2 +1,6 @@
 # Use the LLVM style in this project.
 BasedOnStyle: LLVM
+IndentWidth: 4
+ColumnLimit: 120
+DerivePointerAlignment: false
+PointerAlignment: Left

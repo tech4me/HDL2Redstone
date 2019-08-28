@@ -1,5 +1,3 @@
 #include "Schematic.hpp"
 
-bool Schematic::loadSchematic() {
-    return true;
-}
+bool Schematic::loadSchematic() { return true; }
