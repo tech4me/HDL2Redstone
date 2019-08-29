@@ -1,0 +1,17 @@
+# TODO: Replace this so the user can set it through our main program
+read -sv <files>
+hierarchy -check -auto-top
+
+proc; fsm; opt; memory; opt
+
+# TODO: Change this to map to our cell library
+techmap; opt
+
+# Remove unused cells and wires
+clean
+
+# Generate schematics using graphviz
+show
+
+# Write design to BLIF file
+write_blif

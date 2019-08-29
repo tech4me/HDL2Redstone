@@ -42,7 +42,7 @@ Some static code analysis will be run by `clang-tidy` during each build, warning
 
 ### Source Code Styling
 
-We use [Google C++ Style](https://google.github.io/styleguide/cppguide.html) in this project, run `make clangformat` in your build directory to format your source code before committing.
+We use [LLVM Coding Standards](https://llvm.org/docs/CodingStandards.html) in this project, run `make format` in your build directory to format your source code before committing. You can also make sure your changes complies with the standard by running `make format-check`.
 
 ## Authors
 

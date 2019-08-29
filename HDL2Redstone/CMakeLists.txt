@@ -1,4 +1,4 @@
-set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-header-filter=.*;-checks=cppcoreguidelines-*,google-*,hicpp-*;-warnings-as-errors=*")
+set(CMAKE_CXX_CLANG_TIDY "clang-tidy")
 
 add_subdirectory(lib)
 
