@@ -6,7 +6,7 @@
 #include <sstream>
 #include <string>
 
-#include "Schematic.hpp"
+#include <Schematic.hpp>
 
 // This comes from https://minecraft.gamepedia.com/Schematic_file_format
 static constexpr auto SCH_WIDTH = "Width";

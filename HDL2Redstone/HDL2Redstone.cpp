@@ -1,4 +1,4 @@
-#include "lib/Schematic.hpp"
+#include <Schematic.hpp>
 #include <iostream>
 
 int main() {

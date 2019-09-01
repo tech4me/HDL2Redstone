@@ -15,6 +15,13 @@ class Schematic {
     const std::vector<int8_t>& getBlocks() const { return Blocks; }
     const std::vector<int8_t>& getData() const { return Data; }
 
+    void setWidth(int16_t Width_) { Width = Width_; }
+    void setHeight(int16_t Height_) { Height = Height_; }
+    void setLength(int16_t Length_) { Length = Length_; }
+    void setMaterials(const std::string& Materials_) { Materials = Materials_; }
+    void setBlocks(const std::vector<int8_t>& Blocks_) { Blocks = Blocks_; }
+    void setData(const std::vector<int8_t>& Data_) { Data = Data_; }
+
   private:
     int16_t Width;
     int16_t Height;
