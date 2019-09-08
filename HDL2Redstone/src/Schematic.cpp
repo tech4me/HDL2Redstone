@@ -1,12 +1,15 @@
 #include <fstream>
-#include <io/izlibstream.h>
-#include <io/stream_reader.h>
 #include <iostream>
-#include <nbt_tags.h>
 #include <sstream>
 #include <string>
 
+#include <io/izlibstream.h>
+#include <io/stream_reader.h>
+#include <nbt_tags.h>
+
 #include <Schematic.hpp>
+
+using namespace HDL2Redstone;
 
 // This comes from https://minecraft.gamepedia.com/Schematic_file_format
 static constexpr auto SCH_WIDTH = "Width";

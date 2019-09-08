@@ -1,3 +1,4 @@
-Checks: 'llvm-*'
-WarningsAsErrors: ''
+Checks: 'llvm-*, -llvm-include-order'
+#WarningsAsErrors: 'llvm-*, -llvm-include-order'
+WarningsAsErrors: '*'
 HeaderFilterRegex: '^((?!third_party).)*$'

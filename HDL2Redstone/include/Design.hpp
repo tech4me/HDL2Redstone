@@ -2,6 +2,7 @@
 
 #include <Schematic.hpp>
 
+namespace HDL2Redstone {
 class Design {
   public:
     // Deleted default constructor
@@ -16,3 +17,4 @@ class Design {
 
   private:
 };
+} // namespace HDL2Redstone

@@ -1,6 +1,9 @@
+#include <iostream>
+
 #include <ComponentNetlist.hpp>
 #include <Schematic.hpp>
-#include <iostream>
+
+using namespace HDL2Redstone;
 
 int main() {
     /*

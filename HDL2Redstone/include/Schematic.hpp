@@ -1,9 +1,11 @@
 #pragma once
 
-#include <io/stream_reader.h>
 #include <string>
 #include <vector>
 
+#include <io/stream_reader.h>
+
+namespace HDL2Redstone {
 class Schematic {
   public:
     bool loadSchematic(const std::string& File);
@@ -30,3 +32,4 @@ class Schematic {
     std::vector<int8_t> Blocks;
     std::vector<int8_t> Data;
 };
+} // namespace HDL2Redstone
