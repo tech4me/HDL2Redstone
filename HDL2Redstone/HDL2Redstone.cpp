@@ -9,6 +9,6 @@ int main() {
         std::cout << "failed to load schematic" << std::endl;
     }
     */
-    ComponentNetlist CN("../HDL2Redstone/examples/design.blif");
+    ComponentNetlist CN("design.blif");
     return 0;
 }

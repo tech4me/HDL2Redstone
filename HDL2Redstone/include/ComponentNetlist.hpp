@@ -1,6 +1,6 @@
 #include <string>
 
 class ComponentNetlist {
-public:
+  public:
     ComponentNetlist(const std::string& File);
 };

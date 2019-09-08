@@ -1,3 +1,1 @@
-class Connection {
-
-};
+class Connection {};
