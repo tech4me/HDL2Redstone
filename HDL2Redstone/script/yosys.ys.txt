@@ -3,7 +3,6 @@ hierarchy -check -auto-top
 
 proc; fsm; opt; memory; opt
 
-# TODO: Change this to map to our cell library
 techmap; opt
 
 abc -liberty {input_liberty_file} -g AND
