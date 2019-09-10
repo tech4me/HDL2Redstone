@@ -10,5 +10,32 @@
       }
     },
     "name": "BUF"
+  },
+  {
+    "pins": {
+      "A": {
+        "direction": "input"
+      },
+      "Y": {
+        "direction": "output",
+        "function": "A'"
+      }
+    },
+    "name": "NOT"
+  },
+  {
+    "pins": {
+      "A": {
+        "direction": "input"
+      },
+      "B": {
+        "direction": "input"
+      },
+      "Y": {
+        "direction": "output",
+        "function": "(A*B)"
+      }
+    },
+    "name": "AND"
   }
 ]
