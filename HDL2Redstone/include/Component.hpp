@@ -8,6 +8,7 @@ namespace HDL2Redstone {
 class Component {
   public:
     Component(const std::string& TypeName_);
+    Component(Cell* CellPtr_) : CellPtr(CellPtr_) {};
     // Port* getPort(std::string PortName);
     std::string getType() const;
 

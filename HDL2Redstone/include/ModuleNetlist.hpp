@@ -17,21 +17,19 @@ class ModuleNetlist {
 
   private:
     class ExtractNetlist : public blifparse::Callback {
-        public:
+      public:
         void start_parse() override {}
         void filename(std::string /*fname*/) override {}
         void lineno(int /*line_num*/) override {}
         void begin_model(std::string /*model_name*/) override {}
-        void inputs(std::vector<std::string> inputs) override {
-            for (const auto& input : inputs) {
-                ModulePorts.push_back(std::make_unique<ModulePort>(input, PortType::Input));
-            }
-        }
-        void outputs(std::vector<std::string> /*outputs*/) override {}
-        void names(std::vector<std::string> /*nets*/, std::vector<std::vector<blifparse::LogicValue>> /*so_cover*/) override {}
-        void latch(std::string /*input*/, std::string /*output*/, blifparse::LatchType /*type*/, std::string /*control*/, blifparse::LogicValue /*init*/) override {}
+        void inputs(std::vector<std::string> /*inputs*/) override;
+        void outputs(std::vector<std::string> /*outputs*/) override;
+        void names(std::vector<std::string> /*nets*/,
+                   std::vector<std::vector<blifparse::LogicValue>> /*so_cover*/) override {}
+        void latch(std::string /*input*/, std::string /*output*/, blifparse::LatchType /*type*/,
+                   std::string /*control*/, blifparse::LogicValue /*init*/) override {}
         void subckt(std::string /*model*/, std::vector<std::string> /*ports*/,
-                    std::vector<std::string> /*nets*/) override {}
+                    std::vector<std::string> /*nets*/) override;
         void blackbox() override {}
         void end_model() override {}
         void finish_parse() override {}
@@ -40,11 +38,12 @@ class ModuleNetlist {
             had_error_ = true;
         }
 
-        bool had_error() { return had_error_; }
+        bool had_error() { return had_error_ = 1; }
 
-      private:
         bool had_error_ = false;
         std::vector<std::unique_ptr<ModulePort>> ModulePorts;
+        std::vector<std::unique_ptr<Component>> Components;
+        std::vector<std::unique_ptr<Connection>> Connections;
     };
 
     // Input and output ports of the top module

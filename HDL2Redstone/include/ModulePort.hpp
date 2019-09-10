@@ -8,6 +8,8 @@ class ModulePort {
   public:
     ModulePort(const std::string& Name_, PortType PT_);
 
+    const std::string& getName() const;
+
   private:
     std::string Name;
     PortType PT;
