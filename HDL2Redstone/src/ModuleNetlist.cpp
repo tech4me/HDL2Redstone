@@ -47,7 +47,8 @@ void ModuleNetlist::ExtractNetlist::subckt(std::string model, std::vector<std::s
         };
         auto It = std::find_if(Connections.begin(), Connections.end(), P);
         if (It != Connections.end()) {
-
+            // TODO: This is assuming source of a connection will always be before sink
+            (*It)->addSink(ComponentPtr.get(), port);
         } else {
             Connections.push_back(std::make_unique<Connection>(net, ComponentPtr.get(), port));
         }
