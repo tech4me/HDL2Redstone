@@ -1,8 +1,9 @@
 add_library(hdl2redstone-core
+    CellLibrary.cpp
     Component.cpp
     Connection.cpp
     Design.cpp
     ModuleNetlist.cpp
 	ModulePort.cpp
     Schematic.cpp)
-target_link_libraries(hdl2redstone-core libblifparse nbt++)
+target_link_libraries(hdl2redstone-core libblifparse nbt++ nlohmann_json)

@@ -1,0 +1,14 @@
+[
+  {
+    "pins": {
+      "A": {
+        "direction": "input"
+      },
+      "Y": {
+        "direction": "output",
+        "function": "A"
+      }
+    },
+    "name": "BUF"
+  }
+]
