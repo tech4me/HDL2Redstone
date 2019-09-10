@@ -4,42 +4,48 @@ HDL2Redstone is a hardware compiler, it takes HDL(Verilog) files as input and ou
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
-
 ### Prerequisites
 
-What things you need to install the software and how to install them
+This project has only be tested to work on Linux
 
 ```
 gcc with C++17 support
-cmake3.10
-python3.7
+cmake 3.10
+makefile
+python 3.7
 zlib
 flex
-bison3
+bison 3
 ```
 
 ### Installing
 
-A step by step series of examples that tell you how to get a development env running
+Make sure you have [Github ssh key](https://help.github.com/en/articles/connecting-to-github-with-ssh) setup already
 
-Say what the step will be
-
-```
-Give the example
-```
-
-And repeat
+#### Get the Source Code
 
 ```
-until finished
+git clone git@github.com:tech4me/HDL2Redstone.git
+cd HDL2Redstone
+git submodule update --init --recursive
 ```
 
-End with an example of getting some data out of the system or using it for a little demo
+#### Build the Project
+
+```
+mkdir -p build
+cd build
+cmake ..
+make
+```
+
+### Run Example Design
+
+```
+HDL2Redstone/HDL2Redstone.py <verilog file>
+```
 
 ## Developer Information
-
-Useful information for people who work on this project.
 
 ### Static Code Analysis
 
