@@ -7,10 +7,14 @@
 namespace HDL2Redstone {
 class Connection {
   public:
-    Connection(const std::string& Name_, Component* Component_, const std::string& PortName_);
-};
+    Connection(const std::string& Name_, Component* ComponentPtr_, const std::string& PortName_);
 
-// bool addSource();
-// Check connection's exsisting sinks, add port to sink
-// bool addSink(Port*);
+    const std::string& getName() const;
+
+    // Check connection's exsisting sinks, add component port to sink
+    bool addSink(Component* ComponentPtr_, const std::string& PortName_);
+
+  private:
+    std::string Name;
+};
 } // namespace HDL2Redstone
