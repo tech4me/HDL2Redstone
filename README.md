@@ -61,4 +61,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Acknowledgments
 
-* Thanks to Prof. Vaughn Betz for guiding us.
+* Thanks to Prof. Vaughn Betz for supervising us.
