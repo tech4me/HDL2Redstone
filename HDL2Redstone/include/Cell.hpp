@@ -7,13 +7,13 @@
 
 namespace HDL2Redstone {
 class Cell {
-    enum class Type { Nand };
     enum class Direction { Input, Output, Inout };
 
   public:
     Cell() = delete;
 
     Cell(const std::string& Type_, const std::map<std::string, std::map<std::string, std::string>>& Pin_);
+    const std::string& getType() const;
 
   private:
     Schematic Sch;

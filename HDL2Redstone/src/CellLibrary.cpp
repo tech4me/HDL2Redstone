@@ -1,3 +1,4 @@
+#include <exception>
 #include <fstream>
 #include <iostream>
 
@@ -25,5 +26,13 @@ CellLibrary::CellLibrary(const std::string& json_in_) {
         }
     } catch (json::out_of_range& e) {
         std::cout << e.what() << std::endl;
+    }
+}
+
+const Cell* CellLibrary::getCellPtr(const std::string& Name_) const {
+    try {
+        return CellInstances.at(Name_).get();
+    } catch (std::out_of_range& e) {
+        return nullptr;
     }
 }

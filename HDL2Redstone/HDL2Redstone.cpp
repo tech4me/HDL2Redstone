@@ -13,8 +13,8 @@ int main() {
         std::cout << "failed to load schematic" << std::endl;
     }
     */
-    ModuleNetlist MN("design.blif");
-    std::cout << MN;
     CellLibrary CL("/home/kitty/496/HDL2Redstone/HDL2Redstone/cell_lib/HDL2Redstone.json");
+    ModuleNetlist MN("design.blif", CL);
+    std::cout << MN;
     return 0;
 }

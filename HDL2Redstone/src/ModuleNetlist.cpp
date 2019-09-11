@@ -8,6 +8,9 @@
 
 using namespace blifparse;
 using namespace HDL2Redstone;
+
+ModuleNetlist::ExtractNetlist::ExtractNetlist(const CellLibrary& CellLib_) : CellLib(CellLib_) {}
+
 void ModuleNetlist::ExtractNetlist::inputs(std::vector<std::string> inputs) {
     for (const auto& input : inputs) {
         // const Cell* CellPtr = CellLib.getCellPtr("INPUT");
@@ -30,8 +33,8 @@ void ModuleNetlist::ExtractNetlist::outputs(std::vector<std::string> outputs) {
 
 void ModuleNetlist::ExtractNetlist::subckt(std::string model, std::vector<std::string> ports,
                                            std::vector<std::string> nets) {
-    // const Cell* CellPtr = CellLib.getCellPtr(model);
-    const Cell* CellPtr = nullptr;
+    const Cell* CellPtr = CellLib.getCellPtr(model);
+    // TODO: Check is CellPtr is nullptr
     auto ComponentPtr = std::make_unique<Component>(CellPtr);
     auto It1 = ports.begin();
     auto It2 = nets.begin();
@@ -62,9 +65,9 @@ void ModuleNetlist::ExtractNetlist::parse_error(const int curr_lineno, const std
     had_error_ = true;
 }
 
-ModuleNetlist::ModuleNetlist(const std::string& File) {
-    ExtractNetlist EN;
-    blif_parse_filename(File, EN);
+ModuleNetlist::ModuleNetlist(const std::string& File_, const CellLibrary& CellLib_) {
+    ExtractNetlist EN(CellLib_);
+    blif_parse_filename(File_, EN);
     if (EN.had_error()) {
         throw "error";
     }

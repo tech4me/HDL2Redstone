@@ -7,19 +7,21 @@
 
 #include <blifparse.hpp>
 
+#include <CellLibrary.hpp>
 #include <Component.hpp>
 #include <Connection.hpp>
 
 namespace HDL2Redstone {
 class ModuleNetlist {
   public:
-    ModuleNetlist(const std::string& File);
+    ModuleNetlist(const std::string& File_, const CellLibrary& CellLib_);
 
   private:
     class ExtractNetlist : public blifparse::Callback {
         friend class ModuleNetlist;
 
       public:
+        ExtractNetlist(const CellLibrary& CellLib_);
         void start_parse() override {}
         void filename(std::string /*fname*/) override {}
         void lineno(int /*line_num*/) override {}
@@ -42,6 +44,7 @@ class ModuleNetlist {
 
       private:
         bool had_error_ = false;
+        const CellLibrary& CellLib;
         std::vector<std::unique_ptr<Component>> Components;
         std::vector<std::unique_ptr<Connection>> Connections;
     };

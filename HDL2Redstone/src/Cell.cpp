@@ -19,3 +19,5 @@ Cell::Cell(const std::string& Type_, const std::map<std::string, std::map<std::s
         Pins.emplace(Pin.first, PinInfo(Pin.second));
     }
 }
+
+const std::string& Cell::getType() const { return Type; }
