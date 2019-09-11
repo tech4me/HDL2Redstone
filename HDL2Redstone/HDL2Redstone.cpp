@@ -13,5 +13,6 @@ int main() {
     }
     */
     ModuleNetlist MN("design.blif");
+    std::cout << MN;
     return 0;
 }

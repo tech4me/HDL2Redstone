@@ -1,17 +1,17 @@
+#include <algorithm>
 #include <fstream>
-#include <iostream>
 
 #include <blif_pretty_print.hpp>
 
+#include <Component.hpp>
 #include <ModuleNetlist.hpp>
 
 using namespace blifparse;
 using namespace HDL2Redstone;
-
 void ModuleNetlist::ExtractNetlist::inputs(std::vector<std::string> inputs) {
     for (const auto& input : inputs) {
-        // Cell* CellPtr = CellLib.getCellPtr("INPUT");
-        Cell* CellPtr = nullptr;
+        // const Cell* CellPtr = CellLib.getCellPtr("INPUT");
+        const Cell* CellPtr = nullptr;
         auto ComponentPtr = std::make_unique<Component>(CellPtr);
         Connections.push_back(std::make_unique<Connection>(input, ComponentPtr.get(), "INPUT"));
         Components.push_back(std::move(ComponentPtr));
@@ -20,8 +20,8 @@ void ModuleNetlist::ExtractNetlist::inputs(std::vector<std::string> inputs) {
 
 void ModuleNetlist::ExtractNetlist::outputs(std::vector<std::string> outputs) {
     for (const auto& output : outputs) {
-        // Cell* CellPtr = CellLib.getCellPtr("OUTPUT");
-        Cell* CellPtr = nullptr;
+        // const Cell* CellPtr = CellLib.getCellPtr("OUTPUT");
+        const Cell* CellPtr = nullptr;
         auto ComponentPtr = std::make_unique<Component>(CellPtr);
         Connections.push_back(std::make_unique<Connection>(output, ComponentPtr.get(), "OUTPUT"));
         Components.push_back(std::move(ComponentPtr));
@@ -30,8 +30,8 @@ void ModuleNetlist::ExtractNetlist::outputs(std::vector<std::string> outputs) {
 
 void ModuleNetlist::ExtractNetlist::subckt(std::string model, std::vector<std::string> ports,
                                            std::vector<std::string> nets) {
-    // Cell* CellPtr = CellLib.getCellPtr(model);
-    Cell* CellPtr = nullptr;
+    // const Cell* CellPtr = CellLib.getCellPtr(model);
+    const Cell* CellPtr = nullptr;
     auto ComponentPtr = std::make_unique<Component>(CellPtr);
     auto It1 = ports.begin();
     auto It2 = nets.begin();
@@ -71,4 +71,18 @@ ModuleNetlist::ModuleNetlist(const std::string& File) {
     // Move all our internal data structure
     Components = std::move(EN.Components);
     Connections = std::move(EN.Connections);
+}
+
+namespace HDL2Redstone {
+std::ostream& operator<<(std::ostream& out, const ModuleNetlist& ModuleNetlist_) {
+    for (const auto& T : ModuleNetlist_.Components) {
+        out << "Modules:" << std::endl;
+        out << *T;
+    }
+    for (const auto& T : ModuleNetlist_.Connections) {
+        out << "Connections:" << std::endl;
+        out << *T;
+    }
+    return out;
+}
 }

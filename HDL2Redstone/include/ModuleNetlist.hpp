@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
@@ -48,5 +49,6 @@ class ModuleNetlist {
     // Netlist data
     std::vector<std::unique_ptr<Component>> Components;
     std::vector<std::unique_ptr<Connection>> Connections;
+    friend std::ostream& operator<<(std::ostream& out, const ModuleNetlist& ModuleNetlist_);
 };
 } // namespace HDL2Redstone

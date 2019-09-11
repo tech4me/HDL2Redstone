@@ -1,15 +1,12 @@
 #include <Component.hpp>
 
 using namespace HDL2Redstone;
+Component::Component(const Cell* CellPtr_) : CellPtr(CellPtr_){};
+std::string Component::getCellType() const { return "HIGH"; };
 
-Component::Component(const std::string& TypeName_) {
-    /*
-    CellPtr = CellLib.getCell(TypeName_);
-    if (CellPtr == nullptr) {
-        throw "ERROR";
-    }
-    for (CellPtr->getPorts()) {
-        Ports.push_back();
-    }
-    */
+namespace HDL2Redstone {
+std::ostream& operator<<(std::ostream& out, const Component& Component_) {
+    out << "MODULE TYPE:" << Component_.getCellType() << std::endl;
+    return out;
+}
 }
