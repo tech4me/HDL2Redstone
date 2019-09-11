@@ -75,13 +75,19 @@ ModuleNetlist::ModuleNetlist(const std::string& File) {
 
 namespace HDL2Redstone {
 std::ostream& operator<<(std::ostream& out, const ModuleNetlist& ModuleNetlist_) {
+    out << "Modules:" << std::endl;
+    int i = 0;
     for (const auto& T : ModuleNetlist_.Components) {
-        out << "Modules:" << std::endl;
+        out << i << " ";
         out << *T;
+        i++;
     }
-    for (const auto& T : ModuleNetlist_.Connections) {
-        out << "Connections:" << std::endl;
+    out << "Connections:" << std::endl;
+    i = 0;
+    for (const auto& T : ModuleNetlist_.Connections) {  
+        out << i << " ";  
         out << *T;
+        i++;
     }
     return out;
 }

@@ -18,7 +18,7 @@ namespace HDL2Redstone {
 std::ostream& operator<<(std::ostream& out, const Connection& Connection_) {
     out << "Connection Name:" << Connection_.Name << std::endl;
     for (const auto& T : Connection_.PortName) {
-        out << "Module Type:" << *(T.first) << "Port Name:" << T.second << std::endl;
+        out << *(T.first) << "Port Name:" << T.second << std::endl;
     }
     return out;
 }
