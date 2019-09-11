@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include <CellLibrary.hpp>
 #include <ModuleNetlist.hpp>
 #include <Schematic.hpp>
 
@@ -14,5 +15,6 @@ int main() {
     */
     ModuleNetlist MN("design.blif");
     std::cout << MN;
+    CellLibrary CL("/home/kitty/496/HDL2Redstone/HDL2Redstone/cell_lib/HDL2Redstone.json");
     return 0;
 }

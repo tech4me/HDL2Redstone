@@ -1,4 +1,5 @@
 add_library(hdl2redstone-core
+    Cell.cpp
     CellLibrary.cpp
     Component.cpp
     Connection.cpp

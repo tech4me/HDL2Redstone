@@ -1,5 +1,7 @@
 #pragma once
 
+#include <map>
+#include <memory>
 #include <string>
 
 #include <Cell.hpp>
@@ -11,6 +13,6 @@ class CellLibrary {
     CellLibrary(const std::string& json_in);
 
   private:
-    std::vector<Cell> cell_instances;
+    std::map<std::string, std::unique_ptr<Cell>> CellInstances;
 };
 } // namespace HDL2Redstone
