@@ -9,4 +9,4 @@ std::ostream& operator<<(std::ostream& out, const Component& Component_) {
     out << "Module Type:" << Component_.getCellType() << std::endl;
     return out;
 }
-}
+} // namespace HDL2Redstone

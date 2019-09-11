@@ -22,4 +22,4 @@ std::ostream& operator<<(std::ostream& out, const Connection& Connection_) {
     }
     return out;
 }
-}
+} // namespace HDL2Redstone

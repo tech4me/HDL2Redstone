@@ -12,5 +12,5 @@ CellLibrary::CellLibrary(const std::string& json_in_) {
     std::ifstream j_in(json_in_);
     json j;
     j_in >> j;
-    std::cout<<j;
+    std::cout << j;
 }

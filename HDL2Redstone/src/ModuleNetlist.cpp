@@ -84,11 +84,11 @@ std::ostream& operator<<(std::ostream& out, const ModuleNetlist& ModuleNetlist_)
     }
     out << "Connections:" << std::endl;
     i = 0;
-    for (const auto& T : ModuleNetlist_.Connections) {  
-        out << i << " ";  
+    for (const auto& T : ModuleNetlist_.Connections) {
+        out << i << " ";
         out << *T;
         i++;
     }
     return out;
 }
-}
+} // namespace HDL2Redstone
