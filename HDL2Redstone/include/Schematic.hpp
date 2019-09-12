@@ -8,7 +8,7 @@
 namespace HDL2Redstone {
 class Schematic {
   public:
-    void loadSchematic(const std::string& File);
+    Schematic(const std::string& File);
 
     int16_t getWidth() const { return Width; }
     int16_t getHeight() const { return Height; }

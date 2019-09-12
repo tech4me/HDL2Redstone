@@ -2,21 +2,23 @@
 
 #include <map>
 #include <string>
+#include <vector>
 
 #include <Schematic.hpp>
 
 namespace HDL2Redstone {
 class Cell {
     enum class Direction { Input, Output, Inout };
+    enum class Orientation { North, South, West, East };
 
   public:
     Cell() = delete;
 
-    Cell(const std::string& Type_, const std::map<std::string, std::map<std::string, std::string>>& Pin_);
+    Cell(const std::string& Type_, const std::map<std::string, std::map<std::string, std::string>>& Pin_,
+         const std::map<std::string, std::map<std::string, std::string>>& Schematics_);
     const std::string& getType() const;
 
   private:
-    Schematic Sch;
     std::string Type;
 
     class PinInfo {
@@ -25,8 +27,17 @@ class Cell {
 
         Direction Dir;
     };
-    // <pin_name, direction_info>
+    // <pin_name, Other info:direction, function etc>
     std::map<std::string, PinInfo> Pins;
-    // Here we should also store timing, volume, and constraint info
+
+    class SchemaInfo {
+      public:
+        SchemaInfo(const std::string& SchemaPath_, const std::map<std::string, std::string>& JsonInfo_);
+        // will store timing, volume, constraint info
+        // Orientation Ori;
+        Schematic Schema;
+    };
+    // <schema_name, Other info:orientation, timing etc >
+    std::map<std::string, SchemaInfo> Schematics;
 };
 } // namespace HDL2Redstone

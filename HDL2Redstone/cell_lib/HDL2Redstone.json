@@ -10,7 +10,10 @@
         "function": "A"
       }
     },
-    "name": "BUF"
+    "name": "BUF",
+    "schematics" : {
+      "1_tick_delay_buf": {}
+    }
   },
   {
     "liberty": true,

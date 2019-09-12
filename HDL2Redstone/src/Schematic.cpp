@@ -22,20 +22,20 @@ static constexpr auto SCH_DATA = "Data";
 static constexpr auto SCH_ENTITIES = "Entities";
 static constexpr auto SCH_TILE_ENTITIES = "TileEntities";
 
-void Schematic::loadSchematic(const std::string& File_) {
+Schematic::Schematic(const std::string& File_) {
     std::ifstream FS(File_, std::ios::binary);
     if (FS.fail()) {
-        Exception("Problem loading File: " + File_ + " .");
+        throw Exception("Problem opening File: " + File_);
     }
-
-    zlib::izlibstream ZS(FS);
-    auto P = nbt::io::read_compound(ZS);
-    if (P.first != "Schematic") {
-        Exception(File_ + " is not a schematic file.");
-    }
-    auto C = *P.second;
 
     try {
+        zlib::izlibstream ZS(FS);
+        auto P = nbt::io::read_compound(ZS);
+        if (P.first != "Schematic") {
+            throw Exception(File_ + " is not a schematic file.");
+        }
+        auto C = *P.second;
+
         Width = C.at(SCH_WIDTH).as<nbt::tag_short>();
         Height = C.at(SCH_HEIGHT).as<nbt::tag_short>();
         Length = C.at(SCH_LENGTH).as<nbt::tag_short>();
@@ -43,6 +43,6 @@ void Schematic::loadSchematic(const std::string& File_) {
         Blocks = C.at(SCH_BLOCKS).as<nbt::tag_byte_array>().get();
         Data = C.at(SCH_DATA).as<nbt::tag_byte_array>().get();
     } catch (...) {
-        Exception("Failed loading schematic file " + File_ + " .");
+        throw Exception("Failed loading schematic file " + File_);
     }
 }

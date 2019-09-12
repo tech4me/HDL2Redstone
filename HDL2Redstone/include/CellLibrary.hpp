@@ -10,7 +10,7 @@
 namespace HDL2Redstone {
 class CellLibrary {
   public:
-    CellLibrary(const std::string& json_in);
+    CellLibrary(const std::string& Json_in);
     const Cell* getCellPtr(const std::string& Name_) const;
 
   private:
