@@ -20,7 +20,7 @@ CellLibrary::CellLibrary(const std::string& json_in_) {
     try {
         for (const auto& cell : j) {
             std::map<std::string, std::map<std::string, std::string>> temp;
-            for (const auto& [key, value] : cell["pins"].items())
+            for (const auto & [ key, value ] : cell["pins"].items())
                 temp.emplace(key, value);
             CellInstances.emplace(cell["name"], std::make_unique<Cell>(cell["name"], temp));
         }
