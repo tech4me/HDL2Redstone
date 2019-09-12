@@ -4,6 +4,7 @@ add_library(hdl2redstone-core
     Component.cpp
     Connection.cpp
     Design.cpp
+    Exception.cpp
     ModuleNetlist.cpp
     Parameters.cpp
     Schematic.cpp)

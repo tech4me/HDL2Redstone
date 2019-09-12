@@ -7,6 +7,7 @@
 #include <io/stream_reader.h>
 #include <nbt_tags.h>
 
+#include <Exception.hpp>
 #include <Schematic.hpp>
 
 using namespace HDL2Redstone;
@@ -21,18 +22,16 @@ static constexpr auto SCH_DATA = "Data";
 static constexpr auto SCH_ENTITIES = "Entities";
 static constexpr auto SCH_TILE_ENTITIES = "TileEntities";
 
-bool Schematic::loadSchematic(const std::string& File) {
-    std::ifstream FS(File, std::ios::binary);
+void Schematic::loadSchematic(const std::string& File_) {
+    std::ifstream FS(File_, std::ios::binary);
     if (FS.fail()) {
-        std::cerr << "Error: Problem loading File: " << File << std::endl;
-        return true;
+        Exception("Problem loading File: " + File_ + " .");
     }
 
     zlib::izlibstream ZS(FS);
     auto P = nbt::io::read_compound(ZS);
     if (P.first != "Schematic") {
-        std::cerr << "Error: Is " << File << " a schematic file?" << std::endl;
-        return true;
+        Exception(File_ + " is not a schematic file.");
     }
     auto C = *P.second;
 
@@ -44,9 +43,6 @@ bool Schematic::loadSchematic(const std::string& File) {
         Blocks = C.at(SCH_BLOCKS).as<nbt::tag_byte_array>().get();
         Data = C.at(SCH_DATA).as<nbt::tag_byte_array>().get();
     } catch (...) {
-        std::cerr << "Error: Schematic file " << File << " loading error" << std::endl;
-        return true;
+        Exception("Failed loading schematic file " + File_ + " .");
     }
-
-    return false;
 }

@@ -16,4 +16,4 @@ class Parameters {
     int16_t X, Y, Z;
     Orientation Turn;
 };
-}
+} // namespace HDL2Redstone

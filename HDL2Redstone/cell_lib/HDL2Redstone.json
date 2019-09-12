@@ -1,5 +1,6 @@
 [
   {
+    "liberty": true,
     "pins": {
       "A": {
         "direction": "input"
@@ -12,6 +13,7 @@
     "name": "BUF"
   },
   {
+    "liberty": true,
     "pins": {
       "A": {
         "direction": "input"
@@ -24,6 +26,7 @@
     "name": "NOT"
   },
   {
+    "liberty": true,
     "pins": {
       "A": {
         "direction": "input"
@@ -37,5 +40,23 @@
       }
     },
     "name": "AND"
+  },
+  {
+    "liberty": false,
+    "pins": {
+      "Y": {
+        "direction": "output"
+      }
+    },
+    "name": "INPUT"
+  },
+  {
+    "liberty": false,
+    "pins": {
+      "A": {
+        "direction": "input"
+      }
+    },
+    "name": "OUTPUT"
   }
 ]

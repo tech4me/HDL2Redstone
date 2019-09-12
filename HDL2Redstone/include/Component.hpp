@@ -9,7 +9,6 @@ namespace HDL2Redstone {
 class Component {
   public:
     Component(const Cell* CellPtr_);
-    std::string getCellType() const;
     void SetParameters(std::string& CellStructure_, int16_t X_, int16_t Y_, int16_t Z_, Parameters::Orientation Turn_);
     friend std::ostream& operator<<(std::ostream& out, const Component& Component_);
 

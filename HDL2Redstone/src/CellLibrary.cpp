@@ -5,27 +5,28 @@
 #include <nlohmann/json.hpp>
 
 #include <CellLibrary.hpp>
+#include <Exception.hpp>
 
 using namespace nlohmann;
 using namespace HDL2Redstone;
 
-CellLibrary::CellLibrary(const std::string& json_in_) {
-    std::ifstream j_in(json_in_);
-    if (j_in.fail()) {
-        std::cout << "Error" << std::endl;
+CellLibrary::CellLibrary(const std::string& Json_in_) {
+    std::ifstream Json_in_fs(Json_in_);
+    if (Json_in_fs.fail()) {
+        throw Exception("Failed reading json file: " + Json_in_ + " .");
     }
-    json j;
-    j_in >> j;
+    json J;
+    Json_in_fs >> J;
 
     try {
-        for (const auto& cell : j) {
-            std::map<std::string, std::map<std::string, std::string>> temp;
-            for (const auto & [ key, value ] : cell["pins"].items())
-                temp.emplace(key, value);
-            CellInstances.emplace(cell["name"], std::make_unique<Cell>(cell["name"], temp));
+        for (const auto& CellData : J) {
+            std::map<std::string, std::map<std::string, std::string>> Temp;
+            for (const auto& [key, value] : CellData["pins"].items())
+                Temp.emplace(key, value);
+            CellInstances.emplace(CellData["name"], std::make_unique<Cell>(CellData["name"], std::move(Temp)));
         }
-    } catch (json::out_of_range& e) {
-        std::cout << e.what() << std::endl;
+    } catch (json::exception& E) {
+        throw Exception(E.what());
     }
 }
 
@@ -33,6 +34,6 @@ const Cell* CellLibrary::getCellPtr(const std::string& Name_) const {
     try {
         return CellInstances.at(Name_).get();
     } catch (std::out_of_range& e) {
-        return nullptr;
+        throw Exception("Invalid cell type: " + Name_ + " .");
     }
 }
