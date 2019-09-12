@@ -6,15 +6,21 @@
 
 using namespace HDL2Redstone;
 
-int main() {
+int main(int argc, char* argv[]) {
     /*
     Schematic S;
     if (S.loadSchematic("../HDL2Redstone/cell_lib/BlankShape.schematic")) {
         std::cout << "failed to load schematic" << std::endl;
     }
     */
-    CellLibrary CL("/home/kitty/496/HDL2Redstone/HDL2Redstone/cell_lib/HDL2Redstone.json");
-    ModuleNetlist MN("design.blif", CL);
-    std::cout << MN;
+    if (argc > 1) {
+        std::string CellLibJSON(argv[1]);
+        CellLibrary CL(CellLibJSON);
+        ModuleNetlist MN("design.blif", CL);
+        std::cout << MN;
+    } else {
+        std::cout << "ERROR" << std::endl;
+    }
+
     return 0;
 }

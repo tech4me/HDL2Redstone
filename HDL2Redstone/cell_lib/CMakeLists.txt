@@ -1,1 +1,1 @@
-configure_file(HDL2Redstone.lib ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+configure_file(HDL2Redstone.json ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)

@@ -1,5 +1,10 @@
+# IDE related
 .vscode/
+
+# Build directory
 build/
+
+# Design output
 *.blif
 *.dot
-*log
+*.log

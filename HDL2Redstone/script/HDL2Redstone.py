@@ -5,6 +5,8 @@ import sys
 import argparse
 import subprocess
 
+from CreateLibertyLib import create_liberty_lib
+
 file_path = os.path.dirname(os.path.realpath(__file__))
 
 parser = argparse.ArgumentParser(description="HDL2Redstone main excutable.")
@@ -19,7 +21,10 @@ if not os.path.isfile(args.verilog_file):
     sys.exit("Error: Verilog file provided does not exist.")
 verilog_file = os.path.abspath(args.verilog_file)
 
+json_file = os.path.abspath(os.path.join(file_path, "cell_lib/HDL2Redstone.json"))
+
 liberty_file = os.path.abspath(os.path.join(file_path, "cell_lib/HDL2Redstone.lib"))
+create_liberty_lib(json_file, liberty_file)
 if not os.path.isfile(liberty_file):
     sys.exit("Error: Liberty file does not exist.")
 
@@ -39,7 +44,7 @@ os.chdir(output_dir)
 yosys_command = yosys_command.format(input_verilog_file=verilog_file, input_liberty_file=liberty_file, output_dot_file_name="design", output_blif_file="design.blif")
 
 # Run Yosys to generate BLIF file
-subprocess.call(["yosys", "-Q", "-q", "-l", "yosys.log", "-p", yosys_command])
+subprocess.run(["yosys", "-Q", "-q", "-l", "yosys.log", "-p", yosys_command])
 
 # Run HDL2Redstone main executable to generate schematics
-subprocess.call([os.path.join(file_path, "HDL2Redstone")])
+subprocess.run([os.path.join(file_path, "HDL2Redstone"), json_file])

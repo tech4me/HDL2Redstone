@@ -13,6 +13,7 @@ gcc with C++17 support
 cmake 3.10
 makefile
 python 3.7
+clang-tools
 zlib
 flex
 bison 3
