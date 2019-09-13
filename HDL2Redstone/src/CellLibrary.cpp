@@ -10,10 +10,10 @@
 using namespace nlohmann;
 using namespace HDL2Redstone;
 
-CellLibrary::CellLibrary(const std::string& Json_in_) {
-    std::ifstream Json_in_fs(Json_in_);
+CellLibrary::CellLibrary(const std::string& CellLibDir_) {
+    std::ifstream Json_in_fs(CellLibDir_ + "HDL2Redstone.json");
     if (Json_in_fs.fail()) {
-        throw Exception("Failed reading json file: " + Json_in_);
+        throw Exception("Failed reading json file: " + CellLibDir_ + "HDL2Redstone.json");
     }
     json J;
     Json_in_fs >> J;
@@ -22,13 +22,17 @@ CellLibrary::CellLibrary(const std::string& Json_in_) {
         for (const auto& CellData : J) {
             std::map<std::string, std::map<std::string, std::string>> TempPinInfo;
             std::map<std::string, std::map<std::string, std::string>> TempSchemaInfo;
-            for (const auto& [key, value] : CellData["pins"].items())
+            for (const auto& [key, value] : CellData["pins"].items()) {
                 TempPinInfo.emplace(key, value);
-            for (const auto& [key, value] : CellData["schematics"].items()) {
-                TempSchemaInfo.emplace(key, value);
             }
-            CellInstances.emplace(CellData["name"], std::make_unique<Cell>(CellData["name"], std::move(TempPinInfo),
-                                                                           std::move(TempSchemaInfo)));
+            if (CellData.contains("schematics")) {
+                for (const auto& [key, value] : CellData["schematics"].items()) {
+                    TempSchemaInfo.emplace(key, value);
+                }
+            }
+            CellInstances.emplace(CellData["name"],
+                                  std::make_unique<Cell>(CellData["name"], CellLibDir_, std::move(TempPinInfo),
+                                                         std::move(TempSchemaInfo)));
         }
     } catch (json::exception& E) {
         throw Exception(E.what());

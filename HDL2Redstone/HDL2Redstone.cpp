@@ -10,8 +10,8 @@ using namespace HDL2Redstone;
 int main(int argc, char* argv[]) {
     try {
         if (argc > 1) {
-            std::string CellLibJSON(argv[1]);
-            CellLibrary CL(CellLibJSON);
+            std::string CellLibDir(argv[1]);
+            CellLibrary CL(CellLibDir);
             ModuleNetlist MN("design.blif", CL);
             std::cout << MN;
         } else {

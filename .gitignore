@@ -8,3 +8,6 @@ build/
 *.blif
 *.dot
 *.log
+
+# Liberty library
+*.lib

@@ -16,7 +16,7 @@ void ModuleNetlist::ExtractNetlist::inputs(std::vector<std::string> inputs) {
     for (const auto& input : inputs) {
         const Cell* CellPtr = CellLib.getCellPtr("INPUT");
         auto ComponentPtr = std::make_unique<Component>(CellPtr);
-        Connections.push_back(std::make_unique<Connection>(input, ComponentPtr.get(), "INPUT"));
+        Connections.push_back(std::make_unique<Connection>(input, ComponentPtr.get(), "Y"));
         Components.push_back(std::move(ComponentPtr));
     }
 }
@@ -25,7 +25,7 @@ void ModuleNetlist::ExtractNetlist::outputs(std::vector<std::string> outputs) {
     for (const auto& output : outputs) {
         const Cell* CellPtr = CellLib.getCellPtr("OUTPUT");
         auto ComponentPtr = std::make_unique<Component>(CellPtr);
-        Connections.push_back(std::make_unique<Connection>(output, ComponentPtr.get(), "OUTPUT"));
+        Connections.push_back(std::make_unique<Connection>(output, ComponentPtr.get(), "A"));
         Components.push_back(std::move(ComponentPtr));
     }
 }

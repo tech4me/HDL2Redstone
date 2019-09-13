@@ -14,7 +14,8 @@ class Cell {
   public:
     Cell() = delete;
 
-    Cell(const std::string& Type_, const std::map<std::string, std::map<std::string, std::string>>& Pin_,
+    Cell(const std::string& Type_, const std::string& CellLibDir_,
+         const std::map<std::string, std::map<std::string, std::string>>& Pin_,
          const std::map<std::string, std::map<std::string, std::string>>& Schematics_);
     const std::string& getType() const;
 

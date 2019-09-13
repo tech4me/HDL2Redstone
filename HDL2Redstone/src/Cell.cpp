@@ -24,14 +24,15 @@ Cell::SchemaInfo::SchemaInfo(const std::string& SchemaPath_, const std::map<std:
      }*/
 }
 
-Cell::Cell(const std::string& Type_, const std::map<std::string, std::map<std::string, std::string>>& Pins_,
+Cell::Cell(const std::string& Type_, const std::string& CellLibDir_,
+           const std::map<std::string, std::map<std::string, std::string>>& Pins_,
            const std::map<std::string, std::map<std::string, std::string>>& Schematics_)
     : Type(Type_) {
     for (const auto& Pin : Pins_) {
         Pins.emplace(Pin.first, PinInfo(Pin.second));
     }
     for (const auto& Schema : Schematics_) {
-        std::string SchPath = "../HDL2Redstone/cell_lib/" + Type_ + "/" + Schema.first + ".schematic";
+        std::string SchPath = CellLibDir_ + Type_ + "/" + Schema.first + ".schematic";
         Schematics.emplace(Type_, SchemaInfo(SchPath, Schema.second));
     }
     // Schematic S;
