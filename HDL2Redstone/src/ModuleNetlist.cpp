@@ -73,7 +73,12 @@ ModuleNetlist::ModuleNetlist(const std::string& File_, const CellLibrary& CellLi
     Components = std::move(EN.Components);
     Connections = std::move(EN.Connections);
 }
-
+std::vector<std::unique_ptr<Component>>* ModuleNetlist::getComponentsPtr(){
+    return &Components;
+}
+std::vector<std::unique_ptr<Connection>>* ModuleNetlist::getConnectionsPtr(){
+    return &Connections;
+}
 namespace HDL2Redstone {
 std::ostream& operator<<(std::ostream& out, const ModuleNetlist& ModuleNetlist_) {
     out << "Modules:" << std::endl;
