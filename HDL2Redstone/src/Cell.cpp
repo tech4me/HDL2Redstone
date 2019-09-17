@@ -32,11 +32,9 @@ Cell::Cell(const std::string& Type_, const std::string& CellLibDir_,
         Pins.emplace(Pin.first, PinInfo(Pin.second));
     }
     for (const auto& Schema : Schematics_) {
-        std::string SchPath = CellLibDir_ + Type_ + "/" + Schema.first + ".schematic";
+        std::string SchPath = CellLibDir_ + Type_ + "/" + Schema.first + ".schem";
         Schematics.emplace(Type_, SchemaInfo(SchPath, Schema.second));
     }
-    // Schematic S;
-    // S.loadSchematic("../HDL2Redstone/cell_lib/<cell type>/<sch name>.schematic")
 }
 
 const std::string& Cell::getType() const { return Type; }

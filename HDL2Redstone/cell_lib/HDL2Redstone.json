@@ -42,7 +42,10 @@
         "function": "(A*B)"
       }
     },
-    "name": "AND"
+    "name": "AND",
+    "schematics" : {
+      "basic_and_gate": {}
+    }
   },
   {
     "liberty": false,
