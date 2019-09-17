@@ -22,11 +22,11 @@ CellLibrary::CellLibrary(const std::string& CellLibDir_) {
         for (const auto& CellData : J) {
             std::map<std::string, std::map<std::string, std::string>> TempPinInfo;
             std::map<std::string, std::map<std::string, std::string>> TempSchemaInfo;
-            for (const auto & [ key, value ] : CellData["pins"].items()) {
+            for (const auto& [key, value] : CellData["pins"].items()) {
                 TempPinInfo.emplace(key, value);
             }
             if (CellData.contains("schematics")) {
-                for (const auto & [ key, value ] : CellData["schematics"].items()) {
+                for (const auto& [key, value] : CellData["schematics"].items()) {
                     TempSchemaInfo.emplace(key, value);
                 }
             }

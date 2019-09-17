@@ -1,8 +1,9 @@
 #pragma once
+
 #include <iostream>
+
 #include <ModuleNetlist.hpp>
 #include <Schematic.hpp>
-
 
 namespace HDL2Redstone {
 class Design {
@@ -23,6 +24,6 @@ class Design {
   private:
     int16_t X, Y, Z;
     ModuleNetlist MN;
-  friend std::ostream& operator<<(std::ostream& out, const Design& Design_);
+    friend std::ostream& operator<<(std::ostream& out, const Design& Design_);
 };
 } // namespace HDL2Redstone

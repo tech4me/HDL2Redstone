@@ -13,12 +13,12 @@ int main(int argc, char* argv[]) {
         if (argc > 1) {
             std::string CellLibDir(argv[1]);
             CellLibrary CL(CellLibDir);
-            //ModuleNetlist MN("design.blif", CL);
-            Design Design_(100, 200, 300, "design.blif", CL); //take 100x200x300 as an example
+            // ModuleNetlist MN("design.blif", CL);
+            Design Design_(100, 200, 300, "design.blif", CL); // take 100x200x300 as an example
             std::cout << Design_;
             std::cout << "Now Placing ...\n";
             Design_.place();
-            std::cout <<Design_;
+            std::cout << Design_;
         } else {
             throw Exception("Incorrect number of arguments provided.");
         }

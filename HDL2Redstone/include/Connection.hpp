@@ -10,12 +10,11 @@ namespace HDL2Redstone {
 class Connection {
   public:
     class Parameters {
-    public:
-      void SetParameters(std::vector<std::tuple<int16_t, int16_t, int16_t>> connection_points_);
+      public:
+        void SetParameters(std::vector<std::tuple<int16_t, int16_t, int16_t>> connection_points_);
 
-    private:
-      std::vector<std::tuple<int16_t, int16_t, int16_t>> connection_points;
-      
+      private:
+        std::vector<std::tuple<int16_t, int16_t, int16_t>> connection_points;
     };
 
     Connection(const std::string& Name_, Component* ComponentPtr_, const std::string& PortName_);
@@ -25,7 +24,6 @@ class Connection {
     void addSink(Component* ComponentPtr_, const std::string& PortName_);
 
   private:
-
     const std::string Name;
     std::vector<std::tuple<Component*, std::string, Parameters>> PortConnection;
     friend std::ostream& operator<<(std::ostream& out, const Connection& Connection_);
