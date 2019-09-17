@@ -22,7 +22,9 @@ class Design {
     Schematic exportDesign();
 
   private:
-    int16_t X, Y, Z;
+    int16_t Width;
+    int16_t Height;
+    int16_t Length;
     ModuleNetlist MN;
     friend std::ostream& operator<<(std::ostream& out, const Design& Design_);
 };

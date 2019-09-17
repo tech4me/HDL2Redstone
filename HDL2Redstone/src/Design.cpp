@@ -1,20 +1,19 @@
 #include <Design.hpp>
 
 using namespace HDL2Redstone;
-Design::Design(int16_t Width, int16_t Height, int16_t Length, const std::string& File_, const CellLibrary& CellLib_)
-    : X(Width), Y(Length), Z(Height), MN(File_, CellLib_) {}
+Design::Design(int16_t Width_, int16_t Height_, int16_t Length_, const std::string& File_, const CellLibrary& CellLib_)
+    : Width(Width_), Height(Height_), Length(Length_), MN(File_, CellLib_) {}
 
 bool Design::place() {
-    std::vector<std::unique_ptr<Component>>* ComponentPtr_;
-    ComponentPtr_ = MN.getComponentsPtr();
-    int16_t size = ComponentPtr_->size();
-    int16_t unitX = X / size;
-    int16_t unitY = Y / size;
-    int16_t unitZ = Z / size;
+    auto& Component = MN.getComponents();
+    int16_t size = Component.size();
+    int16_t unitX = Width / size;
+    int16_t unitY = Height / size;
+    int16_t unitZ = Length / size;
 
     int16_t i = 0;
     std::string temp = "N/A";
-    for (auto& T : *ComponentPtr_) {
+    for (auto& T : Component) {
         T->SetParameters(temp, i * unitX, i * unitY, i * unitZ, Component::Orientation::OneCW);
         i++;
     }
