@@ -8,6 +8,7 @@ build/
 *.blif
 *.dot
 *.log
+/HDL2Redstone/examples/**/*.schem
 
 # Liberty library
 *.lib
