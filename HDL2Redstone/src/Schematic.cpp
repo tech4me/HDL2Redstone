@@ -4,7 +4,9 @@
 #include <string>
 
 #include <io/izlibstream.h>
+#include <io/ozlibstream.h>
 #include <io/stream_reader.h>
+#include <io/stream_writer.h>
 #include <nbt_tags.h>
 
 #include <Exception.hpp>
@@ -34,6 +36,10 @@ static constexpr auto SCHEM_BIOME_PALETTE_MAX = "BiomePaletteMax";
 static constexpr auto SCHEM_BIOME_PALETTE = "BiomePalette";
 static constexpr auto SCHEM_BIOME_DATA = "BiomeData";
 
+Schematic::Schematic(uint16_t Width_, uint16_t Height_, uint16_t Length_)
+    : Width(Width_), Height(Height_), Length(Length_), Offset{0, 0, 0},
+      PaletteMax(1), InvertPalette{{0, "minecraft:air"}}, BlockData(Width_ * Height_ * Length_, 0) {}
+
 Schematic::Schematic(const std::string& File_) {
     std::ifstream FS(File_, std::ios::binary);
     if (FS.fail()) {
@@ -42,7 +48,7 @@ Schematic::Schematic(const std::string& File_) {
 
     try {
         zlib::izlibstream ZS(FS);
-        auto P = nbt::io::read_compound(ZS);
+        auto P = io::read_compound(ZS);
         if (P.first != "Schematic") {
             throw Exception(File_ + " is not a schematic file.");
         }
@@ -60,38 +66,133 @@ Schematic::Schematic(const std::string& File_) {
         Width = static_cast<uint16_t>(C.at(SCHEM_WIDTH).as<tag_short>());
         Height = static_cast<uint16_t>(C.at(SCHEM_HEIGHT).as<tag_short>());
         Length = static_cast<uint16_t>(C.at(SCHEM_LENGTH).as<tag_short>());
-        // TODO: Based on the spec Offset, PaletteMax, Palette, and BlockEntities are not required fields. We shouldn't
-        // need to error out.
-        Offset = C.at(SCHEM_OFFSET).as<tag_int_array>().get();
-        PaletteMax = C.at(SCHEM_PALETTE_MAX).as<tag_int>();
-        const auto& PaletteMap = C.at(SCHEM_PALETTE).as<tag_compound>();
-        for (auto It = PaletteMap.begin(); It != PaletteMap.end(); ++It) {
-            InvertPalette.emplace(It->second, It->first);
+        if (C.has_key(SCHEM_OFFSET, tag_type::Int_Array)) {
+            Offset = C.at(SCHEM_OFFSET).as<tag_int_array>().get();
+        } else {
+            Offset = {0, 0, 0};
+        }
+        if (C.has_key(SCHEM_PALETTE_MAX, tag_type::Int)) {
+            PaletteMax = C.at(SCHEM_PALETTE_MAX).as<tag_int>();
+        } else {
+            PaletteMax = 0;
+        }
+        if (C.has_key(SCHEM_PALETTE, tag_type::Compound)) {
+            const auto& PaletteMap = C.at(SCHEM_PALETTE).as<tag_compound>();
+            for (auto It = PaletteMap.begin(); It != PaletteMap.end(); ++It) {
+                InvertPalette.emplace(It->second, It->first);
+            }
         }
         int32_t Value;
         const auto& Blocks = C.at(SCHEM_BLOCK_DATA).as<tag_byte_array>();
         for (auto It = Blocks.begin(); It != Blocks.end();) {
+            uint8_t Read;
             int32_t VarintLength = 0;
             Value = 0;
-            while (true) {
-                Value |= (static_cast<uint8_t>(*It) & 0x7F) << (VarintLength++ * 7);
+            do {
+                Read = static_cast<uint8_t>(*It);
+                Value |= (Read & 0x7F) << (VarintLength++ * 7);
                 if (VarintLength > 5) {
                     throw Exception("VarintLength too big.");
                 }
-                if ((static_cast<uint8_t>(*It) & 0x80) != 0x80) {
-                    ++It;
-                    break;
-                }
                 ++It;
-            }
+            } while ((Read & 0x80) != 0);
             BlockData.push_back(Value);
         }
-        // TODO: Add missing block entities data
-        // C.at(SCHEM_BLOCK_ENTITIES).as<tag_compound>();
+        if (C.has_key(SCHEM_BLOCK_ENTITIES, tag_type::Compound)) {
+            // TODO: Add missing block entities data
+            C.at(SCHEM_BLOCK_ENTITIES).as<tag_compound>();
+        }
         // Ignore entities and biome related data
-    } catch (Exception& e) {
-        throw e;
+    } catch (Exception& E) {
+        throw E;
     } catch (...) {
-        throw Exception("Failed loading schematic file " + File_);
+        throw Exception("Failed reading schematic file " + File_);
+    }
+}
+
+void Schematic::insertSubSchematic(const Placement& P_, const Schematic& Schem_) {
+    // TODO: Add schematic out-of-bound checks here
+
+    // 1. Merge sub schematic palette into schematic palette, update palette, create conversion map
+    std::map<int32_t, int32_t> ConversionMap;
+    for (int32_t i = 0; i < Schem_.InvertPalette.size(); ++i) {
+        int32_t j = 0;
+        for (; j < InvertPalette.size(); ++j) {
+            if (Schem_.InvertPalette.at(i) == InvertPalette.at(j)) {
+                // Add entry to conversion map
+                ConversionMap.emplace(i, j);
+                break;
+            }
+        }
+        if (j == InvertPalette.size()) {
+            // Insert a new entry into palette
+            int32_t Loc = InvertPalette.size();
+            InvertPalette.emplace(Loc, Schem_.InvertPalette.at(i));
+            // Add entry to conversion map
+            ConversionMap.emplace(i, Loc);
+        }
+    }
+    // 2. Update palette max
+    PaletteMax = InvertPalette.size();
+    // 3. Update block data using conversion map
+    for (int32_t i = 0; i < Schem_.BlockData.size(); ++i) {
+        // TODO: Handle orientation here
+        int32_t X = (i % (Schem_.Width * Schem_.Length)) % Schem_.Width + P_.X;
+        int32_t Y = i / (Schem_.Width * Schem_.Length) + P_.Y;
+        int32_t Z = (i % (Schem_.Width * Schem_.Length)) / Schem_.Width + P_.Z;
+        int32_t Index = X + (Y * Width * Length) + (Z * Width);
+        auto It = ConversionMap.find(Schem_.BlockData.at(i));
+        if (It != ConversionMap.end()) {
+            BlockData.at(Index) = It->second;
+        } else {
+            BlockData.at(Index) = Schem_.BlockData.at(i);
+        }
+    }
+    // TODO: Missing block entities handling
+}
+
+void Schematic::exportSchematic(const std::string& File_) const {
+    std::ofstream FS(File_, std::ios::binary);
+    if (FS.fail()) {
+        throw Exception("Problem opening File: " + File_);
+    }
+
+    try {
+        // Output in gzip format for WorldEdit
+        zlib::ozlibstream ZS(FS, Z_DEFAULT_COMPRESSION, true);
+        tag_compound C;
+        C.emplace<tag_int>(SCHEM_VERSION, SUPPORTED_SCHEM_VERSION);
+        C.emplace<tag_int>(SCHEM_DATA_VERSION, SUPPORTED_SCHEM_DATA_VERSION);
+        C.emplace<tag_short>(SCHEM_WIDTH, Width);
+        C.emplace<tag_short>(SCHEM_HEIGHT, Height);
+        C.emplace<tag_short>(SCHEM_LENGTH, Length);
+
+        C.emplace<tag_int_array>(SCHEM_OFFSET, tag_int_array(std::vector<int32_t>(Offset)));
+        C.emplace<tag_int>(SCHEM_PALETTE_MAX, PaletteMax);
+        tag_compound Palette;
+        for (auto It = InvertPalette.begin(); It != InvertPalette.end(); ++It) {
+            Palette.emplace<tag_int>(It->second, It->first);
+        }
+        C.emplace<tag_compound>(SCHEM_PALETTE, Palette);
+        std::vector<int8_t> Blocks;
+        int i = 0;
+        for (auto It = BlockData.begin(); It != BlockData.end(); ++It) {
+            int32_t Value;
+            do {
+                Value = *It;
+                uint8_t Temp = static_cast<int8_t>(Value & 0x7F);
+                // Cast to unsigned int to avoid sign extension
+                Value = static_cast<uint32_t>(Value) >> 7;
+                if (Value != 0) {
+                    Temp |= 0x80;
+                }
+                Blocks.push_back(Temp);
+            } while (Value != 0);
+            i++;
+        }
+        C.emplace<tag_byte_array>(SCHEM_BLOCK_DATA, tag_byte_array(std::move(Blocks)));
+        io::write_tag("Schematic", C, ZS);
+    } catch (...) {
+        throw Exception("Failed writing schematic file " + File_);
     }
 }

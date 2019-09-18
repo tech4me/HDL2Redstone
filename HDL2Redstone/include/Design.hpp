@@ -11,20 +11,17 @@ class Design {
     // Deleted default constructor
     Design() = delete;
     // Create a design with max width, max height, and max length
-    Design(int16_t Width, int16_t Height, int16_t Length, const std::string& File_, const CellLibrary& CellLib_);
+    Design(uint16_t Width, uint16_t Height, uint16_t Length, const std::string& File_, const CellLibrary& CellLib_);
 
     bool place();
     bool route();
 
-    // Add a Schematic to the Design
-    // bool addSchematic(Schematic Sch, int16_t X, int16_t Y, int16_t Z);
-
-    Schematic exportDesign();
+    Schematic exportDesign() const;
 
   private:
-    int16_t Width;
-    int16_t Height;
-    int16_t Length;
+    uint16_t Width;
+    uint16_t Height;
+    uint16_t Length;
     ModuleNetlist MN;
     friend std::ostream& operator<<(std::ostream& out, const Design& Design_);
 };

@@ -15,8 +15,10 @@ namespace HDL2Redstone {
 class ModuleNetlist {
   public:
     ModuleNetlist(const std::string& File_, const CellLibrary& CellLib_);
-    std::vector<std::unique_ptr<Component>>& getComponents();
-    std::vector<std::unique_ptr<Connection>>& getConnections();
+    std::vector<std::unique_ptr<Component>>& getComponents() { return Components; }
+    const std::vector<std::unique_ptr<Component>>& getComponents() const { return Components; }
+    std::vector<std::unique_ptr<Connection>>& getConnections() { return Connections; }
+    const std::vector<std::unique_ptr<Connection>>& getConnections() const { return Connections; }
 
   private:
     class ExtractNetlist : public blifparse::Callback {

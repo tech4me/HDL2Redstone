@@ -13,12 +13,12 @@ int main(int argc, char* argv[]) {
         if (argc > 1) {
             std::string CellLibDir(argv[1]);
             CellLibrary CL(CellLibDir);
-            // ModuleNetlist MN("design.blif", CL);
-            Design D(100, 200, 300, "design.blif", CL); // take 100x200x300 as an example
+            Design D(32, 32, 32, "design.blif", CL);
             std::cout << D;
-            std::cout << "Now Placing ...\n";
+            std::cout << "Now Placing ..." << std::endl;
             D.place();
             std::cout << D;
+            D.exportDesign().exportSchematic("design.schem");
         } else {
             throw Exception("Incorrect number of arguments provided.");
         }

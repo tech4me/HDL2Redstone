@@ -4,27 +4,31 @@
 #include <string>
 
 #include <Cell.hpp>
+#include <Placement.hpp>
 
 namespace HDL2Redstone {
 class Component {
   public:
-    enum class Orientation { ZeroCW, OneCW, TwoCW, ThreeCW };
     Component(const Cell* CellPtr_);
-    void SetParameters(std::string& CellStructure_, int16_t X_, int16_t Y_, int16_t Z_, Orientation Turn_);
-    friend std::ostream& operator<<(std::ostream& out, const Component& Component_);
+
+    const std::string& getType() const { return CellPtr->getType(); }
+
+    bool getPlaced() const { return Placed; }
+    void setPlaced(bool Placed_) { Placed = Placed_; }
+
+    void setPlacement(const std::string& CellStructName_, uint16_t X_, uint16_t Y_, uint16_t Z_, Orientation Turn_);
+
+    // Post placement method
+    // TODO: Make sure they are only called when Placed is true
+    const Placement& getPlacement() const { return P; }
+    // Return schematic specified by CellStructName
+    const Schematic& getSchematic() const { return CellPtr->getSchematic(P.CellStructName); }
 
   private:
-    class Parameters {
-      public:
-        Parameters(std::string CellStructure_ = "NOT", int16_t X_ = 0, int16_t Y_ = 0, int16_t Z_ = 0,
-                   Orientation Turn_ = Orientation::ZeroCW);
-        void SetParameters(std::string& CellStructure_, int16_t X_, int16_t Y_, int16_t Z_, Orientation Turn_);
-
-        std::string CellStructure;
-        int16_t X, Y, Z;
-        Orientation Turn;
-    };
     const Cell* CellPtr;
-    Parameters Param;
+    bool Placed;
+    // Post placement data structure
+    Placement P;
+    friend std::ostream& operator<<(std::ostream& out, const Component& Component_);
 };
 } // namespace HDL2Redstone

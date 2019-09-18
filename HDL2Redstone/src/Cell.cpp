@@ -17,7 +17,7 @@ Cell::PinInfo::PinInfo(std::map<std::string, std::string> JsonInfo_) {
 }
 
 Cell::SchemaInfo::SchemaInfo(const std::string& SchemaPath_, const std::map<std::string, std::string>& JsonInfo_)
-    : Schema(SchemaPath_) {
+    : Schem(SchemaPath_) {
     /*const auto& Orientation = JsonInfo_["orientation"];
      *if (Orientation == "north") {
         Ori = North;
@@ -31,10 +31,8 @@ Cell::Cell(const std::string& Type_, const std::string& CellLibDir_,
     for (const auto& Pin : Pins_) {
         Pins.emplace(Pin.first, PinInfo(Pin.second));
     }
-    for (const auto& Schema : Schematics_) {
-        std::string SchPath = CellLibDir_ + Type_ + "/" + Schema.first + ".schem";
-        Schematics.emplace(Type_, SchemaInfo(SchPath, Schema.second));
+    for (const auto& Schem : Schematics_) {
+        std::string SchPath = CellLibDir_ + Type_ + "/" + Schem.first + ".schem";
+        Schematics.emplace(Schem.first, SchemaInfo(SchPath, Schem.second));
     }
 }
-
-const std::string& Cell::getType() const { return Type; }

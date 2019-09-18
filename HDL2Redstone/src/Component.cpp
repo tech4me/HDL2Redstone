@@ -1,42 +1,38 @@
 #include <Component.hpp>
 
 using namespace HDL2Redstone;
-Component::Component(const Cell* CellPtr_)
-    : CellPtr(CellPtr_), Param(CellPtr_->getType()){
-                             // TODO: replace gettype() with getcellinstance()
-                         };
+Component::Component(const Cell* CellPtr_) : CellPtr(CellPtr_), Placed(false) {}
 
-void Component::SetParameters(std::string& CellStructure_, int16_t X_, int16_t Y_, int16_t Z_, Orientation Turn_) {
-    Param.SetParameters(CellStructure_, X_, Y_, Z_, Turn_);
-}
-
-Component::Parameters::Parameters(std::string CellStructure_, int16_t X_, int16_t Y_, int16_t Z_, Orientation Turn_)
-    : CellStructure(CellStructure_), X(X_), Y(Y_), Z(Z_), Turn(Turn_) {}
-
-void Component::Parameters::SetParameters(std::string& CellStructure_, int16_t X_, int16_t Y_, int16_t Z_,
-                                          Orientation Turn_) {
-    CellStructure = CellStructure_;
-    X = X_;
-    Y = Y_;
-    Z = Z_;
-    Turn = Turn_;
+void Component::setPlacement(const std::string& CellStructName_, uint16_t X_, uint16_t Y_, uint16_t Z_,
+                             Orientation Orient_) {
+    P.CellStructName = CellStructName_;
+    P.X = X_;
+    P.Y = Y_;
+    P.Z = Z_;
+    P.Orient = Orient_;
+    Placed = true;
 }
 
 namespace HDL2Redstone {
 std::ostream& operator<<(std::ostream& out, const Component& Component_) {
-    int CW;
-    if (Component_.Param.Turn == Component::Orientation::ZeroCW) {
-        CW = 0;
-    } else if (Component_.Param.Turn == Component::Orientation::OneCW) {
-        CW = 1;
-    } else if (Component_.Param.Turn == Component::Orientation::TwoCW) {
-        CW = 2;
+    out << "Module Type: " << Component_.CellPtr->getType();
+    if (Component_.Placed) {
+        int CW;
+        if (Component_.P.Orient == Orientation::ZeroCW) {
+            CW = 0;
+        } else if (Component_.P.Orient == Orientation::OneCW) {
+            CW = 1;
+        } else if (Component_.P.Orient == Orientation::TwoCW) {
+            CW = 2;
+        } else {
+            CW = 3;
+        }
+
+        out << "   Cell Structure Name: " << Component_.P.CellStructName << "   Location: " << Component_.P.X << " "
+            << Component_.P.Y << " " << Component_.P.Z << "   Number of CW: " << CW << std::endl;
     } else {
-        CW = 3;
+        out << std::endl;
     }
-    out << "Module Type: " << Component_.CellPtr->getType() << "   Cell Structure: " << Component_.Param.CellStructure
-        << "   Location: " << Component_.Param.X << " " << Component_.Param.Y << " " << Component_.Param.Z
-        << "   Number of CW: " << CW << std::endl;
     return out;
 }
 } // namespace HDL2Redstone
