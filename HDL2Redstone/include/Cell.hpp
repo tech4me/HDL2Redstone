@@ -44,5 +44,7 @@ class Cell {
     };
     // <schema_name, Other info:orientation, timing etc >
     std::map<std::string, SchemaInfo> Schematics;
+
+    friend std::ostream& operator<<(std::ostream& out, const Cell& Cell_);
 };
 } // namespace HDL2Redstone

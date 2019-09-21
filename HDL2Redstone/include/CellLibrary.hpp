@@ -15,5 +15,7 @@ class CellLibrary {
 
   private:
     std::map<std::string, std::unique_ptr<Cell>> CellInstances;
+
+    friend std::ostream& operator<<(std::ostream& out, const CellLibrary& CellLibrary_);
 };
 } // namespace HDL2Redstone

@@ -36,3 +36,28 @@ Cell::Cell(const std::string& Type_, const std::string& CellLibDir_,
         Schematics.emplace(Schem.first, SchemaInfo(SchPath, Schem.second));
     }
 }
+
+namespace HDL2Redstone {
+std::ostream& operator<<(std::ostream& out, const Cell& Cell_) {
+    out << "In cell " << Cell_.Type << ": " << std::endl;
+
+    // Dir is in enum class, will add print if needed, right now not gonna print
+    /*out << "Pins: " << std::endl;
+    for (const auto& Pin : Cell_.Pins) {
+        out << Pin.first << ": " << std::endl;
+        out << "Direction: " << Pin.second.Dir << std::endl;
+    }*/
+
+    out << "Schematics: " << std::endl;
+    int i = 1;
+    for (const auto& Schema : Cell_.Schematics) {
+        out << i << ". ";
+        out << Schema.first << ": " << std::endl;
+        out << Schema.second.Schem << std::endl;
+        i++;
+    }
+
+    return out;
+}
+
+} // namespace HDL2Redstone

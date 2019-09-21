@@ -35,5 +35,7 @@ class Schematic {
     int32_t PaletteMax;
     std::map<int32_t, std::string> InvertPalette;
     std::vector<int32_t> BlockData;
+
+    friend std::ostream& operator<<(std::ostream& out, const Schematic& Schematic_);
 };
 } // namespace HDL2Redstone

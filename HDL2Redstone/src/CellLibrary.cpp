@@ -46,3 +46,12 @@ const Cell* CellLibrary::getCellPtr(const std::string& Name_) const {
         throw Exception("Invalid cell type: " + Name_);
     }
 }
+
+namespace HDL2Redstone {
+std::ostream& operator<<(std::ostream& out, const CellLibrary& CellLibrary_) {
+    for (const auto& Inst : CellLibrary_.CellInstances) {
+        out << *Inst.second << std::endl;
+    }
+    return out;
+}
+} // namespace HDL2Redstone

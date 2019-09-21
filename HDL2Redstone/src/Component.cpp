@@ -15,7 +15,9 @@ void Component::setPlacement(const std::string& CellStructName_, uint16_t X_, ui
 
 namespace HDL2Redstone {
 std::ostream& operator<<(std::ostream& out, const Component& Component_) {
+
     out << "Module Type: " << Component_.CellPtr->getType();
+
     if (Component_.Placed) {
         int CW;
         if (Component_.P.Orient == Orientation::ZeroCW) {
