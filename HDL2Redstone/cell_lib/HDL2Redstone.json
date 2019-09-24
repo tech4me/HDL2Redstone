@@ -12,7 +12,7 @@
     },
     "name": "BUF",
     "schematics" : {
-      "1_tick_delay_buf": {}
+      "redstone_repeater_buf": {}
     }
   },
   {
@@ -26,7 +26,11 @@
         "function": "A'"
       }
     },
-    "name": "NOT"
+    "name": "NOT",
+    "schematics" : {
+      "horizontal_torch_inv": {}
+    }
+
   },
   {
     "liberty": true,
@@ -54,7 +58,11 @@
         "direction": "output"
       }
     },
-    "name": "INPUT"
+    "name": "INPUT",
+    "schematics" : {
+      "input": {}
+    }
+
   },
   {
     "liberty": false,
@@ -63,6 +71,9 @@
         "direction": "input"
       }
     },
-    "name": "OUTPUT"
+    "name": "OUTPUT",
+    "schematics" : {
+      "output": {}
+    }
   }
 ]

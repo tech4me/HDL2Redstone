@@ -14,7 +14,7 @@ int main(int argc, char* argv[]) {
             std::string CellLibDir(argv[1]);
             CellLibrary CL(CellLibDir);
             std::cout << CL;
-            Design D(32, 32, 32, "design.blif", CL);
+            Design D(100, 100, 100, "design.blif", CL);
             std::cout << D;
             std::cout << "Now Placing ..." << std::endl;
             D.place();
