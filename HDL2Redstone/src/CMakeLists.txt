@@ -7,5 +7,6 @@ add_library(hdl2redstone-core
     Exception.cpp
     ModuleNetlist.cpp
     Placement.cpp
+    Placer.cpp
     Schematic.cpp)
 target_link_libraries(hdl2redstone-core libblifparse nbt++ nlohmann_json)

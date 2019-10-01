@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include <ModuleNetlist.hpp>
+
 #include <Schematic.hpp>
 
 namespace HDL2Redstone {
