@@ -6,9 +6,9 @@ Design::Design(uint16_t Width_, uint16_t Height_, uint16_t Length_, const std::s
                const CellLibrary& CellLib_)
     : Width(Width_), Height(Height_), Length(Length_), MN(File_, CellLib_) {}
 
-bool Design::place() {
-    Placer P;
-    P.placing(MN, Width, Height, Length);
+bool Design::doPlaceAndRoute() {
+    Placer P(*this);
+    P.place();
     return true;
 }
 

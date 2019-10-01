@@ -37,8 +37,8 @@ static constexpr auto SCHEM_BIOME_PALETTE = "BiomePalette";
 static constexpr auto SCHEM_BIOME_DATA = "BiomeData";
 
 Schematic::Schematic(uint16_t Width_, uint16_t Height_, uint16_t Length_)
-    : Width(Width_), Height(Height_), Length(Length_), Offset{0, 0, 0}, PaletteMax(1),
-      InvertPalette{{0, "minecraft:air"}}, BlockData(Width_ * Height_ * Length_, 0) {}
+    : Width(Width_), Height(Height_), Length(Length_), Offset{0, 0, 0},
+      PaletteMax(1), InvertPalette{{0, "minecraft:air"}}, BlockData(Width_ * Height_ * Length_, 0) {}
 
 Schematic::Schematic(const std::string& File_) {
     std::ifstream FS(File_, std::ios::binary);

@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
             Design D(100, 100, 100, "design.blif", CL);
             std::cout << D;
             std::cout << "Now Placing ..." << std::endl;
-            D.place();
+            D.doPlaceAndRoute();
             std::cout << D;
             D.exportDesign().exportSchematic("design.schem");
         } else {

@@ -1,12 +1,15 @@
 #include <Placer.hpp>
 
 using namespace HDL2Redstone;
-bool Placer::placing(ModuleNetlist& MN, uint16_t Width, uint16_t Height, uint16_t Length) {
-    auto& Components = MN.getComponents();
+
+Placer::Placer(Design& _D) : D(_D) {}
+
+bool Placer::place() {
+    auto& Components = D.MN.getComponents();
     uint16_t size = Components.size();
-    uint16_t unitX = Width / size;
-    uint16_t unitY = Height / size;
-    uint16_t unitZ = Length / size;
+    uint16_t unitX = D.Width / size;
+    uint16_t unitY = D.Height / size;
+    uint16_t unitZ = D.Length / size;
 
     int16_t i = 0;
     for (auto& Component : Components) {

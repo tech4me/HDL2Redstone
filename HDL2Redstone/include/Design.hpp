@@ -14,8 +14,7 @@ class Design {
     // Create a design with max width, max height, and max length
     Design(uint16_t Width, uint16_t Height, uint16_t Length, const std::string& File_, const CellLibrary& CellLib_);
 
-    bool place();
-    bool route();
+    bool doPlaceAndRoute();
 
     Schematic exportDesign() const;
 
@@ -24,6 +23,8 @@ class Design {
     uint16_t Height;
     uint16_t Length;
     ModuleNetlist MN;
+
+    friend class Placer;
     friend std::ostream& operator<<(std::ostream& out, const Design& Design_);
 };
 } // namespace HDL2Redstone
