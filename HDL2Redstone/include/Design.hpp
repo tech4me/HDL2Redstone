@@ -25,6 +25,7 @@ class Design {
     ModuleNetlist MN;
 
     friend class Placer;
+    friend class Router;
     friend std::ostream& operator<<(std::ostream& out, const Design& Design_);
 };
 } // namespace HDL2Redstone

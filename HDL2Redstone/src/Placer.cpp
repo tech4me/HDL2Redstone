@@ -2,7 +2,7 @@
 
 using namespace HDL2Redstone;
 
-Placer::Placer(Design& _D) : D(_D) {}
+Placer::Placer(Design& D_) : D(D_) {}
 
 bool Placer::place() {
     auto& Components = D.MN.getComponents();
@@ -27,6 +27,15 @@ bool Placer::place() {
             Component->setPlacement("basic_and_gate", i * unitX, i * unitY, i * unitZ, Orientation::OneCW);
             ++i;
         }
+    }
+    return true;
+}
+
+bool Placer::checkComponentLegality() const {
+    const auto& Components = D.MN.getComponents();
+
+    for (auto& Component : Components) {
+        Component->getRange();
     }
     return true;
 }

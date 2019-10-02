@@ -7,7 +7,7 @@
 namespace HDL2Redstone {
 class Placer {
   public:
-    Placer(Design& _D);
+    Placer(Design& D_);
 
     bool place();
     bool checkComponentLegality() const;
