@@ -12,6 +12,7 @@ class Connection {
     class Parameters {
       public:
         void SetParameters(std::vector<std::tuple<int16_t, int16_t, int16_t>> connection_points_);
+        const std::vector<std::tuple<int16_t, int16_t, int16_t>>& getParameters() const { return connection_points; };
 
       private:
         std::vector<std::tuple<int16_t, int16_t, int16_t>> connection_points;
@@ -25,7 +26,7 @@ class Connection {
 
   private:
     const std::string Name;
-    std::vector<std::tuple<Component*, std::string, Parameters>> PortConnection;
+    std::vector<std::tuple<Component*, std::string, Connection::Parameters>> PortConnection;
     friend std::ostream& operator<<(std::ostream& out, const Connection& Connection_);
 };
 

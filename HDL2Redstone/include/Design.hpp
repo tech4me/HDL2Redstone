@@ -13,7 +13,7 @@ class Design {
     Design() = delete;
     // Create a design with max width, max height, and max length
     Design(uint16_t Width, uint16_t Height, uint16_t Length, const std::string& File_, const CellLibrary& CellLib_);
-
+    const ModuleNetlist& getModuleNetlist() const;
     bool doPlaceAndRoute();
 
     Schematic exportDesign() const;

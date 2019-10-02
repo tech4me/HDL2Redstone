@@ -8,7 +8,6 @@ class Router {
     bool flatRoute(Design& D, Connection& C);
 
   private:
-    const Component*& checkSingleRoute(const Design& D,
-                                       const std::vector<std::tuple<int16_t, int16_t, int16_t>> connection_points);
+    bool checkSingleRoute(const Design& D, const std::vector<std::tuple<int16_t, int16_t, int16_t>> connection_points);
 };
-}
+} // namespace HDL2Redstone

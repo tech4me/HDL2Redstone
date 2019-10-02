@@ -6,6 +6,8 @@ Design::Design(uint16_t Width_, uint16_t Height_, uint16_t Length_, const std::s
                const CellLibrary& CellLib_)
     : Width(Width_), Height(Height_), Length(Length_), MN(File_, CellLib_) {}
 
+const ModuleNetlist& Design::getModuleNetlist() const { return MN; }
+
 bool Design::doPlaceAndRoute() {
     Placer P(*this);
     P.place();
