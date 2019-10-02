@@ -2,6 +2,7 @@
 
 #include <map>
 #include <string>
+#include <tuple>
 #include <vector>
 
 #include <io/stream_reader.h>
@@ -32,6 +33,9 @@ class Schematic {
     uint16_t Height;
     uint16_t Length;
     std::vector<int32_t> Offset;
+    std::vector<std::vector<int32_t>> BlockEntityPositions;
+    std::vector<std::string> BlockEntityIds;
+    std::vector<std::map<std::string, std::string>> BlockEntityTexts;
     int32_t PaletteMax;
     std::map<int32_t, std::string> InvertPalette;
     std::vector<int32_t> BlockData;

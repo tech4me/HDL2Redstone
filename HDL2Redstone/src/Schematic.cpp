@@ -98,9 +98,20 @@ Schematic::Schematic(const std::string& File_) {
             } while ((Read & 0x80) != 0);
             BlockData.push_back(Value);
         }
-        if (C.has_key(SCHEM_BLOCK_ENTITIES, tag_type::Compound)) {
-            // TODO: Add missing block entities data
-            C.at(SCHEM_BLOCK_ENTITIES).as<tag_compound>();
+        if (C.has_key(SCHEM_BLOCK_ENTITIES, tag_type::List)) {
+            // TODO: check if the following works when actually have block entity data
+            const auto& BlockEntities = C.at(SCHEM_BLOCK_ENTITIES).as<tag_list>();
+            for (int i = 0; i < BlockEntities.size(); i++) {
+                auto Entity = BlockEntities[i].as<tag_compound>();
+                BlockEntityPositions.push_back(Entity.at("Pos").as<tag_int_array>().get());
+                BlockEntityIds.push_back(Entity.at("Id").as<tag_string>().get());
+                std::map<std::string, std::string> EntityText;
+                for (auto It = Entity.begin(); It != Entity.end(); It++) {
+                    if ((It->first != "Pos") && (It->first != "Id"))
+                        EntityText.emplace(It->first, It->second);
+                }
+                BlockEntityTexts.push_back(EntityText);
+            }
         }
         // Ignore entities and biome related data
     } catch (Exception& E) {
@@ -148,7 +159,14 @@ void Schematic::insertSubSchematic(const Placement& P_, const Schematic& Schem_)
             BlockData.at(Index) = Schem_.BlockData.at(i);
         }
     }
-    // TODO: Missing block entities handling
+    // TODO: not checked against real block entity info!
+    for (int32_t i = 0; i < Schem_.BlockEntityPositions.size(); ++i) {
+        std::vector<int32_t> Pos = BlockEntityPositions[i];
+        std::vector<int32_t> Updated_pos({Pos[0] + P_.X, Pos[1] + P_.Y, Pos[2] + P_.Z});
+        BlockEntityPositions.push_back(Updated_pos);
+        BlockEntityIds.push_back(Schem_.BlockEntityIds[i]);
+        BlockEntityTexts.push_back(Schem_.BlockEntityTexts[i]);
+    }
 }
 
 void Schematic::exportSchematic(const std::string& File_) const {
@@ -191,6 +209,18 @@ void Schematic::exportSchematic(const std::string& File_) const {
             i++;
         }
         C.emplace<tag_byte_array>(SCHEM_BLOCK_DATA, tag_byte_array(std::move(Blocks)));
+        // TODO: Not Tested....
+        tag_list BlockEntities;
+        for (int32_t i = 0; i < BlockEntityPositions.size(); i++) {
+            tag_compound BlockEntity;
+            BlockEntity.emplace<tag_int_array>("Pos", tag_int_array(std::vector<int32_t>(BlockEntityPositions[i])));
+            BlockEntity.emplace<tag_string>("Id", tag_string(BlockEntityIds[i]));
+            for (auto It = BlockEntityTexts[i].begin(); It != BlockEntityTexts[i].end(); It++)
+                BlockEntity.emplace<tag_string>(tag_string(It->first), tag_string(It->second));
+            BlockEntities.push_back(tag_compound(BlockEntity));
+        }
+        C.emplace<tag_list>(SCHEM_BLOCK_ENTITIES, BlockEntities);
+        // END Not Tested....
         io::write_tag("Schematic", C, ZS);
     } catch (...) {
         throw Exception("Failed writing schematic file " + File_);
