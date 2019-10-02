@@ -11,6 +11,7 @@ namespace HDL2Redstone {
 class Cell {
     enum class Direction { Input, Output, Inout };
     enum class Orientation { North, South, West, East };
+    enum class Facing { Up, Down, Front, Back, Left, Right };
 
   public:
     Cell() = delete;
@@ -29,8 +30,11 @@ class Cell {
     class PinInfo {
       public:
         PinInfo(std::map<std::string, std::string> JsonInfo_);
+        const Facing& getFacing() const { return Face; }
+        const Direction& getDirection() const { return Dir; }
 
         Direction Dir;
+        Facing Face;
     };
     // <pin_name, Other info:direction, function etc>
     std::map<std::string, PinInfo> Pins;

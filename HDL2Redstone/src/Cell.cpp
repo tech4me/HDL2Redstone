@@ -14,13 +14,38 @@ Cell::PinInfo::PinInfo(std::map<std::string, std::string> JsonInfo_) {
     } else {
         throw Exception("Invalid cell pin direction: " + Direction + " .");
     }
+
+    const auto& Facing = JsonInfo_["Facing"];
+    if (Facing == "up") {
+        Face = Facing::Up;
+    } else if (Facing == "down") {
+        Face = Facing::Down;
+    } else if (Facing == "front") {
+        Face = Facing::Front;
+    } else if (Facing == "back") {
+        Face = Facing::Back;
+    } else if (Facing == "Left") {
+        Face = Facing::Left;
+    } else if (Facing == "right") {
+        Face = Facing::Right;
+    } else {
+        throw Exception("Invalid cell pin facing: " + Facing + " .");
+    }
 }
 
 Cell::SchemaInfo::SchemaInfo(const std::string& SchemaPath_, const std::map<std::string, std::string>& JsonInfo_)
     : Schem(SchemaPath_) {
-    /*const auto& Orientation = JsonInfo_["orientation"];
-     *if (Orientation == "north") {
-        Ori = North;
+    /* const auto& Orientation = JsonInfo_["orientation"];
+     if (Orientation == "north") {
+         Ori = North;
+     } else if (Orientation == "south") {
+         Ori = South;
+     } else if (Orientation == "west") {
+         Ori = West;
+     } else if (Orientation == "east") {
+     Ori = East;
+     } else {
+     throw Exception("Invalid cell pin orientation: " + Orientation + " .");
      }*/
 }
 
