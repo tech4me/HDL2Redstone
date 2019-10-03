@@ -21,18 +21,13 @@ CellLibrary::CellLibrary(const std::string& CellLibDir_) {
     try {
         for (const auto& CellData : J) {
             std::map<std::string, std::map<std::string, std::string>> TempPinInfo;
-            std::map<std::string, std::map<std::string, std::string>> TempSchemaInfo;
             for (const auto& [key, value] : CellData["pins"].items()) {
                 TempPinInfo.emplace(key, value);
             }
-            if (CellData.contains("schematics")) {
-                for (const auto& [key, value] : CellData["schematics"].items()) {
-                    TempSchemaInfo.emplace(key, value);
-                }
-            }
-            CellInstances.emplace(CellData["name"],
-                                  std::make_unique<Cell>(CellData["name"], CellLibDir_, std::move(TempPinInfo),
-                                                         std::move(TempSchemaInfo)));
+            std::string SchematicDir = CellLibDir_ + (CellData["is_component"] ? "components/" : "connections/");
+            CellInstances.emplace(
+                CellData["name"],
+                std::make_unique<Cell>(CellData["name"], SchematicDir, std::move(TempPinInfo), CellData["schematic"]));
         }
     } catch (json::exception& E) {
         throw Exception(E.what());

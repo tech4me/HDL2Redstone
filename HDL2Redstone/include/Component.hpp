@@ -16,7 +16,7 @@ class Component {
     bool getPlaced() const { return Placed; }
     void setPlaced(bool Placed_) { Placed = Placed_; }
 
-    void setPlacement(const std::string& CellStructName_, uint16_t X_, uint16_t Y_, uint16_t Z_, Orientation Turn_);
+    void setPlacement(uint16_t X_, uint16_t Y_, uint16_t Z_, Orientation Turn_);
 
     // Post placement method
     // TODO: Make sure they are only called when Placed is true
@@ -24,7 +24,7 @@ class Component {
 
     std::pair<std::tuple<uint16_t, uint16_t, uint16_t>, std::tuple<uint16_t, uint16_t, uint16_t>> getRange() const;
     // Return schematic specified by CellStructName
-    const Schematic& getSchematic() const { return CellPtr->getSchematic(P.CellStructName); }
+    const Schematic& getSchematic() const { return CellPtr->getSchematic(); }
 
   private:
     const Cell* CellPtr;

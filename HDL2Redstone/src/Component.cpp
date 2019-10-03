@@ -3,52 +3,51 @@
 using namespace HDL2Redstone;
 Component::Component(const Cell* CellPtr_) : CellPtr(CellPtr_), Placed(false) {}
 
-void Component::setPlacement(const std::string& CellStructName_, uint16_t X_, uint16_t Y_, uint16_t Z_,
-                             Orientation Orient_) {
-    P.CellStructName = CellStructName_;
+void Component::setPlacement(uint16_t X_, uint16_t Y_, uint16_t Z_, Orientation Orient_) {
     P.X = X_;
     P.Y = Y_;
     P.Z = Z_;
     P.Orient = Orient_;
     Placed = true;
 }
+
 std::pair<std::tuple<uint16_t, uint16_t, uint16_t>, std::tuple<uint16_t, uint16_t, uint16_t>>
 Component::getRange() const {
-    uint16_t x1, z1, y1, x2, z2, y2;
-    Schematic S = CellPtr->getSchematic(P.CellStructName);
+    uint16_t x1, y1, z1, x2, y2, z2;
+    Schematic S = CellPtr->getSchematic();
     uint16_t Width = S.getWidth();
     uint16_t Height = S.getHeight();
     uint16_t Length = S.getLength();
     if (P.Orient == Orientation::ZeroCW) {
         x1 = P.X;
-        z1 = P.Z;
         y1 = P.Y;
+        z1 = P.Z;
         x2 = P.X + Width;
-        z2 = P.Z + Length;
         y2 = P.Y + Height;
+        z2 = P.Z + Length;
     } else if (P.Orient == Orientation::OneCW) {
         x1 = P.X;
-        z1 = P.Z - Width;
         y1 = P.Y;
+        z1 = P.Z - Width;
         x2 = P.X + Length;
-        z2 = P.Z;
         y2 = P.Y + Height;
+        z2 = P.Z;
     } else if (P.Orient == Orientation::TwoCW) {
         x1 = P.X - Width;
-        z1 = P.Z - Length;
         y1 = P.Y;
+        z1 = P.Z - Length;
         x2 = P.X;
-        z2 = P.Z;
         y2 = P.Y + Height;
+        z2 = P.Z;
     } else {
         x1 = P.X - Length;
-        z1 = P.Z;
         y1 = P.Y;
+        z1 = P.Z;
         x2 = P.X;
-        z2 = P.Z + Width;
         y2 = P.Y + Height;
+        z2 = P.Z + Width;
     }
-    return std::pair(std::make_tuple(x1, z1, y1), std::make_tuple(x2, z2, y2));
+    return std::pair(std::make_tuple(x1, y1, z1), std::make_tuple(x2, y2, z2));
 }
 namespace HDL2Redstone {
 std::ostream& operator<<(std::ostream& out, const Component& Component_) {
@@ -67,8 +66,8 @@ std::ostream& operator<<(std::ostream& out, const Component& Component_) {
             CW = 3;
         }
 
-        out << "   Cell Structure Name: " << Component_.P.CellStructName << "   Location: " << Component_.P.X << " "
-            << Component_.P.Y << " " << Component_.P.Z << "   Number of CW: " << CW << std::endl;
+        out << "   Location: " << Component_.P.X << " " << Component_.P.Y << " " << Component_.P.Z
+            << "   Number of CW: " << CW << std::endl;
     } else {
         out << std::endl;
     }

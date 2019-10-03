@@ -1,7 +1,9 @@
 #include <Component.hpp>
 #include <Connection.hpp>
 #include <Router.hpp>
+
 using namespace HDL2Redstone;
+
 bool Router::flatRoute(Design& D, Connection& C) { return true; }
 
 bool Router::checkSingleRoute(const Design& D,

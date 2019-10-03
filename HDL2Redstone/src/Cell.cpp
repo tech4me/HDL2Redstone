@@ -3,6 +3,14 @@
 
 using namespace HDL2Redstone;
 
+Cell::Cell(const std::string& Type_, const std::string& CellLibDir_,
+           const std::map<std::string, std::map<std::string, std::string>>& Pins_, const std::string& SchematicName_)
+    : Type(Type_), Schem(CellLibDir_ + SchematicName_ + ".schem") {
+    for (const auto& Pin : Pins_) {
+        Pins.emplace(Pin.first, PinInfo(Pin.second));
+    }
+}
+
 Cell::PinInfo::PinInfo(std::map<std::string, std::string> JsonInfo_) {
     const auto& Direction = JsonInfo_["direction"];
     if (Direction == "input") {
@@ -15,50 +23,22 @@ Cell::PinInfo::PinInfo(std::map<std::string, std::string> JsonInfo_) {
         throw Exception("Invalid cell pin direction: " + Direction + " .");
     }
 
-    const auto& Facing = JsonInfo_["Facing"];
+    const auto& Facing = JsonInfo_["facing"];
     if (Facing == "up") {
         Face = Facing::Up;
     } else if (Facing == "down") {
         Face = Facing::Down;
-    } else if (Facing == "front") {
-        Face = Facing::Front;
-    } else if (Facing == "back") {
-        Face = Facing::Back;
-    } else if (Facing == "Left") {
-        Face = Facing::Left;
-    } else if (Facing == "right") {
-        Face = Facing::Right;
+    } else if (Facing == "north") {
+        Face = Facing::North;
+    } else if (Facing == "south") {
+        Face = Facing::South;
+    } else if (Facing == "east") {
+        Face = Facing::East;
+    } else if (Facing == "west") {
+        Face = Facing::West;
     } else {
-        throw Exception("Invalid cell pin facing: " + Facing + " .");
-    }
-}
-
-Cell::SchemaInfo::SchemaInfo(const std::string& SchemaPath_, const std::map<std::string, std::string>& JsonInfo_)
-    : Schem(SchemaPath_) {
-    /* const auto& Orientation = JsonInfo_["orientation"];
-     if (Orientation == "north") {
-         Ori = North;
-     } else if (Orientation == "south") {
-         Ori = South;
-     } else if (Orientation == "west") {
-         Ori = West;
-     } else if (Orientation == "east") {
-     Ori = East;
-     } else {
-     throw Exception("Invalid cell pin orientation: " + Orientation + " .");
-     }*/
-}
-
-Cell::Cell(const std::string& Type_, const std::string& CellLibDir_,
-           const std::map<std::string, std::map<std::string, std::string>>& Pins_,
-           const std::map<std::string, std::map<std::string, std::string>>& Schematics_)
-    : Type(Type_) {
-    for (const auto& Pin : Pins_) {
-        Pins.emplace(Pin.first, PinInfo(Pin.second));
-    }
-    for (const auto& Schem : Schematics_) {
-        std::string SchPath = CellLibDir_ + Type_ + "/" + Schem.first + ".schem";
-        Schematics.emplace(Schem.first, SchemaInfo(SchPath, Schem.second));
+        // TODO: Uncomment below once we have facing info
+        // throw Exception("Invalid cell pin facing: " + Facing + " .");
     }
 }
 
@@ -73,14 +53,8 @@ std::ostream& operator<<(std::ostream& out, const Cell& Cell_) {
         out << "Direction: " << Pin.second.Dir << std::endl;
     }*/
 
-    out << "Schematics: " << std::endl;
-    int i = 1;
-    for (const auto& Schema : Cell_.Schematics) {
-        out << i << ". ";
-        out << Schema.first << ": " << std::endl;
-        out << Schema.second.Schem << std::endl;
-        i++;
-    }
+    out << "Schematic: " << std::endl;
+    out << Cell_.Schem << ": " << std::endl;
 
     return out;
 }

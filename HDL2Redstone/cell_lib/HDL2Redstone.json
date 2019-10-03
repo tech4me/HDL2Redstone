@@ -1,81 +1,74 @@
 [
-  {
-    "liberty": true,
-    "pins": {
-      "A": {
-        "direction": "input",
-	"facing": "up"
-      },
-      "Y": {
-        "direction": "output",
-        "function": "A",
-	"facing": "down"
-      }
+    {
+        "is_component": true,
+        "liberty": false,
+        "name": "INPUT",
+        "pins": {
+            "Y": {
+                "direction": "output"
+            }
+        },
+        "schematic": "input"
     },
-    "name": "BUF",
-    "schematics" : {
-      "redstone_repeater_buf": {}
-    }
-  },
-  {
-    "liberty": true,
-    "pins": {
-      "A": {
-        "direction": "input"
-      },
-      "Y": {
-        "direction": "output",
-        "function": "A'"
-      }
+    {
+        "is_component": true,
+        "liberty": false,
+        "name": "OUTPUT",
+        "pins": {
+            "A": {
+                "direction": "input"
+            }
+        },
+        "schematic": "output"
     },
-    "name": "NOT",
-    "schematics" : {
-      "horizontal_torch_inv": {}
-    }
-
-  },
-  {
-    "liberty": true,
-    "pins": {
-      "A": {
-        "direction": "input"
-      },
-      "B": {
-        "direction": "input"
-      },
-      "Y": {
-        "direction": "output",
-        "function": "(A*B)"
-      }
+    {
+        "is_component": true,
+        "liberty": true,
+        "name": "AND",
+        "pins": {
+            "A": {
+                "direction": "input"
+            },
+            "B": {
+                "direction": "input"
+            },
+            "Y": {
+                "direction": "output",
+                "function": "(A*B)"
+            }
+        },
+        "schematic": "basic_and_gate"
     },
-    "name": "AND",
-    "schematics" : {
-      "basic_and_gate": {}
-    }
-  },
-  {
-    "liberty": false,
-    "pins": {
-      "Y": {
-        "direction": "output"
-      }
+    {
+        "is_component": true,
+        "liberty": true,
+        "name": "BUF",
+        "pins": {
+            "A": {
+                "direction": "input",
+                "facing": "up"
+            },
+            "Y": {
+                "direction": "output",
+                "facing": "down",
+                "function": "A"
+            }
+        },
+        "schematic": "redstone_repeater_buf"
     },
-    "name": "INPUT",
-    "schematics" : {
-      "input": {}
+    {
+        "is_component": true,
+        "liberty": true,
+        "name": "NOT",
+        "pins": {
+            "A": {
+                "direction": "input"
+            },
+            "Y": {
+                "direction": "output",
+                "function": "A'"
+            }
+        },
+        "schematic": "horizontal_torch_inv"
     }
-
-  },
-  {
-    "liberty": false,
-    "pins": {
-      "A": {
-        "direction": "input"
-      }
-    },
-    "name": "OUTPUT",
-    "schematics" : {
-      "output": {}
-    }
-  }
 ]
