@@ -11,11 +11,11 @@ class Connection {
   public:
     class Parameters {
       public:
-        void SetParameters(std::vector<std::tuple<int16_t, int16_t, int16_t>> connection_points_);
-        const std::vector<std::tuple<int16_t, int16_t, int16_t>>& getParameters() const { return connection_points; };
+        void SetParameters(std::vector<std::tuple<uint16_t, uint16_t, uint16_t>> connection_points_);
+        const std::vector<std::tuple<uint16_t, uint16_t, uint16_t>>& getParameters() const { return connection_points; };
 
       private:
-        std::vector<std::tuple<int16_t, int16_t, int16_t>> connection_points;
+        std::vector<std::tuple<uint16_t, uint16_t, uint16_t>> connection_points;
     };
 
     Connection(const std::string& Name_, Component* ComponentPtr_, const std::string& PortName_);

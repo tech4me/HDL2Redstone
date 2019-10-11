@@ -44,6 +44,18 @@ Router::Router(const Design& D) {
             for (uint16_t k = std::get<1>(i.first); k <= std::get<1>(i.second); k++) {
                 for (uint16_t z = std::get<2>(i.first); z <= std::get<2>(i.second); z++) {
                     UsedSpace[j][k][z] = 1;
+                    if(j>0)
+                        UsedSpace[j-1][k][z] = 1;
+                    if(j<std::get<0>(Space) -1 )
+                        UsedSpace[j+1][k][z] = 1;
+                    if(k>0)
+                        UsedSpace[j][k-1][z] = 1;
+                    if(k<std::get<1>(Space) -1 )
+                        UsedSpace[j][k+1][z] = 1; //TODO veritcal range should be reconsidered
+                    if(z>0)
+                        UsedSpace[j][k][z-1] = 1;
+                    if(z<std::get<2>(Space) -1 )
+                        UsedSpace[j][k][z+1] = 1;
                 }
             }
         }
@@ -100,57 +112,59 @@ bool Router::flatRoute(Design& D, Connection& C) {
 
         if ((std::get<0>(TempP.Loc)) &&
             (!UsedSpace[std::get<0>(TempP.Loc) - 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)]) &&
-            (!P_[std::get<0>(TempP.Loc) - 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].visited))
+            (!P_[std::get<0>(TempP.Loc) - 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].visited)) {
             P_[std::get<0>(TempP.Loc) - 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].P =
                 &P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)];
-        P_[std::get<0>(TempP.Loc) - 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost =
-            (P_[std::get<0>(TempP.Loc) - 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost >
-             P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1)
-                ? P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1
-                : P_[std::get<0>(TempP.Loc) - 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost;
-        Q.push(P_[std::get<0>(TempP.Loc) - 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)]);
-
+            P_[std::get<0>(TempP.Loc) - 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost =
+                (P_[std::get<0>(TempP.Loc) - 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost >
+                 P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1)
+                    ? P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1
+                    : P_[std::get<0>(TempP.Loc) - 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost;
+            Q.push(P_[std::get<0>(TempP.Loc) - 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)]);
+        }
         if ((std::get<0>(TempP.Loc) < std::get<0>(Space) - 1) &&
             (!UsedSpace[std::get<0>(TempP.Loc) + 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)]) &&
-            (!P_[std::get<0>(TempP.Loc) + 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].visited))
+            (!P_[std::get<0>(TempP.Loc) + 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].visited)) {
             P_[std::get<0>(TempP.Loc) + 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].P =
                 &P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)];
-        P_[std::get<0>(TempP.Loc) + 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost =
-            (P_[std::get<0>(TempP.Loc) + 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost >
-             P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1)
-                ? P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1
-                : P_[std::get<0>(TempP.Loc) + 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost;
-        Q.push(P_[std::get<0>(TempP.Loc) + 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)]);
-
+            P_[std::get<0>(TempP.Loc) + 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost =
+                (P_[std::get<0>(TempP.Loc) + 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost >
+                 P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1)
+                    ? P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1
+                    : P_[std::get<0>(TempP.Loc) + 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost;
+            Q.push(P_[std::get<0>(TempP.Loc) + 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)]);
+        }
         if ((std::get<2>(TempP.Loc)) &&
             (!UsedSpace[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) - 1]) &&
-            (!P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) - 1].visited))
+            (!P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) - 1].visited)) {
             P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) - 1].P =
                 &P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)];
-        P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) - 1].cost =
-            (P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) - 1].cost >
-             P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1)
-                ? P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1
-                : P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) - 1].cost;
-        Q.push(P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) - 1]);
-
+            P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) - 1].cost =
+                (P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) - 1].cost >
+                 P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1)
+                    ? P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1
+                    : P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) - 1].cost;
+            Q.push(P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) - 1]);
+        }
         if ((std::get<2>(TempP.Loc) < std::get<2>(Space) - 1) &&
             (!UsedSpace[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) + 1]) &&
-            (!P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) + 1].visited))
+            (!P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) + 1].visited)) {
             P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) + 1].P =
                 &P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)];
-        P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) + 1].cost =
-            (P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) + 1].cost >
-             P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1)
-                ? P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1
-                : P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) + 1].cost;
-        Q.push(P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) + 1]);
-
+            P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) + 1].cost =
+                (P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) + 1].cost >
+                 P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1)
+                    ? P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1
+                    : P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) + 1].cost;
+            Q.push(P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) + 1]);
+        }
         P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)] = TempP;
     }
+    
+
     return true;
 }
-bool Router::updateUsedSpace(Connection& C) {
+bool Router::updateUsedSpace(Connection& C, std::tuple<uint16_t, uint16_t, uint16_t> bound) {
     const std::vector<std::tuple<Component*, std::string, Connection::Parameters>> PortConnection_ =
         C.getPortConnection();
     if (!PortConnection_.empty()) {
@@ -159,9 +173,21 @@ bool Router::updateUsedSpace(Connection& C) {
 
     for (auto const& k : PortConnection_) {
         if (!(std::get<2>(k).getParameters().empty())) {
-            const std::vector<std::tuple<int16_t, int16_t, int16_t>> tempConnection = std::get<2>(k).getParameters();
+            const std::vector<std::tuple<uint16_t, uint16_t, uint16_t>> tempConnection = std::get<2>(k).getParameters();
             for (auto const& i : tempConnection) {
                 UsedSpace[std::get<0>(i)][std::get<1>(i)][std::get<2>(i)] = 1;
+                if(std::get<0>(i)>0)
+                    UsedSpace[std::get<0>(i)-1][std::get<1>(i)][std::get<2>(i)] = 1;
+                if(std::get<0>(i)<std::get<0>(bound) -1 )
+                    UsedSpace[std::get<0>(i)+1][std::get<1>(i)][std::get<2>(i)] = 1;
+                if(std::get<1>(i)>0)
+                    UsedSpace[std::get<0>(i)][std::get<1>(i)-1][std::get<2>(i)] = 1;
+                if(std::get<1>(i)<std::get<1>(bound) -1 )
+                    UsedSpace[std::get<0>(i)][std::get<1>(i)+1][std::get<2>(i)] = 1; //TODO veritcal range should be reconsidered
+                if(std::get<2>(i)>0)
+                    UsedSpace[std::get<0>(i)][std::get<1>(i)][std::get<2>(i)-1] = 1;
+                if(std::get<2>(i)<std::get<2>(bound) -1 )
+                    UsedSpace[std::get<0>(i)][std::get<1>(i)][std::get<2>(i)+1] = 1;   
             }
         }
     }
@@ -169,12 +195,12 @@ bool Router::updateUsedSpace(Connection& C) {
 }
 
 bool Router::checkSingleRoute(const Design& D,
-                              const std::vector<std::tuple<int16_t, int16_t, int16_t>> connection_points) {
+                              const std::vector<std::tuple<uint16_t, uint16_t, uint16_t>> connection_points) {
     auto& Components_ = D.getModuleNetlist().getComponents();
     auto& Connections_ = D.getModuleNetlist().getConnections();
     std::vector<std::pair<std::tuple<uint16_t, uint16_t, uint16_t>, std::tuple<uint16_t, uint16_t, uint16_t>>>
         UsedComponentSpace;
-    std::vector<std::vector<std::tuple<int16_t, int16_t, int16_t>>> UsedConnectionSpace;
+    std::vector<std::vector<std::tuple<uint16_t, uint16_t, uint16_t>>> UsedConnectionSpace;
     for (auto const& i : Components_) {
         UsedComponentSpace.push_back(i->getRange());
     } // TO DO: move in design.route
@@ -210,15 +236,15 @@ bool Router::checkSingleRoute(const Design& D,
     return true;
 }
 
-std::vector<std::tuple<int16_t, int16_t, int16_t>>
-Router::flatRouteDirectLine(std::tuple<int16_t, int16_t, int16_t> start, std::tuple<int16_t, int16_t, int16_t> end) {
+std::vector<std::tuple<uint16_t, uint16_t, uint16_t>>
+Router::flatRouteDirectLine(std::tuple<uint16_t, uint16_t, uint16_t> start, std::tuple<uint16_t, uint16_t, uint16_t> end) {
     // Note: Here implement with tuple<x,z,y>
-    std::vector<std::tuple<int16_t, int16_t, int16_t>> result;
+    std::vector<std::tuple<uint16_t, uint16_t, uint16_t>> result;
     // result.push_back(start);
-    int16_t x_distance = abs(std::get<0>(start) - std::get<0>(end)) + 1;
-    int16_t z_distance = abs(std::get<1>(start) - std::get<1>(end)) + 1;
-    int16_t x_dir;
-    int16_t z_dir;
+    uint16_t x_distance = abs(std::get<0>(start) - std::get<0>(end)) + 1;
+    uint16_t z_distance = abs(std::get<1>(start) - std::get<1>(end)) + 1;
+    uint16_t x_dir;
+    uint16_t z_dir;
     if (std::get<0>(start) - std::get<0>(end) > 0) {
         x_dir = -1;
     } else if (std::get<0>(start) - std::get<0>(end) < 0) {
@@ -236,22 +262,22 @@ Router::flatRouteDirectLine(std::tuple<int16_t, int16_t, int16_t> start, std::tu
     }
 
     if (x_dir == 0) {
-        for (int16_t i = 0; i < z_distance; i++) {
+        for (uint16_t i = 0; i < z_distance; i++) {
             result.push_back(std::make_tuple(std::get<0>(start), std::get<1>(start) + i, std::get<2>(start)));
         }
         return result;
     }
     if (z_dir == 0) {
-        for (int16_t i = 0; i < x_distance; i++) {
+        for (uint16_t i = 0; i < x_distance; i++) {
             result.push_back(std::make_tuple(std::get<0>(start) + i, std::get<1>(start), std::get<2>(start)));
         }
         return result;
     }
 
-    int16_t step;
-    int16_t remainder;
-    int16_t x_repair = 1;
-    int16_t z_repair = 0;
+    uint16_t step;
+    uint16_t remainder;
+    uint16_t x_repair = 1;
+    uint16_t z_repair = 0;
     if (x_distance >= z_distance) {
         remainder = x_distance % z_distance;
         step = x_distance / z_distance;
@@ -261,18 +287,18 @@ Router::flatRouteDirectLine(std::tuple<int16_t, int16_t, int16_t> start, std::tu
             step = x_distance / (z_distance - 1);
         } // TODO: need to re-update
 
-        for (int16_t i = 0; i < z_distance - 1; i++) {
-            for (int16_t j = 0; j < step; j++) {
+        for (uint16_t i = 0; i < z_distance - 1; i++) {
+            for (uint16_t j = 0; j < step; j++) {
                 result.push_back(std::make_tuple(std::get<0>(start) + x_dir * (j + step * i),
                                                  std::get<1>(start) + z_dir * i, std::get<2>(start)));
             }
             result.push_back(std::make_tuple(std::get<0>(start) + x_dir * ((i + 1) * step - 1 + x_repair),
                                              std::get<1>(start) + z_dir * (i + z_repair), std::get<2>(start)));
-            int16_t temp_repair = x_repair;
+            uint16_t temp_repair = x_repair;
             x_repair = z_repair;
             z_repair = temp_repair;
         }
-        for (int16_t k = 0; k < remainder; k++) {
+        for (uint16_t k = 0; k < remainder; k++) {
             result.push_back(std::make_tuple(std::get<0>(start) + x_dir * (k + (z_distance - 1) * step),
                                              std::get<1>(end), std::get<2>(start)));
         }
@@ -283,19 +309,19 @@ Router::flatRouteDirectLine(std::tuple<int16_t, int16_t, int16_t> start, std::tu
             remainder = z_distance % (x_distance - 1);
             step = z_distance / (x_distance - 1);
         } // TODO: need to re-update
-        for (int16_t i = 0; i < x_distance - 1; i++) {
-            for (int16_t j = 0; j < step; j++) {
+        for (uint16_t i = 0; i < x_distance - 1; i++) {
+            for (uint16_t j = 0; j < step; j++) {
                 result.push_back(std::make_tuple(std::get<0>(start) + x_dir * i,
                                                  std::get<1>(start) + z_dir * (j + step * i), std::get<2>(start)));
             }
             result.push_back(std::make_tuple(std::get<0>(start) + x_dir * (i + x_repair),
                                              std::get<1>(start) + z_dir * ((i + 1) * step - 1 + z_repair),
                                              std::get<2>(start)));
-            int16_t temp_repair = x_repair;
+            uint16_t temp_repair = x_repair;
             x_repair = z_repair;
             z_repair = temp_repair;
         }
-        for (int16_t k = 0; k < remainder; k++) {
+        for (uint16_t k = 0; k < remainder; k++) {
             result.push_back(std::make_tuple(
                 std::get<0>(end), std::get<1>(start) + z_dir * (k + (x_distance - 1) * step), std::get<2>(start)));
         }
