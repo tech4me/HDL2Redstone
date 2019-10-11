@@ -13,6 +13,7 @@ class Design {
     Design() = delete;
     // Create a design with max width, max height, and max length
     Design(uint16_t Width, uint16_t Height, uint16_t Length, const std::string& File_, const CellLibrary& CellLib_);
+    const std::tuple<uint16_t, uint16_t, uint16_t> getSpace() const;
     const ModuleNetlist& getModuleNetlist() const;
     bool doPlaceAndRoute();
 
