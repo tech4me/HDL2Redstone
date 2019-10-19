@@ -236,17 +236,17 @@ std::ostream& operator<<(std::ostream& out, const Schematic& Schematic_) {
     // for index in range(0, BlockData.size())
     // 	     -> Location {X, Y, Z} // Calculate from index
     // 	     -> Type IntertPalette.at(BlockData.at(index))
-    out << "Length: " << Schematic_.Length << ", Weight: " << Schematic_.Width << ", Height: " << Schematic_.Height
+    out << "  Length: " << Schematic_.Length << ", Weight: " << Schematic_.Width << ", Height: " << Schematic_.Height
         << std::endl;
 
-    out << "Offset: ";
+    out << "  Offset: ";
     for (const auto o : Schematic_.Offset)
         out << o << ", ";
     out << std::endl;
 
     for (int i = 0; i < Schematic_.BlockData.size(); i++) {
-        out << "Location: Y:" << i / (w * l) << " Z:" << i % (w * l) / w << " X:" << (i % (w * l)) % w << ";  ";
-        out << "Type: " << Schematic_.InvertPalette.at(Schematic_.BlockData.at(i)) << std::endl;
+        out << "  Location: Y:" << i / (w * l) << " Z:" << i % (w * l) / w << " X:" << (i % (w * l)) % w << ";  ";
+        out << "  Type: " << Schematic_.InvertPalette.at(Schematic_.BlockData.at(i)) << std::endl;
     }
     return out;
 }
