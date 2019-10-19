@@ -3,9 +3,9 @@
 
 using namespace HDL2Redstone;
 
-Cell::Cell(const std::string& Type_, const std::string& CellLibDir_, const std::map<std::string, Pin> Pins_, const std::string& SchematicName_)
+Cell::Cell(const std::string& Type_, const std::string& CellLibDir_, const std::map<std::string, Pin> Pins_,
+           const std::string& SchematicName_)
     : Type(Type_), Schem(CellLibDir_ + SchematicName_ + ".schem"), Pins(Pins_) {}
-
 
 namespace HDL2Redstone {
 std::ostream& operator<<(std::ostream& out, const Cell& Cell_) {
@@ -14,39 +14,40 @@ std::ostream& operator<<(std::ostream& out, const Cell& Cell_) {
     out << "Pins: " << std::endl;
     for (const auto& Pin : Cell_.Pins) {
         out << "  " << Pin.first << ": " << std::endl;
-	std::string dir, face;
-	switch (static_cast<int>(Pin.second.Dir)) {
-	    case 0:
-		dir = "input";
-		break;
-	    case 1:
-		dir = "output";
-		break;
-	    case 2:
-		dir = "inout";
-		break;
-	}
-	switch (static_cast<int>(Pin.second.Face)) {
-	    case 0:
-		face = "up";
-		break;
-	    case 1:
-		face = "down";
-		break;
-	    case 2:
-		face = "north";
-		break;
-	    case 3:
-		face = "south";
-		break;
-	    case 4:
-		face = "east";
-		break;
-	    case 5:
-		face = "west";
-		break;
-	}
-        out << "    Direction: " << dir << "; Facing: " << face << "; Location: "<<std::get<0>(Pin.second.Location)<<" "<<std::get<1>(Pin.second.Location)<<" "<<std::get<2>(Pin.second.Location)<< std::endl;
+        std::string dir, face;
+        switch (static_cast<int>(Pin.second.Dir)) {
+        case 0:
+            dir = "input";
+            break;
+        case 1:
+            dir = "output";
+            break;
+        case 2:
+            dir = "inout";
+            break;
+        }
+        switch (static_cast<int>(Pin.second.Face)) {
+        case 0:
+            face = "up";
+            break;
+        case 1:
+            face = "down";
+            break;
+        case 2:
+            face = "north";
+            break;
+        case 3:
+            face = "south";
+            break;
+        case 4:
+            face = "east";
+            break;
+        case 5:
+            face = "west";
+            break;
+        }
+        out << "    Direction: " << dir << "; Facing: " << face << "; Location: " << std::get<0>(Pin.second.Location)
+            << " " << std::get<1>(Pin.second.Location) << " " << std::get<2>(Pin.second.Location) << std::endl;
     }
 
     out << "Schematic: " << std::endl;

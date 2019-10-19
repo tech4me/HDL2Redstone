@@ -12,7 +12,9 @@ class Connection {
     class Parameters {
       public:
         void SetParameters(std::vector<std::tuple<uint16_t, uint16_t, uint16_t>> connection_points_);
-        const std::vector<std::tuple<uint16_t, uint16_t, uint16_t>>& getParameters() const { return connection_points; };
+        const std::vector<std::tuple<uint16_t, uint16_t, uint16_t>>& getParameters() const {
+            return connection_points;
+        };
 
       private:
         std::vector<std::tuple<uint16_t, uint16_t, uint16_t>> connection_points;

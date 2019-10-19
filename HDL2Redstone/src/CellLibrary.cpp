@@ -12,19 +12,14 @@ using namespace HDL2Redstone;
 
 namespace HDL2Redstone {
 
-NLOHMANN_JSON_SERIALIZE_ENUM( Direction, {
-    {Direction::Input, "input"},
-    {Direction::Output, "output"},
-    {Direction::Inout, "inout"}
-})
-NLOHMANN_JSON_SERIALIZE_ENUM( Facing, {
-    {Facing::Up, "up"},
-    {Facing::Down, "down"},
-    {Facing::North, "north"},
-    {Facing::South, "south"},
-    {Facing::East, "east"},
-    {Facing::West, "west"}
-})
+NLOHMANN_JSON_SERIALIZE_ENUM(Direction,
+                             {{Direction::Input, "input"}, {Direction::Output, "output"}, {Direction::Inout, "inout"}})
+NLOHMANN_JSON_SERIALIZE_ENUM(Facing, {{Facing::Up, "up"},
+                                      {Facing::Down, "down"},
+                                      {Facing::North, "north"},
+                                      {Facing::South, "south"},
+                                      {Facing::East, "east"},
+                                      {Facing::West, "west"}})
 
 void from_json(const json& J_, Pin& P_) {
     P_.Dir = J_.at("direction").get<Direction>();
@@ -32,7 +27,7 @@ void from_json(const json& J_, Pin& P_) {
     J_.at("location").get_to(P_.Location);
 }
 
-}// namespace HDL2Redstone
+} // namespace HDL2Redstone
 
 CellLibrary::CellLibrary(const std::string& CellLibDir_) {
     std::ifstream Json_in_fs(CellLibDir_ + "HDL2Redstone.json");
@@ -45,13 +40,14 @@ CellLibrary::CellLibrary(const std::string& CellLibDir_) {
     try {
         for (const auto& CellData : J) {
             std::map<std::string, Pin> TempPins;
-	    for (const auto& [key, value] : CellData["pins"].items()) {
-      		TempPins.emplace(key, value.get<HDL2Redstone::Pin>());
-	    }	    
+            for (const auto& [key, value] : CellData["pins"].items()) {
+                TempPins.emplace(key, value.get<HDL2Redstone::Pin>());
+            }
             std::string SchematicDir = CellLibDir_ + (CellData["is_component"] ? "components/" : "connections/");
             CellInstances.emplace(
                 CellData["name"],
-                //std::make_unique<Cell>(CellData["name"], SchematicDir, std::move(TempPinInfo), CellData["schematic"]));
+                // std::make_unique<Cell>(CellData["name"], SchematicDir, std::move(TempPinInfo),
+                // CellData["schematic"]));
                 std::make_unique<Cell>(CellData["name"], SchematicDir, std::move(TempPins), CellData["schematic"]));
         }
     } catch (json::exception& E) {

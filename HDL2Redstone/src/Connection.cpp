@@ -3,8 +3,7 @@
 using namespace HDL2Redstone;
 
 Connection::Connection(const std::string& Name_, Component* ComponentPtr_, const std::string& PortName_) : Name(Name_) {
-    Connection::Parameters blank;
-    PortConnection.push_back(std::make_tuple(ComponentPtr_, PortName_, blank));
+    PortConnection.push_back(std::make_tuple(ComponentPtr_, PortName_, Connection::Parameters()));
 }
 
 const std::string& Connection::getName() const { return Name; }
@@ -14,8 +13,7 @@ const std::vector<std::tuple<Component*, std::string, Connection::Parameters>>& 
 }
 
 void Connection::addSink(Component* ComponentPtr_, const std::string& PortName_) {
-    Connection::Parameters blank;
-    PortConnection.push_back(std::make_tuple(ComponentPtr_, PortName_, blank));
+    PortConnection.push_back(std::make_tuple(ComponentPtr_, PortName_, Connection::Parameters()));
 }
 
 namespace HDL2Redstone {
