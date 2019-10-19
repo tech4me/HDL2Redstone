@@ -10,12 +10,18 @@
 using namespace blifparse;
 using namespace HDL2Redstone;
 
-ModuleNetlist::ExtractNetlist::ExtractNetlist(const CellLibrary& CellLib_) : CellLib(CellLib_) {}
+ModuleNetlist::ExtractNetlist::ExtractNetlist(const CellLibrary& CellLib_, const DesignConstraint& DC_)
+    : CellLib(CellLib_), DC(DC_) {}
 
 void ModuleNetlist::ExtractNetlist::inputs(std::vector<std::string> inputs) {
     for (const auto& input : inputs) {
         const Cell* CellPtr = CellLib.getCellPtr("INPUT");
         auto ComponentPtr = std::make_unique<Component>(CellPtr);
+        auto It = DC.getForcedPlacement().find(input);
+        if (It != DC.getForcedPlacement().end()) {
+            ComponentPtr->setPlacement(It->second.X, It->second.Y, It->second.Z, It->second.Orient);
+            ComponentPtr->setPlaced(true);
+        }
         Connections.push_back(std::make_unique<Connection>(input, ComponentPtr.get(), "Y"));
         Components.push_back(std::move(ComponentPtr));
     }
@@ -25,6 +31,11 @@ void ModuleNetlist::ExtractNetlist::outputs(std::vector<std::string> outputs) {
     for (const auto& output : outputs) {
         const Cell* CellPtr = CellLib.getCellPtr("OUTPUT");
         auto ComponentPtr = std::make_unique<Component>(CellPtr);
+        auto It = DC.getForcedPlacement().find(output);
+        if (It != DC.getForcedPlacement().end()) {
+            ComponentPtr->setPlacement(It->second.X, It->second.Y, It->second.Z, It->second.Orient);
+            ComponentPtr->setPlaced(true);
+        }
         Connections.push_back(std::make_unique<Connection>(output, ComponentPtr.get(), "A"));
         Components.push_back(std::move(ComponentPtr));
     }
@@ -63,8 +74,8 @@ void ModuleNetlist::ExtractNetlist::parse_error(const int curr_lineno, const std
     had_error_ = true;
 }
 
-ModuleNetlist::ModuleNetlist(const std::string& File_, const CellLibrary& CellLib_) {
-    ExtractNetlist EN(CellLib_);
+ModuleNetlist::ModuleNetlist(const std::string& File_, const CellLibrary& CellLib_, const DesignConstraint& DC_) {
+    ExtractNetlist EN(CellLib_, DC_);
     blif_parse_filename(File_, EN);
     if (EN.had_error()) {
         throw Exception("BLIF parsing failed.");

@@ -6,8 +6,12 @@
         "pins": {
             "Y": {
                 "direction": "output",
-                "location": [0,1,0],
-		"facing": "west"
+                "location": [
+                    0,
+                    1,
+                    0
+                ],
+                "facing": "north"
             }
         },
         "schematic": "input"
@@ -19,8 +23,12 @@
         "pins": {
             "A": {
                 "direction": "input",
-		"location": [0,0,0],
-		"facing": "east"
+                "location": [
+                    0,
+                    1,
+                    0
+                ],
+                "facing": "south"
             }
         },
         "schematic": "output"
@@ -32,18 +40,30 @@
         "pins": {
             "A": {
                 "direction": "input",
-		"location": [1,0,1],
-		"facing": "west"
+                "location": [
+                    0,
+                    1,
+                    0
+                ],
+                "facing": "north"
             },
             "B": {
                 "direction": "input",
-		"location": [1,0,0],
-		"facing": "west"
+                "location": [
+                    2,
+                    1,
+                    0
+                ],
+                "facing": "north"
             },
             "Y": {
                 "direction": "output",
-		"location": [0,0,1],
-		"facing": "east",
+                "location": [
+                    1,
+                    1,
+                    3
+                ],
+                "facing": "south",
                 "function": "(A*B)"
             }
         },
@@ -56,13 +76,21 @@
         "pins": {
             "A": {
                 "direction": "input",
-		"location": [1,0,1],
-		"facing": "west"
+                "location": [
+                    1,
+                    0,
+                    1
+                ],
+                "facing": "west"
             },
             "Y": {
-                "direction": "output",	
-		"location": [1,0,0],
-		"facing": "east",
+                "direction": "output",
+                "location": [
+                    1,
+                    0,
+                    0
+                ],
+                "facing": "east",
                 "function": "A"
             }
         },
@@ -75,13 +103,21 @@
         "pins": {
             "A": {
                 "direction": "input",
-		"location": [1,0,1],
-		"facing": "west"
+                "location": [
+                    1,
+                    0,
+                    1
+                ],
+                "facing": "west"
             },
             "Y": {
-                "direction": "output",	
-		"location": [1,0,0],
-		"facing": "east",
+                "direction": "output",
+                "location": [
+                    1,
+                    0,
+                    0
+                ],
+                "facing": "east",
                 "function": "A'"
             }
         },

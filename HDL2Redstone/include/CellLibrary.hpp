@@ -19,6 +19,3 @@ class CellLibrary {
     friend std::ostream& operator<<(std::ostream& out, const CellLibrary& CellLibrary_);
 };
 } // namespace HDL2Redstone
-
-
-

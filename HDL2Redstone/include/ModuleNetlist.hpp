@@ -10,11 +10,12 @@
 #include <CellLibrary.hpp>
 #include <Component.hpp>
 #include <Connection.hpp>
+#include <DesignConstraint.hpp>
 
 namespace HDL2Redstone {
 class ModuleNetlist {
   public:
-    ModuleNetlist(const std::string& File_, const CellLibrary& CellLib_);
+    ModuleNetlist(const std::string& File_, const CellLibrary& CellLib_, const DesignConstraint& DC_);
     std::vector<std::unique_ptr<Component>>& getComponents() { return Components; }
     const std::vector<std::unique_ptr<Component>>& getComponents() const { return Components; }
     std::vector<std::unique_ptr<Connection>>& getConnections() { return Connections; }
@@ -25,7 +26,7 @@ class ModuleNetlist {
         friend class ModuleNetlist;
 
       public:
-        ExtractNetlist(const CellLibrary& CellLib_);
+        ExtractNetlist(const CellLibrary& CellLib_, const DesignConstraint& DC_);
         void start_parse() override {}
         void filename(std::string /*fname*/) override {}
         void lineno(int /*line_num*/) override {}
@@ -49,6 +50,7 @@ class ModuleNetlist {
       private:
         bool had_error_ = false;
         const CellLibrary& CellLib;
+        const DesignConstraint& DC;
         std::vector<std::unique_ptr<Component>> Components;
         std::vector<std::unique_ptr<Connection>> Connections;
     };

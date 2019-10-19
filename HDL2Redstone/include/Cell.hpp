@@ -9,31 +9,30 @@
 
 namespace HDL2Redstone {
 
-    enum class Direction { Input, Output, Inout };
-   // enum class Orientation { North, South, West, East };
-    enum class Facing { Up, Down, North, South, East, West };
+enum class Direction { Input, Output, Inout };
+// enum class Orientation { North, South, West, East };
+enum class Facing { Up, Down, North, South, East, West };
 
-    struct Pin{
-      Direction Dir;
-      Facing Face;
-      std::tuple<uint16_t, uint16_t, uint16_t> Location;
-    };
-
-	
+struct Pin {
+    Direction Dir;
+    Facing Face;
+    std::tuple<uint16_t, uint16_t, uint16_t> Location;
+};
 
 class Cell {
-    
 
   public:
     Cell() = delete;
 
-    Cell(const std::string& Type_, const std::string& CellLibDir_, const std::map<std::string, Pin> Pins_, const std::string& SchematicName_);
+    Cell(const std::string& Type_, const std::string& CellLibDir_, const std::map<std::string, Pin> Pins_,
+         const std::string& SchematicName_);
     const std::string& getType() const { return Type; }
     const Schematic& getSchematic() const { return Schem; }
     const Direction& getPinDir(std::string PinName_) const { return Pins.at(PinName_).Dir; }
     const Facing& getPinFacing(std::string PinName_) const { return Pins.at(PinName_).Face; }
-    const std::tuple<uint16_t, uint16_t, uint16_t>& getPinLocation(std::string PinName_) const { return Pins.at(PinName_).Location; } 
-
+    const std::tuple<uint16_t, uint16_t, uint16_t>& getPinLocation(std::string PinName_) const {
+        return Pins.at(PinName_).Location;
+    }
 
   private:
     std::string Type;
@@ -44,8 +43,5 @@ class Cell {
 
     friend std::ostream& operator<<(std::ostream& out, const Cell& Cell_);
 };
-
-
-
 
 } // namespace HDL2Redstone
