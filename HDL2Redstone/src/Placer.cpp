@@ -28,7 +28,7 @@ bool Placer::place() {
             Component->setPlacement(i * unitX, i * unitY, i * unitZ, Orientation::OneCW);
             ++i;
         } else if (Component->getType() == "AND") {
-            Component->setPlacement(3, 0, 3, Orientation::OneCW);
+            Component->setPlacement(3, 0, 3, Orientation::ZeroCW);
             // Component->setPlacement(i * unitX, i * unitY, i * unitZ, Orientation::OneCW);
             ++i;
         }
@@ -37,6 +37,7 @@ bool Placer::place() {
 }
 
 bool Placer::checkComponentLegality() const {
+    // TODO: Check bound here
     std::vector<std::vector<std::vector<bool>>> OccupiedSpace(
         D.Width, std::vector<std::vector<bool>>(D.Height, std::vector<bool>(D.Length)));
     const auto& Components = D.MN.getComponents();
@@ -47,7 +48,7 @@ bool Placer::checkComponentLegality() const {
         const auto& P2 = ComponentRange.second;
         for (int X = std::get<0>(P1); X != std::get<0>(P2); ++X) {
             for (int Y = std::get<1>(P1); Y != std::get<1>(P2); ++Y) {
-                for (int Z = std::get<1>(P1); Z != std::get<1>(P2); ++Z) {
+                for (int Z = std::get<2>(P1); Z != std::get<2>(P2); ++Z) {
                     if (OccupiedSpace[X][Y][Z]) {
                         return false;
                     } else {

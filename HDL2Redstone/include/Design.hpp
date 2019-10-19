@@ -26,6 +26,7 @@ class Design {
     uint16_t Width;
     uint16_t Height;
     uint16_t Length;
+    const CellLibrary& CellLib;
     const DesignConstraint& DC;
     ModuleNetlist MN;
     std::map<std::string, Placement> ForcedPlacement;

@@ -21,12 +21,15 @@ class Connection {
     };
 
     Connection(const std::string& Name_, Component* ComponentPtr_, const std::string& PortName_);
+    bool getRouted() const { return Routed; }
+    void setRouted(bool Routed_) { Routed = Routed_; }
     const std::string& getName() const;
     const std::vector<std::tuple<Component*, std::string, Connection::Parameters>>& getPortConnection() const;
     // add component port to sink
     void addSink(Component* ComponentPtr_, const std::string& PortName_);
 
   private:
+    bool Routed;
     const std::string Name;
     std::vector<std::tuple<Component*, std::string, Connection::Parameters>> PortConnection;
     friend std::ostream& operator<<(std::ostream& out, const Connection& Connection_);
