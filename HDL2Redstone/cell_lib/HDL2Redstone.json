@@ -5,7 +5,9 @@
         "name": "INPUT",
         "pins": {
             "Y": {
-                "direction": "output"
+                "direction": "output",
+                "location": [0,1,0],
+		"facing": "west"
             }
         },
         "schematic": "input"
@@ -16,7 +18,9 @@
         "name": "OUTPUT",
         "pins": {
             "A": {
-                "direction": "input"
+                "direction": "input",
+		"location": [0,0,0],
+		"facing": "east"
             }
         },
         "schematic": "output"
@@ -27,13 +31,19 @@
         "name": "AND",
         "pins": {
             "A": {
-                "direction": "input"
+                "direction": "input",
+		"location": [1,0,1],
+		"facing": "west"
             },
             "B": {
-                "direction": "input"
+                "direction": "input",
+		"location": [1,0,0],
+		"facing": "west"
             },
             "Y": {
                 "direction": "output",
+		"location": [0,0,1],
+		"facing": "east",
                 "function": "(A*B)"
             }
         },
@@ -46,11 +56,13 @@
         "pins": {
             "A": {
                 "direction": "input",
-                "facing": "up"
+		"location": [1,0,1],
+		"facing": "west"
             },
             "Y": {
-                "direction": "output",
-                "facing": "down",
+                "direction": "output",	
+		"location": [1,0,0],
+		"facing": "east",
                 "function": "A"
             }
         },
@@ -62,10 +74,14 @@
         "name": "NOT",
         "pins": {
             "A": {
-                "direction": "input"
+                "direction": "input",
+		"location": [1,0,1],
+		"facing": "west"
             },
             "Y": {
-                "direction": "output",
+                "direction": "output",	
+		"location": [1,0,0],
+		"facing": "east",
                 "function": "A'"
             }
         },
