@@ -14,7 +14,11 @@ int main(int argc, char* argv[]) {
             std::string CellLibDir(argv[1]);
             CellLibrary CL(CellLibDir);
             std::cout << CL;
-            Design D(100, 10, 100, "design.blif", CL);
+            DesignConstraint DC;
+            DC.addForcedPlacement("a", {0, 0, 0, Orientation::ZeroCW});
+            DC.addForcedPlacement("b", {2, 0, 0, Orientation::ZeroCW});
+            DC.addForcedPlacement("c", {1, 0, 9, Orientation::ZeroCW});
+            Design D(10, 10, 10, "design.blif", CL, DC);
             std::cout << D;
             std::cout << "Now Placing ..." << std::endl;
             D.doPlaceAndRoute();

@@ -13,6 +13,10 @@ bool Placer::place() {
 
     int16_t i = 0;
     for (auto& Component : Components) {
+        if (Component->getPlaced()) {
+            continue;
+        }
+
         // FIXME: We only place the gates we have for now
         if (Component->getType() == "INPUT") {
             Component->setPlacement(i * unitX, i * unitY, i * unitZ, Orientation::OneCW);
@@ -24,7 +28,8 @@ bool Placer::place() {
             Component->setPlacement(i * unitX, i * unitY, i * unitZ, Orientation::OneCW);
             ++i;
         } else if (Component->getType() == "AND") {
-            Component->setPlacement(i * unitX, i * unitY, i * unitZ, Orientation::OneCW);
+            Component->setPlacement(3, 0, 3, Orientation::OneCW);
+            // Component->setPlacement(i * unitX, i * unitY, i * unitZ, Orientation::OneCW);
             ++i;
         }
     }

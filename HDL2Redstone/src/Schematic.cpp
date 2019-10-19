@@ -151,7 +151,18 @@ void Schematic::insertSubSchematic(const Placement& P_, const Schematic& Schem_)
         int32_t X = (i % (Schem_.Width * Schem_.Length)) % Schem_.Width + P_.X;
         int32_t Y = i / (Schem_.Width * Schem_.Length) + P_.Y;
         int32_t Z = (i % (Schem_.Width * Schem_.Length)) / Schem_.Width + P_.Z;
+        // Bound check
+        if (X < 0 || X >= Width || Y < 0 || Y >= Height || Z < 0 || Z >= Length) {
+            throw Exception("Block:" + Schem_.InvertPalette.at(i) + " X:" + std::to_string(X) +
+                            " Y:" + std::to_string(Y) + " Z:" + std::to_string(Z) + " is being placed out of bound.");
+        }
         int32_t Index = X + (Y * Width * Length) + (Z * Width);
+        // Check overlap (non-air block)
+        if (BlockData.at(Index)) {
+            throw Exception("Block:" + Schem_.InvertPalette.at(i) + " cannot be placed at X:" + std::to_string(X) +
+                            " Y:" + std::to_string(Y) + " Z:" + std::to_string(Z) +
+                            " the location is already occupied.");
+        }
         auto It = ConversionMap.find(Schem_.BlockData.at(i));
         if (It != ConversionMap.end()) {
             BlockData.at(Index) = It->second;
@@ -245,7 +256,7 @@ std::ostream& operator<<(std::ostream& out, const Schematic& Schematic_) {
     out << std::endl;
 
     for (int i = 0; i < Schematic_.BlockData.size(); i++) {
-        out << "  Location: Y:" << i / (w * l) << " Z:" << i % (w * l) / w << " X:" << (i % (w * l)) % w << ";  ";
+        out << "  Location: X:" << (i % (w * l)) % w << " Y:" << i / (w * l) << " Z:" << i % (w * l) / w << ";  ";
         out << "  Type: " << Schematic_.InvertPalette.at(Schematic_.BlockData.at(i)) << std::endl;
     }
     return out;
