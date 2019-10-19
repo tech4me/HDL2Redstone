@@ -46,7 +46,8 @@ os.chdir(output_dir)
 yosys_command = yosys_command.format(input_verilog_file=verilog_file, input_liberty_file=liberty_file, output_dot_file_name="design", output_blif_file="design.blif")
 
 # Run Yosys to generate BLIF file
-subprocess.run(["yosys", "-Q", "-q", "-l", "yosys.log", "-p", yosys_command])
+ret = subprocess.run(["yosys", "-Q", "-q", "-l", "yosys.log", "-p", yosys_command])
+ret.check_returncode()
 
 # Run HDL2Redstone main executable to generate schematics
 ret = subprocess.run([os.path.join(file_path, "HDL2Redstone"), os.path.join(source_path, "cell_lib/")])
