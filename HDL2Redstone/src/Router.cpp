@@ -236,26 +236,26 @@ bool Router::flatRoute(Design& D, Connection& C) {
         for (auto it : end) {
             std::cout << "Location: " << std::get<0>(it) << " " << std::get<1>(it) << " " << std::get<2>(it)
                       << std::endl;
-            Result.insert(it);
+            Result.insert(std::make_tuple(std::get<0>(it), std::get<1>(it) - 1, std::get<2>(it)));
             ptr = P_[std::get<0>(it)][std::get<1>(it)][std::get<2>(it)].P;
             while (ptr != NULL) {
                 std::cout << "Location: " << std::get<0>(ptr->Loc) << " " << std::get<1>(ptr->Loc) << " "
                           << std::get<2>(ptr->Loc) << std::endl;
-                Result.insert(ptr->Loc);
+                Result.insert(std::make_tuple(std::get<0>(ptr->Loc), std::get<1>(ptr->Loc) - 1, std::get<2>(ptr->Loc)));
                 ptr = ptr->P;
             }
         }
     }
     for (const auto& entry : Result) {
-        UsedSpace[std::get<0>(entry)][std::get<1>(entry)][std::get<2>(entry)] = 1;
+        UsedSpace[std::get<0>(entry)][std::get<1>(entry)+1][std::get<2>(entry)] = 1;
         if (std::get<0>(entry) > 0)
-            UsedSpace[std::get<0>(entry) - 1][std::get<1>(entry)][std::get<2>(entry)] = 1;
+            UsedSpace[std::get<0>(entry) - 1][std::get<1>(entry)+1][std::get<2>(entry)] = 1;
         if (std::get<0>(entry) < std::get<0>(Space) - 1)
-            UsedSpace[std::get<0>(entry) + 1][std::get<1>(entry)][std::get<2>(entry)] = 1;
+            UsedSpace[std::get<0>(entry) + 1][std::get<1>(entry)+1][std::get<2>(entry)] = 1;
         if (std::get<2>(entry) > 0)
-            UsedSpace[std::get<0>(entry)][std::get<1>(entry)][std::get<2>(entry) - 1] = 1;
+            UsedSpace[std::get<0>(entry)][std::get<1>(entry)+1][std::get<2>(entry) - 1] = 1;
         if (std::get<2>(entry) < std::get<2>(Space) - 1)
-            UsedSpace[std::get<0>(entry)][std::get<1>(entry)][std::get<2>(entry) + 1] = 1;
+            UsedSpace[std::get<0>(entry)][std::get<1>(entry)+1][std::get<2>(entry) + 1] = 1;
     }
     for (int i = 0; i < std::get<0>(Space); i++) {
         for (int j = 0; j < std::get<1>(Space); j++) {
