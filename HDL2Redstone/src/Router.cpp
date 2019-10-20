@@ -1,20 +1,36 @@
 #include <cmath>
 #include <queue>
+#include <set>
 
 #include <Component.hpp>
 #include <Connection.hpp>
 #include <Router.hpp>
 
 using namespace HDL2Redstone;
-void Router::updateSinglePortUsedSpace(std::tuple<uint16_t, uint16_t, uint16_t> Loc, Facing Fac) {
-    if (Fac == Facing::North)
+std::tuple<uint16_t, uint16_t, uint16_t> Router::updateSinglePortUsedSpace(std::tuple<uint16_t, uint16_t, uint16_t> Loc,
+                                                                           Facing Fac) {
+    std::cout << "----" << std::get<0>(Loc) << " " << std::get<1>(Loc) << " " << std::get<2>(Loc) << " " << std::endl;
+    if (Fac == Facing::North) {
+        std::cout << 1 << std::endl;
         UsedSpace[std::get<0>(Loc)][std::get<1>(Loc)][std::get<2>(Loc) - 1] = 0;
-    if (Fac == Facing::East)
+        return std::make_tuple(std::get<0>(Loc), std::get<1>(Loc), std::get<2>(Loc) - 1);
+    }
+    if (Fac == Facing::East) {
+        std::cout << 2 << std::endl;
         UsedSpace[std::get<0>(Loc) + 1][std::get<1>(Loc)][std::get<2>(Loc)] = 0;
-    if (Fac == Facing::South)
+        return std::make_tuple(std::get<0>(Loc) + 1, std::get<1>(Loc), std::get<2>(Loc));
+    }
+    if (Fac == Facing::South) {
+        std::cout << 3 << std::endl;
         UsedSpace[std::get<0>(Loc)][std::get<1>(Loc)][std::get<2>(Loc) + 1] = 0;
-    if (Fac == Facing::West)
+        return std::make_tuple(std::get<0>(Loc), std::get<1>(Loc), std::get<2>(Loc) + 1);
+    }
+    if (Fac == Facing::West) {
+        std::cout << 4 << std::endl;
         UsedSpace[std::get<0>(Loc) - 1][std::get<1>(Loc)][std::get<2>(Loc)] = 0;
+        return std::make_tuple(std::get<0>(Loc) - 1, std::get<1>(Loc), std::get<2>(Loc));
+    }
+    return Loc;
 }
 Router::Router(const Design& D) {
     std::tuple<uint16_t, uint16_t, uint16_t> Space = D.getSpace();
@@ -23,7 +39,7 @@ Router::Router(const Design& D) {
         UsedSpace[i] = new bool*[std::get<1>(Space)];
         for (int j = 0; j < std::get<1>(Space); j++) {
             UsedSpace[i][j] = new bool[std::get<2>(Space)];
-            for (int k = 0; k < std::get<1>(Space); k++) {
+            for (int k = 0; k < std::get<2>(Space); k++) {
                 UsedSpace[i][j][k] = 0;
             }
         }
@@ -49,18 +65,19 @@ Router::Router(const Design& D) {
       */
 
     for (auto const& i : UsedComponentSpace) {
-        for (uint16_t j = std::get<0>(i.first); j <= std::get<0>(i.second); j++) {
-            for (uint16_t k = std::get<1>(i.first); k <= std::get<1>(i.second); k++) {
-                for (uint16_t z = std::get<2>(i.first); z <= std::get<2>(i.second); z++) {
+        for (uint16_t j = std::get<0>(i.first); j < std::get<0>(i.second); j++) {
+            for (uint16_t k = std::get<1>(i.first); k < std::get<1>(i.second); k++) {
+                for (uint16_t z = std::get<2>(i.first); z < std::get<2>(i.second); z++) {
                     UsedSpace[j][k][z] = 1;
                     if (j > 0)
                         UsedSpace[j - 1][k][z] = 1;
                     if (j < std::get<0>(Space) - 1)
                         UsedSpace[j + 1][k][z] = 1;
-                    if (k > 0)
+                    /*if (k > 0)
                         UsedSpace[j][k - 1][z] = 1;
                     if (k < std::get<1>(Space) - 1)
                         UsedSpace[j][k + 1][z] = 1; // TODO veritcal range should be reconsidered
+                        */
                     if (z > 0)
                         UsedSpace[j][k][z - 1] = 1;
                     if (z < std::get<2>(Space) - 1)
@@ -68,6 +85,27 @@ Router::Router(const Design& D) {
                 }
             }
         }
+    }
+    for (int i = 0; i < std::get<0>(Space); i++) {
+        for (int j = 0; j < std::get<1>(Space); j++) {
+            for (int k = 0; k < std::get<2>(Space); k++) {
+                if (j == 1)
+                    std::cout << UsedSpace[i][j][k] << " ";
+            }
+        }
+        std::cout << std::endl;
+    }
+}
+void Router::route(Design& D) {
+    // auto& Components_ = D.getModuleNetlist().getComponents();
+    auto& Connections_ = D.getModuleNetlist().getConnections();
+    for (auto& it : Connections_) {
+        std::cout << it->getName() << std::endl;
+        std::cout << *it << std::endl;
+        flatRoute(D, *it);
+        // std::cout<<"DDDD"<<std::endl;
+        // updateUsedSpace(*it, D.getSpace());
+        // std::cout<<"HHHH"<<std::endl;
     }
 }
 bool Router::flatRoute(Design& D, Connection& C) {
@@ -95,98 +133,146 @@ bool Router::flatRoute(Design& D, Connection& C) {
             }
         }
     }
-
     std::tuple<uint16_t, uint16_t, uint16_t> start;
     std::vector<std::tuple<uint16_t, uint16_t, uint16_t>> end;
+    std::tuple<uint16_t, uint16_t, uint16_t> startPin;
+    std::vector<std::tuple<uint16_t, uint16_t, uint16_t>> endPin;
 
     const std::vector<std::tuple<Component*, std::string, Connection::Parameters>> PortConnection_ =
         C.getPortConnection();
 
     // source
     auto SrcFacing = (std::get<0>(PortConnection_[0]))->getPinFacing(std::get<1>(PortConnection_[0]));
-    start = (std::get<0>(PortConnection_[0]))->getPinLocation(std::get<1>(PortConnection_[0]));
-    Router::updateSinglePortUsedSpace(start, SrcFacing);
+    startPin = (std::get<0>(PortConnection_[0]))->getPinLocation(std::get<1>(PortConnection_[0]));
+    start = Router::updateSinglePortUsedSpace(startPin, SrcFacing);
     for (auto it = PortConnection_.begin() + 1; it != PortConnection_.end(); ++it) {
         auto temp = std::get<0>(*it)->getPinLocation(std::get<1>(*it));
-        end.push_back(temp);
-        Router::updateSinglePortUsedSpace(temp, (std::get<0>(*it))->getPinFacing(std::get<1>(*it)));
+        endPin.push_back(temp);
+        // temp = std::make_tuple(std::get<0>(temp),std::get<1>(temp),std::get<2>(temp) );
+        auto endFace = (std::get<0>(*it))->getPinFacing(std::get<1>(*it));
+        end.push_back(Router::updateSinglePortUsedSpace(temp, endFace));
     }
-    // TODO getCoor
     std::vector<std::tuple<uint16_t, uint16_t, uint16_t>> endTemp = end;
     std::priority_queue<Point, std::vector<Point>, PointCompare> Q;
+    std::cout << std::get<0>(start) << " " << std::get<1>(start) << " " << std::get<2>(start) << " " << std::endl;
     P_[std::get<0>(start)][std::get<1>(start)][std::get<2>(start)].cost = 0;
+
     Q.push(P_[std::get<0>(start)][std::get<1>(start)][std::get<2>(start)]);
+    std::cout << "GGGG" << std::endl;
     bool done = 0;
+
     while (!Q.empty()) {
         Point TempP = Q.top();
         Q.pop();
         TempP.visited = 1;
         for (auto it = endTemp.begin(); it != endTemp.end(); ++it) {
             if (TempP.Loc == *it) {
+                // std::cout <<"Location: "<<std::get<0>(TempP.Loc)<<" "<<std::get<1>(TempP.Loc)<<"
+                // "<<std::get<2>(TempP.Loc)<<std::endl;
                 endTemp.erase(it);
                 break;
             }
         }
-        if (!endTemp.empty())
+        if (endTemp.empty())
             break;
 
         if ((std::get<0>(TempP.Loc)) &&
             (!UsedSpace[std::get<0>(TempP.Loc) - 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)])) {
-            P_[std::get<0>(TempP.Loc) - 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].P =
-                &P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)];
-            P_[std::get<0>(TempP.Loc) - 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost =
-                (P_[std::get<0>(TempP.Loc) - 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost >
-                 P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1)
-                    ? P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1
-                    : P_[std::get<0>(TempP.Loc) - 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost;
+            if ((P_[std::get<0>(TempP.Loc) - 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost >
+                 P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1)) {
+                P_[std::get<0>(TempP.Loc) - 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].P =
+                    &P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)];
+                P_[std::get<0>(TempP.Loc) - 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost =
+                    P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1;
+            }
+
             if (!P_[std::get<0>(TempP.Loc) - 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].visited)
                 Q.push(P_[std::get<0>(TempP.Loc) - 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)]);
         }
         if ((std::get<0>(TempP.Loc) < std::get<0>(Space) - 1) &&
             (!UsedSpace[std::get<0>(TempP.Loc) + 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)])) {
-            P_[std::get<0>(TempP.Loc) + 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].P =
-                &P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)];
-            P_[std::get<0>(TempP.Loc) + 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost =
-                (P_[std::get<0>(TempP.Loc) + 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost >
-                 P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1)
-                    ? P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1
-                    : P_[std::get<0>(TempP.Loc) + 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost;
+            if ((P_[std::get<0>(TempP.Loc) + 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost >
+                 P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1)) {
+                P_[std::get<0>(TempP.Loc) + 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].P =
+                    &P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)];
+                P_[std::get<0>(TempP.Loc) + 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost =
+                    P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1;
+            }
+
             if (!P_[std::get<0>(TempP.Loc) + 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].visited)
                 Q.push(P_[std::get<0>(TempP.Loc) + 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)]);
         }
         if ((std::get<2>(TempP.Loc)) &&
             (!UsedSpace[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) - 1])) {
-            P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) - 1].P =
-                &P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)];
-            P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) - 1].cost =
-                (P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) - 1].cost >
-                 P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1)
-                    ? P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1
-                    : P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) - 1].cost;
+            if ((P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) - 1].cost >
+                 P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1)) {
+                P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) - 1].P =
+                    &P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)];
+                P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) - 1].cost =
+                    P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1;
+            }
+
             if (!P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) - 1].visited)
                 Q.push(P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) - 1]);
         }
         if ((std::get<2>(TempP.Loc) < std::get<2>(Space) - 1) &&
             (!UsedSpace[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) + 1])) {
-            P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) + 1].P =
-                &P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)];
-            P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) + 1].cost =
-                (P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) + 1].cost >
-                 P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1)
-                    ? P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1
-                    : P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) + 1].cost;
+            if ((P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) + 1].cost >
+                 P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1)) {
+                P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) + 1].P =
+                    &P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)];
+                P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) + 1].cost =
+                    P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1;
+            }
+
             if (!P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) + 1].visited)
                 Q.push(P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) + 1]);
         }
         P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)] = TempP;
     }
-
+    std::set<std::tuple<uint16_t, uint16_t, uint16_t>> Result;
+    if (endTemp.empty()) {
+        Point* ptr = NULL;
+        for (auto it : end) {
+            std::cout << "Location: " << std::get<0>(it) << " " << std::get<1>(it) << " " << std::get<2>(it)
+                      << std::endl;
+            Result.insert(it);
+            ptr = P_[std::get<0>(it)][std::get<1>(it)][std::get<2>(it)].P;
+            while (ptr != NULL) {
+                std::cout << "Location: " << std::get<0>(ptr->Loc) << " " << std::get<1>(ptr->Loc) << " "
+                          << std::get<2>(ptr->Loc) << std::endl;
+                Result.insert(ptr->Loc);
+                ptr = ptr->P;
+            }
+        }
+    }
+    for (const auto& entry : Result) {
+        UsedSpace[std::get<0>(entry)][std::get<1>(entry)][std::get<2>(entry)] = 1;
+        if (std::get<0>(entry) > 0)
+            UsedSpace[std::get<0>(entry) - 1][std::get<1>(entry)][std::get<2>(entry)] = 1;
+        if (std::get<0>(entry) < std::get<0>(Space) - 1)
+            UsedSpace[std::get<0>(entry) + 1][std::get<1>(entry)][std::get<2>(entry)] = 1;
+        if (std::get<2>(entry) > 0)
+            UsedSpace[std::get<0>(entry)][std::get<1>(entry)][std::get<2>(entry) - 1] = 1;
+        if (std::get<2>(entry) < std::get<2>(Space) - 1)
+            UsedSpace[std::get<0>(entry)][std::get<1>(entry)][std::get<2>(entry) + 1] = 1;
+    }
+    for (int i = 0; i < std::get<0>(Space); i++) {
+        for (int j = 0; j < std::get<1>(Space); j++) {
+            for (int k = 0; k < std::get<2>(Space); k++) {
+                if (j == 1)
+                    std::cout << UsedSpace[i][j][k] << " ";
+            }
+        }
+        std::cout << std::endl;
+    }
+    C.Result = Result;
     return true;
 }
 bool Router::updateUsedSpace(Connection& C, std::tuple<uint16_t, uint16_t, uint16_t> bound) {
     const std::vector<std::tuple<Component*, std::string, Connection::Parameters>> PortConnection_ =
         C.getPortConnection();
-    if (!PortConnection_.empty()) {
+    if (PortConnection_.empty()) {
         return false;
     }
 
@@ -199,11 +285,12 @@ bool Router::updateUsedSpace(Connection& C, std::tuple<uint16_t, uint16_t, uint1
                     UsedSpace[std::get<0>(i) - 1][std::get<1>(i)][std::get<2>(i)] = 1;
                 if (std::get<0>(i) < std::get<0>(bound) - 1)
                     UsedSpace[std::get<0>(i) + 1][std::get<1>(i)][std::get<2>(i)] = 1;
-                if (std::get<1>(i) > 0)
+                /*if (std::get<1>(i) > 0)
                     UsedSpace[std::get<0>(i)][std::get<1>(i) - 1][std::get<2>(i)] = 1;
                 if (std::get<1>(i) < std::get<1>(bound) - 1)
                     UsedSpace[std::get<0>(i)][std::get<1>(i) + 1][std::get<2>(i)] =
                         1; // TODO veritcal range should be reconsidered
+                */
                 if (std::get<2>(i) > 0)
                     UsedSpace[std::get<0>(i)][std::get<1>(i)][std::get<2>(i) - 1] = 1;
                 if (std::get<2>(i) < std::get<2>(bound) - 1)

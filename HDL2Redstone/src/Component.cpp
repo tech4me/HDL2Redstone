@@ -43,13 +43,13 @@ std::tuple<uint16_t, uint16_t, uint16_t> Component::getPinLocation(std::string P
     auto tempLoc = CellPtr->getPinLocation(PinName_);
     // Facing tempFac = Component::getPinFacing(PinName_);
     if (P.Orient == Orientation::ZeroCW) {
-        return tempLoc;
+        return std::make_tuple(std::get<0>(tempLoc) + P.X, std::get<1>(tempLoc) + P.Y, std::get<2>(tempLoc) + P.Z);
     } else if (P.Orient == Orientation::OneCW) {
-        return std::make_tuple(std::get<2>(tempLoc), std::get<1>(tempLoc), -std::get<0>(tempLoc));
+        return std::make_tuple(std::get<2>(tempLoc) + P.X, std::get<1>(tempLoc) + P.Y, -std::get<0>(tempLoc) + P.Z);
     } else if (P.Orient == Orientation::TwoCW) {
-        return std::make_tuple(-std::get<0>(tempLoc), std::get<1>(tempLoc), -std::get<2>(tempLoc));
+        return std::make_tuple(-std::get<0>(tempLoc) + P.X, std::get<1>(tempLoc) + P.Y, -std::get<2>(tempLoc) + P.Z);
     } else {
-        return std::make_tuple(-std::get<2>(tempLoc), std::get<1>(tempLoc), std::get<0>(tempLoc));
+        return std::make_tuple(-std::get<2>(tempLoc) + P.X, std::get<1>(tempLoc) + P.Y, std::get<0>(tempLoc) + P.Z);
     }
 }
 void Component::setPlacement(uint16_t X_, uint16_t Y_, uint16_t Z_, Orientation Orient_) {

@@ -1,6 +1,6 @@
 #include <Design.hpp>
 #include <Placer.hpp>
-
+#include <Router.hpp>
 using namespace HDL2Redstone;
 
 Design::Design(uint16_t Width_, uint16_t Height_, uint16_t Length_, const std::string& File_,
@@ -16,6 +16,10 @@ const ModuleNetlist& Design::getModuleNetlist() const { return MN; }
 bool Design::doPlaceAndRoute() {
     Placer P(*this);
     P.place();
+    std::cout << "Now Routing..." << std::endl;
+    Router R(*this);
+    std::cout << "debug Now Routing..." << std::endl;
+    R.route(*this);
     return true;
 }
 
@@ -29,6 +33,11 @@ Schematic Design::exportDesign() const {
     for (const auto& Connection : MN.getConnections()) {
         if (Connection->getRouted()) {
             // TODO: Check this once we have something other than wire
+            for (const auto& R : Connection->Result) {
+                Schem.insertSubSchematic({std::get<0>(R), std::get<1>(R), std::get<2>(R), Orientation::ZeroCW},
+                                         CellLib.getCellPtr("WIRE")->getSchematic());
+            }
+            /*
             const auto& Ports = Connection->getPortConnection();
             for (const auto& Port : Ports) {
                 for (const auto& Segment : std::get<2>(Port).getParameters()) {
@@ -37,6 +46,7 @@ Schematic Design::exportDesign() const {
                         CellLib.getCellPtr("redstone_dust")->getSchematic());
                 }
             }
+            */
         }
     }
     return Schem;

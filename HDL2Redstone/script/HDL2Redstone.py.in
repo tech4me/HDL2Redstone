@@ -49,4 +49,5 @@ yosys_command = yosys_command.format(input_verilog_file=verilog_file, input_libe
 subprocess.run(["yosys", "-Q", "-q", "-l", "yosys.log", "-p", yosys_command])
 
 # Run HDL2Redstone main executable to generate schematics
-subprocess.run([os.path.join(file_path, "HDL2Redstone"), os.path.join(source_path, "cell_lib/")])
+ret = subprocess.run([os.path.join(file_path, "HDL2Redstone"), os.path.join(source_path, "cell_lib/")])
+ret.check_returncode()

@@ -11,7 +11,7 @@
                     1,
                     0
                 ],
-                "facing": "north"
+                "facing": "south"
             }
         },
         "schematic": "input"
@@ -28,7 +28,7 @@
                     1,
                     0
                 ],
-                "facing": "south"
+                "facing": "north"
             }
         },
         "schematic": "output"
@@ -122,5 +122,22 @@
             }
         },
         "schematic": "horizontal_torch_inv"
+    },
+    {
+        "is_component": false,
+        "liberty": false,
+        "name": "WIRE",
+        "pins": {
+            "Y": {
+                "direction": "output",
+                "location": [
+                    0,
+                    1,
+                    0
+                ],
+                "facing": "south"
+            }
+        },
+        "schematic": "redstone_dust"
     }
 ]

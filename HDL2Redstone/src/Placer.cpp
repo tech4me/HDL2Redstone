@@ -28,7 +28,7 @@ bool Placer::place() {
             Component->setPlacement(i * unitX, i * unitY, i * unitZ, Orientation::OneCW);
             ++i;
         } else if (Component->getType() == "AND") {
-            Component->setPlacement(3, 0, 3, Orientation::ZeroCW);
+            Component->setPlacement(3, 0, 6, Orientation::ZeroCW);
             // Component->setPlacement(i * unitX, i * unitY, i * unitZ, Orientation::OneCW);
             ++i;
         }

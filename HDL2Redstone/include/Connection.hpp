@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <set>
 #include <string>
 #include <tuple>
 
@@ -19,7 +20,7 @@ class Connection {
       private:
         std::vector<std::tuple<uint16_t, uint16_t, uint16_t>> connection_points;
     };
-
+    std::set<std::tuple<uint16_t, uint16_t, uint16_t>> Result;
     Connection(const std::string& Name_, Component* ComponentPtr_, const std::string& PortName_);
     bool getRouted() const { return Routed; }
     void setRouted(bool Routed_) { Routed = Routed_; }
