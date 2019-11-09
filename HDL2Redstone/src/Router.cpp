@@ -9,24 +9,19 @@
 using namespace HDL2Redstone;
 std::tuple<uint16_t, uint16_t, uint16_t> Router::updateSinglePortUsedSpace(std::tuple<uint16_t, uint16_t, uint16_t> Loc,
                                                                            Facing Fac) {
-    std::cout << "----" << std::get<0>(Loc) << " " << std::get<1>(Loc) << " " << std::get<2>(Loc) << " " << std::endl;
     if (Fac == Facing::North) {
-        std::cout << 1 << std::endl;
         UsedSpace[std::get<0>(Loc)][std::get<1>(Loc)][std::get<2>(Loc) - 1] = 0;
         return std::make_tuple(std::get<0>(Loc), std::get<1>(Loc), std::get<2>(Loc) - 1);
     }
     if (Fac == Facing::East) {
-        std::cout << 2 << std::endl;
         UsedSpace[std::get<0>(Loc) + 1][std::get<1>(Loc)][std::get<2>(Loc)] = 0;
         return std::make_tuple(std::get<0>(Loc) + 1, std::get<1>(Loc), std::get<2>(Loc));
     }
     if (Fac == Facing::South) {
-        std::cout << 3 << std::endl;
         UsedSpace[std::get<0>(Loc)][std::get<1>(Loc)][std::get<2>(Loc) + 1] = 0;
         return std::make_tuple(std::get<0>(Loc), std::get<1>(Loc), std::get<2>(Loc) + 1);
     }
     if (Fac == Facing::West) {
-        std::cout << 4 << std::endl;
         UsedSpace[std::get<0>(Loc) - 1][std::get<1>(Loc)][std::get<2>(Loc)] = 0;
         return std::make_tuple(std::get<0>(Loc) - 1, std::get<1>(Loc), std::get<2>(Loc));
     }
@@ -99,16 +94,16 @@ Router::Router(const Design& D) {
 void Router::route(Design& D) {
     // auto& Components_ = D.getModuleNetlist().getComponents();
     auto& Connections_ = D.getModuleNetlist().getConnections();
+    std::tuple<uint16_t, uint16_t, uint16_t> Space = D.getSpace();
     for (auto& it : Connections_) {
-        std::cout << it->getName() << std::endl;
-        std::cout << *it << std::endl;
-        flatRoute(D, *it);
+        std::cout <<"Placing: "<<it->getName() << std::endl;
+        flatRoute(D, *it, Space);
         // std::cout<<"DDDD"<<std::endl;
         // updateUsedSpace(*it, D.getSpace());
         // std::cout<<"HHHH"<<std::endl;
     }
 }
-bool Router::flatRoute(Design& D, Connection& C) {
+bool Router::flatRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_t, uint16_t> Space) {
     // implement dijkstra
     class Point {
       public:
@@ -116,12 +111,13 @@ bool Router::flatRoute(Design& D, Connection& C) {
         int cost;
         Point* P;
         bool visited;
+        bool inserted;
     };
     class PointCompare {
       public:
-        bool operator()(const Point& lhs, const Point& rhs) const { return lhs.cost > rhs.cost; }
+        bool operator()(const Point* lhs, const Point* rhs) const { return lhs->cost > rhs->cost; }
     };
-    std::tuple<uint16_t, uint16_t, uint16_t> Space = D.getSpace();
+    
     Point P_[std::get<0>(Space)][std::get<1>(Space)][std::get<2>(Space)];
     for (int i = 0; i < std::get<0>(Space); i++) {
         for (int j = 0; j < std::get<1>(Space); j++) {
@@ -129,6 +125,7 @@ bool Router::flatRoute(Design& D, Connection& C) {
                 P_[i][j][k].cost = std::get<0>(Space) * std::get<1>(Space) * std::get<2>(Space);
                 P_[i][j][k].P = NULL;
                 P_[i][j][k].visited = 0;
+                P_[i][j][k].inserted = 0;
                 P_[i][j][k].Loc = std::make_tuple(i, j, k);
             }
         }
@@ -153,22 +150,20 @@ bool Router::flatRoute(Design& D, Connection& C) {
         end.push_back(Router::updateSinglePortUsedSpace(temp, endFace));
     }
     std::vector<std::tuple<uint16_t, uint16_t, uint16_t>> endTemp = end;
-    std::priority_queue<Point, std::vector<Point>, PointCompare> Q;
-    std::cout << std::get<0>(start) << " " << std::get<1>(start) << " " << std::get<2>(start) << " " << std::endl;
+    std::priority_queue<Point*, std::vector<Point*>, PointCompare> Q;
     P_[std::get<0>(start)][std::get<1>(start)][std::get<2>(start)].cost = 0;
-
-    Q.push(P_[std::get<0>(start)][std::get<1>(start)][std::get<2>(start)]);
-    std::cout << "GGGG" << std::endl;
+    P_[std::get<0>(start)][std::get<1>(start)][std::get<2>(start)].inserted = 1;
+    Q.push(&P_[std::get<0>(start)][std::get<1>(start)][std::get<2>(start)]);
     bool done = 0;
 
     while (!Q.empty()) {
-        Point TempP = Q.top();
+        Point* TempP = Q.top();
         Q.pop();
-        TempP.visited = 1;
+        TempP->visited = 1;
         for (auto it = endTemp.begin(); it != endTemp.end(); ++it) {
-            if (TempP.Loc == *it) {
-                // std::cout <<"Location: "<<std::get<0>(TempP.Loc)<<" "<<std::get<1>(TempP.Loc)<<"
-                // "<<std::get<2>(TempP.Loc)<<std::endl;
+            if (TempP->Loc == *it) {
+                // std::cout <<"Location: "<<std::get<0>(TempP->Loc)<<" "<<std::get<1>(TempP->Loc)<<"
+                // "<<std::get<2>(TempP->Loc)<<std::endl;
                 endTemp.erase(it);
                 break;
             }
@@ -176,71 +171,71 @@ bool Router::flatRoute(Design& D, Connection& C) {
         if (endTemp.empty())
             break;
 
-        if ((std::get<0>(TempP.Loc)) &&
-            (!UsedSpace[std::get<0>(TempP.Loc) - 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)])) {
-            if ((P_[std::get<0>(TempP.Loc) - 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost >
-                 P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1)) {
-                P_[std::get<0>(TempP.Loc) - 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].P =
-                    &P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)];
-                P_[std::get<0>(TempP.Loc) - 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost =
-                    P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1;
+        if ((std::get<0>(TempP->Loc)) &&
+            (!UsedSpace[std::get<0>(TempP->Loc) - 1][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc)])) {
+            if ((P_[std::get<0>(TempP->Loc) - 1][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc)].cost >
+                 TempP->cost + 1)) {
+                P_[std::get<0>(TempP->Loc) - 1][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc)].P = TempP;
+                P_[std::get<0>(TempP->Loc) - 1][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc)].cost =
+                    TempP->cost + 1;
             }
 
-            if (!P_[std::get<0>(TempP.Loc) - 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].visited)
-                Q.push(P_[std::get<0>(TempP.Loc) - 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)]);
+            if (!P_[std::get<0>(TempP->Loc) - 1][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc)].visited && !P_[std::get<0>(TempP->Loc) - 1][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc)].inserted){
+                P_[std::get<0>(TempP->Loc) - 1][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc)].inserted = 1;
+                Q.push(&P_[std::get<0>(TempP->Loc) - 1][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc)]);
+            }
         }
-        if ((std::get<0>(TempP.Loc) < std::get<0>(Space) - 1) &&
-            (!UsedSpace[std::get<0>(TempP.Loc) + 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)])) {
-            if ((P_[std::get<0>(TempP.Loc) + 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost >
-                 P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1)) {
-                P_[std::get<0>(TempP.Loc) + 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].P =
-                    &P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)];
-                P_[std::get<0>(TempP.Loc) + 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost =
-                    P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1;
+        if ((std::get<0>(TempP->Loc) < std::get<0>(Space) - 1) &&
+            (!UsedSpace[std::get<0>(TempP->Loc) + 1][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc)])) {
+            if ((P_[std::get<0>(TempP->Loc) + 1][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc)].cost >
+                 TempP->cost + 1)) {
+                P_[std::get<0>(TempP->Loc) + 1][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc)].P = TempP;
+                P_[std::get<0>(TempP->Loc) + 1][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc)].cost =
+                    TempP->cost + 1;
             }
 
-            if (!P_[std::get<0>(TempP.Loc) + 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].visited)
-                Q.push(P_[std::get<0>(TempP.Loc) + 1][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)]);
+            if (!P_[std::get<0>(TempP->Loc) + 1][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc)].visited && !P_[std::get<0>(TempP->Loc) + 1][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc)].inserted){
+                P_[std::get<0>(TempP->Loc) + 1][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc)].inserted = 1;
+                Q.push(&P_[std::get<0>(TempP->Loc) + 1][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc)]);
+            }
         }
-        if ((std::get<2>(TempP.Loc)) &&
-            (!UsedSpace[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) - 1])) {
-            if ((P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) - 1].cost >
-                 P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1)) {
-                P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) - 1].P =
-                    &P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)];
-                P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) - 1].cost =
-                    P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1;
+        if ((std::get<2>(TempP->Loc)) &&
+            (!UsedSpace[std::get<0>(TempP->Loc)][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc) - 1])) {
+            if ((P_[std::get<0>(TempP->Loc)][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc) - 1].cost >
+                 TempP->cost + 1)) {
+                P_[std::get<0>(TempP->Loc)][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc) - 1].P = TempP;
+                P_[std::get<0>(TempP->Loc)][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc) - 1].cost =
+                    TempP->cost + 1;
             }
 
-            if (!P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) - 1].visited)
-                Q.push(P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) - 1]);
+            if (!P_[std::get<0>(TempP->Loc)][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc) - 1].visited && !P_[std::get<0>(TempP->Loc)][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc) - 1].inserted){
+                P_[std::get<0>(TempP->Loc)][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc) - 1].inserted = 1;
+                Q.push(&P_[std::get<0>(TempP->Loc)][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc) - 1]);
+            }
         }
-        if ((std::get<2>(TempP.Loc) < std::get<2>(Space) - 1) &&
-            (!UsedSpace[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) + 1])) {
-            if ((P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) + 1].cost >
-                 P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1)) {
-                P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) + 1].P =
-                    &P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)];
-                P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) + 1].cost =
-                    P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)].cost + 1;
+        if ((std::get<2>(TempP->Loc) < std::get<2>(Space) - 1) &&
+            (!UsedSpace[std::get<0>(TempP->Loc)][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc) + 1])) {
+            if ((P_[std::get<0>(TempP->Loc)][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc) + 1].cost >
+                 TempP->cost + 1)) {
+                P_[std::get<0>(TempP->Loc)][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc) + 1].P = TempP;
+                P_[std::get<0>(TempP->Loc)][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc) + 1].cost =
+                    TempP->cost + 1;
             }
 
-            if (!P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) + 1].visited)
-                Q.push(P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc) + 1]);
+            if (!P_[std::get<0>(TempP->Loc)][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc) + 1].visited && !P_[std::get<0>(TempP->Loc)][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc) + 1].inserted){
+                P_[std::get<0>(TempP->Loc)][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc) + 1].inserted = 1;
+                Q.push(&P_[std::get<0>(TempP->Loc)][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc) + 1]);
+            }
         }
-        P_[std::get<0>(TempP.Loc)][std::get<1>(TempP.Loc)][std::get<2>(TempP.Loc)] = TempP;
+        //P_[std::get<0>(TempP->Loc)][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc)] = TempP;
     }
     std::set<std::tuple<uint16_t, uint16_t, uint16_t>> Result;
     if (endTemp.empty()) {
         Point* ptr = NULL;
         for (auto it : end) {
-            std::cout << "Location: " << std::get<0>(it) << " " << std::get<1>(it) << " " << std::get<2>(it)
-                      << std::endl;
             Result.insert(std::make_tuple(std::get<0>(it), std::get<1>(it) - 1, std::get<2>(it)));
             ptr = P_[std::get<0>(it)][std::get<1>(it)][std::get<2>(it)].P;
             while (ptr != NULL) {
-                std::cout << "Location: " << std::get<0>(ptr->Loc) << " " << std::get<1>(ptr->Loc) << " "
-                          << std::get<2>(ptr->Loc) << std::endl;
                 Result.insert(std::make_tuple(std::get<0>(ptr->Loc), std::get<1>(ptr->Loc) - 1, std::get<2>(ptr->Loc)));
                 ptr = ptr->P;
             }

@@ -9,7 +9,7 @@ class Router {
     void route(Design& D);
 
   private:
-    bool flatRoute(Design& D, Connection& C);
+    bool flatRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_t, uint16_t> Space);
     bool checkSingleRoute(const Design& D,
                           const std::vector<std::tuple<uint16_t, uint16_t, uint16_t>> connection_points);
     bool checkPointAvaliable(const Design& D, const std::tuple<int16_t, int16_t, int16_t> location);
