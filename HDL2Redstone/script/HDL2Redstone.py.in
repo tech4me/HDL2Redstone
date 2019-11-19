@@ -50,5 +50,5 @@ ret = subprocess.run(["yosys", "-Q", "-q", "-l", "yosys.log", "-p", yosys_comman
 ret.check_returncode()
 
 # Run HDL2Redstone main executable to generate schematics
-subprocess.run([os.path.join(file_path, "HDL2Redstone"), os.path.join(source_path, "cell_lib/")])
+ret = subprocess.run([os.path.join(file_path, "HDL2Redstone"), os.path.join(source_path, "cell_lib/")])
 ret.check_returncode()

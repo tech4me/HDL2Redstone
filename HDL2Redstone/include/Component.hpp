@@ -13,6 +13,8 @@ class Component {
 
     const std::string& getType() const { return CellPtr->getType(); }
 
+    Facing getPinFacing(std::string PinName_) const;
+    std::tuple<uint16_t, uint16_t, uint16_t> getPinLocation(std::string PinName_) const;
     bool getPlaced() const { return Placed; }
     void setPlaced(bool Placed_) { Placed = Placed_; }
 

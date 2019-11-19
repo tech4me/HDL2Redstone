@@ -1,17 +1,25 @@
 #include <Design.hpp>
 #include <Placer.hpp>
-
+#include <Router.hpp>
 using namespace HDL2Redstone;
 
 Design::Design(uint16_t Width_, uint16_t Height_, uint16_t Length_, const std::string& File_,
                const CellLibrary& CellLib_, const DesignConstraint& DC_)
-    : Width(Width_), Height(Height_), Length(Length_), DC(DC_), MN(File_, CellLib_, DC) {}
+    : Width(Width_), Height(Height_), Length(Length_), CellLib(CellLib_), DC(DC_), MN(File_, CellLib_, DC) {}
+
+const std::tuple<uint16_t, uint16_t, uint16_t> Design::getSpace() const {
+    return std::make_tuple(Width, Height, Length);
+}
 
 const ModuleNetlist& Design::getModuleNetlist() const { return MN; }
 
 bool Design::doPlaceAndRoute() {
     Placer P(*this);
     P.place();
+    std::cout << "Now Routing..." << std::endl;
+    Router R(*this);
+    std::cout << "debug Now Routing..." << std::endl;
+    R.route(*this);
     return true;
 }
 
@@ -20,6 +28,25 @@ Schematic Design::exportDesign() const {
     for (const auto& Component : MN.getComponents()) {
         if (Component->getPlaced()) {
             Schem.insertSubSchematic(Component->getPlacement(), Component->getSchematic());
+        }
+    }
+    for (const auto& Connection : MN.getConnections()) {
+        if (Connection->getRouted()) {
+            // TODO: Check this once we have something other than wire
+            for (const auto& R : Connection->Result) {
+                Schem.insertSubSchematic({std::get<0>(R), std::get<1>(R), std::get<2>(R), Orientation::ZeroCW},
+                                         CellLib.getCellPtr("WIRE")->getSchematic());
+            }
+            /*
+            const auto& Ports = Connection->getPortConnection();
+            for (const auto& Port : Ports) {
+                for (const auto& Segment : std::get<2>(Port).getParameters()) {
+                    Schem.insertSubSchematic(
+                        {std::get<0>(Segment), std::get<1>(Segment), std::get<2>(Segment), Orientation::ZeroCW},
+                        CellLib.getCellPtr("redstone_dust")->getSchematic());
+                }
+            }
+            */
         }
     }
     return Schem;

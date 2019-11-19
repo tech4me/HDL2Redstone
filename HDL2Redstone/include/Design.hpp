@@ -16,6 +16,7 @@ class Design {
     // Verilog file, cell library, and design constraint
     Design(uint16_t Width, uint16_t Height, uint16_t Length, const std::string& File_, const CellLibrary& CellLib_,
            const DesignConstraint& DC_);
+    const std::tuple<uint16_t, uint16_t, uint16_t> getSpace() const;
     const ModuleNetlist& getModuleNetlist() const;
     bool doPlaceAndRoute();
 
@@ -25,6 +26,7 @@ class Design {
     uint16_t Width;
     uint16_t Height;
     uint16_t Length;
+    const CellLibrary& CellLib;
     const DesignConstraint& DC;
     ModuleNetlist MN;
     std::map<std::string, Placement> ForcedPlacement;
