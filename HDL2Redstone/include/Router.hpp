@@ -26,7 +26,9 @@ namespace HDL2Redstone {
           bool operator()(const Point* lhs, const Point* rhs) const { return lhs->cost > rhs->cost; }
       };
       void checkUpdateGraph(uint16_t x, uint16_t y, uint16_t z, Router::Point*** &P_, 
-        std::priority_queue<Router::Point*, std::vector<Router::Point*>, Router::PointCompare> &Q, Router::Point* &TempP);
+    std::priority_queue<Router::Point*, std::vector<Router::Point*>, Router::PointCompare> &Q, Router::Point* &TempP,
+    std::tuple<uint16_t, uint16_t, uint16_t>& Space);
+      bool RegularRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_t, uint16_t>& Space, Router::Point*** &P_);
       bool flatRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_t, uint16_t>& Space, Router::Point*** &P_);
       bool checkSingleRoute(const Design& D,
                             const std::vector<std::tuple<uint16_t, uint16_t, uint16_t>> connection_points);

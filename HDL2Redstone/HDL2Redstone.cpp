@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
             DesignConstraint DC;
             /*
             DC.addForcedPlacement("a", {0, 0, 0, Orientation::ZeroCW});
-            DC.addForcedPlacement("b", {4, 0, 0, Orientation::ZeroCW});
+            DC.addForcedPlacement("b", {5, 5, 0, Orientation::ZeroCW});
             DC.addForcedPlacement("c", {1, 0, 19, Orientation::ZeroCW});
             */
             /*

@@ -6,52 +6,38 @@ Placer::Placer(Design& D_) : D(D_) {}
 
 bool Placer::place() {
     auto& Components = D.MN.getComponents();
+    uint16_t size = Components.size();
+    uint16_t unitX = D.Width / size;
+    uint16_t unitY = D.Height / size;
+    uint16_t unitZ = D.Length / size;
 
-    constexpr uint16_t Clearance = 5;
-
-    uint16_t CurrentX = Clearance;
-    uint16_t CurrentY = 0;
-    uint16_t CurrentZ = Clearance;
-    uint16_t MaxY = 0;
-    uint16_t MaxZ = 0;
-
-    // FIXME; Add more cells here
-    std::set<std::string> AvailableCell{"INPUT", "OUTPUT", "NOT", "AND"};
-
+    int16_t i = 0;
     for (auto& Component : Components) {
-        // Skip already placed component
         if (Component->getPlaced()) {
             continue;
         }
 
-        if (AvailableCell.count(Component->getType())) {
-            if (CurrentY + Component->getHeight() >= D.Height) {
-                std::cout << "DEBUG: Placement error: not enough space!" << std::endl;
-                return false;
-            } else if (CurrentZ + Component->getLength() + Clearance >= D.Length) {
-                CurrentX = Clearance;
-                CurrentY += Clearance + MaxY;
-                CurrentZ = Clearance;
-                MaxY = 0;
-                MaxZ = 0;
-            } else if (CurrentX + Component->getWidth() + Clearance >= D.Width) {
-                CurrentX = Clearance;
-                CurrentZ += Clearance + MaxZ;
-                MaxZ = 0;
-            }
-            // std::cout << CurrentX << " " << CurrentY << " " << CurrentZ << std::endl;
-            Component->setPlacement(CurrentX, CurrentY, CurrentZ, Orientation::ZeroCW);
-            CurrentX += Component->getWidth() + Clearance;
-            if (Component->getLength() > MaxZ)
-                MaxZ = Component->getLength();
-            if (Component->getHeight() > MaxY)
-                MaxY = Component->getHeight();
+        // FIXME: We only place the gates we have for now
+        if (Component->getType() == "INPUT") {
+            Component->setPlacement(i * unitX, i * unitY, i * unitZ, Orientation::OneCW);
+            ++i;
+        } else if (Component->getType() == "OUTPUT") {
+            Component->setPlacement(i * unitX, i * unitY, i * unitZ, Orientation::OneCW);
+            ++i;
+        } else if (Component->getType() == "NOT") {
+            Component->setPlacement(i * unitX, i * unitY, i * unitZ, Orientation::OneCW);
+            ++i;
+        } else if (Component->getType() == "AND") {
+            Component->setPlacement(3, 0, 10, Orientation::ZeroCW);
+            // Component->setPlacement(i * unitX, i * unitY, i * unitZ, Orientation::OneCW);
+            ++i;
         }
     }
     return checkComponentLegality();
 }
 
 bool Placer::checkComponentLegality() const {
+    // TODO: Check bound here
     std::vector<std::vector<std::vector<bool>>> OccupiedSpace(
         D.Width, std::vector<std::vector<bool>>(D.Height, std::vector<bool>(D.Length)));
     const auto& Components = D.MN.getComponents();
@@ -60,12 +46,6 @@ bool Placer::checkComponentLegality() const {
         const auto& ComponentRange = Component->getRange();
         const auto& P1 = ComponentRange.first;
         const auto& P2 = ComponentRange.second;
-        if (std::get<0>(P1) >= D.Width || std::get<1>(P1) >= D.Height || std::get<0>(P1) >= D.Length) {
-            return false;
-        }
-        if (std::get<0>(P2) >= D.Width || std::get<1>(P2) >= D.Height || std::get<0>(P2) >= D.Length) {
-            return false;
-        }
         for (int X = std::get<0>(P1); X != std::get<0>(P2); ++X) {
             for (int Y = std::get<1>(P1); Y != std::get<1>(P2); ++Y) {
                 for (int Z = std::get<2>(P1); Z != std::get<2>(P2); ++Z) {
