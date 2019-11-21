@@ -26,6 +26,9 @@ class Cell {
 
     Cell(const std::string& Type_, const std::string& CellLibDir_, const std::map<std::string, Pin> Pins_,
          const std::string& SchematicName_);
+    uint16_t getWidth() const { return Schem.getWidth(); }
+    uint16_t getHeight() const { return Schem.getHeight(); }
+    uint16_t getLength() const { return Schem.getLength(); }
     const std::string& getType() const { return Type; }
     const Schematic& getSchematic() const { return Schem; }
     const Direction& getPinDir(std::string PinName_) const { return Pins.at(PinName_).Dir; }

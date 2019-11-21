@@ -11,6 +11,9 @@ class Component {
   public:
     Component(const Cell* CellPtr_);
 
+    uint16_t getWidth() const { return CellPtr->getWidth(); }
+    uint16_t getHeight() const { return CellPtr->getHeight(); }
+    uint16_t getLength() const { return CellPtr->getLength(); }
     const std::string& getType() const { return CellPtr->getType(); }
 
     Facing getPinFacing(std::string PinName_) const;

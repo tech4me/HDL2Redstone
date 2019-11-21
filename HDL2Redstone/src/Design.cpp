@@ -15,10 +15,11 @@ const ModuleNetlist& Design::getModuleNetlist() const { return MN; }
 
 bool Design::doPlaceAndRoute() {
     Placer P(*this);
-    P.place();
-    std::cout << "Now Routing..." << std::endl;
+    if (!P.place()) {
+        return false;
+    }
     Router R(*this);
-    std::cout << "debug Now Routing..." << std::endl;
+    std::cout << "Now Routing..." << std::endl;
     R.route(*this);
     return true;
 }

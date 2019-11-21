@@ -96,7 +96,7 @@ void Router::route(Design& D) {
     auto& Connections_ = D.getModuleNetlist().getConnections();
     std::tuple<uint16_t, uint16_t, uint16_t> Space = D.getSpace();
     for (auto& it : Connections_) {
-        std::cout <<"Placing: "<<it->getName() << std::endl;
+        std::cout << "Placing: " << it->getName() << std::endl;
         flatRoute(D, *it, Space);
         // std::cout<<"DDDD"<<std::endl;
         // updateUsedSpace(*it, D.getSpace());
@@ -117,7 +117,7 @@ bool Router::flatRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_t, 
       public:
         bool operator()(const Point* lhs, const Point* rhs) const { return lhs->cost > rhs->cost; }
     };
-    
+
     Point P_[std::get<0>(Space)][std::get<1>(Space)][std::get<2>(Space)];
     for (int i = 0; i < std::get<0>(Space); i++) {
         for (int j = 0; j < std::get<1>(Space); j++) {
@@ -180,7 +180,8 @@ bool Router::flatRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_t, 
                     TempP->cost + 1;
             }
 
-            if (!P_[std::get<0>(TempP->Loc) - 1][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc)].visited && !P_[std::get<0>(TempP->Loc) - 1][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc)].inserted){
+            if (!P_[std::get<0>(TempP->Loc) - 1][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc)].visited &&
+                !P_[std::get<0>(TempP->Loc) - 1][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc)].inserted) {
                 P_[std::get<0>(TempP->Loc) - 1][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc)].inserted = 1;
                 Q.push(&P_[std::get<0>(TempP->Loc) - 1][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc)]);
             }
@@ -194,7 +195,8 @@ bool Router::flatRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_t, 
                     TempP->cost + 1;
             }
 
-            if (!P_[std::get<0>(TempP->Loc) + 1][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc)].visited && !P_[std::get<0>(TempP->Loc) + 1][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc)].inserted){
+            if (!P_[std::get<0>(TempP->Loc) + 1][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc)].visited &&
+                !P_[std::get<0>(TempP->Loc) + 1][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc)].inserted) {
                 P_[std::get<0>(TempP->Loc) + 1][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc)].inserted = 1;
                 Q.push(&P_[std::get<0>(TempP->Loc) + 1][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc)]);
             }
@@ -208,7 +210,8 @@ bool Router::flatRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_t, 
                     TempP->cost + 1;
             }
 
-            if (!P_[std::get<0>(TempP->Loc)][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc) - 1].visited && !P_[std::get<0>(TempP->Loc)][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc) - 1].inserted){
+            if (!P_[std::get<0>(TempP->Loc)][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc) - 1].visited &&
+                !P_[std::get<0>(TempP->Loc)][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc) - 1].inserted) {
                 P_[std::get<0>(TempP->Loc)][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc) - 1].inserted = 1;
                 Q.push(&P_[std::get<0>(TempP->Loc)][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc) - 1]);
             }
@@ -222,12 +225,13 @@ bool Router::flatRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_t, 
                     TempP->cost + 1;
             }
 
-            if (!P_[std::get<0>(TempP->Loc)][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc) + 1].visited && !P_[std::get<0>(TempP->Loc)][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc) + 1].inserted){
+            if (!P_[std::get<0>(TempP->Loc)][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc) + 1].visited &&
+                !P_[std::get<0>(TempP->Loc)][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc) + 1].inserted) {
                 P_[std::get<0>(TempP->Loc)][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc) + 1].inserted = 1;
                 Q.push(&P_[std::get<0>(TempP->Loc)][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc) + 1]);
             }
         }
-        //P_[std::get<0>(TempP->Loc)][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc)] = TempP;
+        // P_[std::get<0>(TempP->Loc)][std::get<1>(TempP->Loc)][std::get<2>(TempP->Loc)] = TempP;
     }
     std::set<std::tuple<uint16_t, uint16_t, uint16_t>> Result;
     if (endTemp.empty()) {
@@ -242,15 +246,15 @@ bool Router::flatRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_t, 
         }
     }
     for (const auto& entry : Result) {
-        UsedSpace[std::get<0>(entry)][std::get<1>(entry)+1][std::get<2>(entry)] = 1;
+        UsedSpace[std::get<0>(entry)][std::get<1>(entry) + 1][std::get<2>(entry)] = 1;
         if (std::get<0>(entry) > 0)
-            UsedSpace[std::get<0>(entry) - 1][std::get<1>(entry)+1][std::get<2>(entry)] = 1;
+            UsedSpace[std::get<0>(entry) - 1][std::get<1>(entry) + 1][std::get<2>(entry)] = 1;
         if (std::get<0>(entry) < std::get<0>(Space) - 1)
-            UsedSpace[std::get<0>(entry) + 1][std::get<1>(entry)+1][std::get<2>(entry)] = 1;
+            UsedSpace[std::get<0>(entry) + 1][std::get<1>(entry) + 1][std::get<2>(entry)] = 1;
         if (std::get<2>(entry) > 0)
-            UsedSpace[std::get<0>(entry)][std::get<1>(entry)+1][std::get<2>(entry) - 1] = 1;
+            UsedSpace[std::get<0>(entry)][std::get<1>(entry) + 1][std::get<2>(entry) - 1] = 1;
         if (std::get<2>(entry) < std::get<2>(Space) - 1)
-            UsedSpace[std::get<0>(entry)][std::get<1>(entry)+1][std::get<2>(entry) + 1] = 1;
+            UsedSpace[std::get<0>(entry)][std::get<1>(entry) + 1][std::get<2>(entry) + 1] = 1;
     }
     for (int i = 0; i < std::get<0>(Space); i++) {
         for (int j = 0; j < std::get<1>(Space); j++) {
