@@ -187,7 +187,6 @@ void Router::checkUpdateGraph(uint16_t x, uint16_t y, uint16_t z, Router::Point*
                 if(P_[x][y][z].cost == TempP->cost + 1){
                     if(y==TempP->Loc.y){
                         P_[x][y][z].P = TempP;
-                        std::cout <<"HIT"<< std::endl;
                     }
                 }else{
                     P_[x][y][z].P = TempP;
