@@ -17,7 +17,6 @@ Router::coord Router::updateSinglePortUsedSpace(std::tuple<uint16_t, uint16_t, u
         UsedSpace[ret.x][ret.y][ret.z - 1] = 0;
         UsedSpace[ret.x][ret.y-1][ret.z - 1] = 0;
         ret.z --;
-        std::cout <<"HIT"<<std::endl; 
         return ret;
     }
     if (Fac == Facing::East) {
@@ -104,8 +103,7 @@ Router::Router(const Design& D) {
             }
             if (i == 5)
             std::cout << std::endl;
-        }
-        std::cout << std::endl;   
+        }  
     }
 }
 void Router::route(Design& D) {
@@ -166,12 +164,12 @@ void Router::checkUpdateGraph(uint16_t x, uint16_t y, uint16_t z, Router::Point*
     if ((!UsedSpace[x][y][z])) {
         //check the node is in for its potential path
         //check up to +- 2 unit are clean
-        if ((P_[x][y][z].cost >
+        if ((P_[x][y][z].cost >=
                 TempP->cost + 1)) {
             bool legal = 1;
             Router::Point* temp_ptr = TempP->P;
             while(temp_ptr){
-                if((temp_ptr->Loc.y < std::get<0>(Space) - 2)&&( (y == temp_ptr->Loc.y+1)||(y == temp_ptr->Loc.y+2) )
+                if((temp_ptr->Loc.y < std::get<1>(Space) - 2)&&( (y == temp_ptr->Loc.y+1)||(y == temp_ptr->Loc.y+2) )
                     &&(temp_ptr->Loc.x == x)&&(temp_ptr->Loc.z == z)
                 ){
                     legal = 0;
@@ -186,7 +184,14 @@ void Router::checkUpdateGraph(uint16_t x, uint16_t y, uint16_t z, Router::Point*
                 temp_ptr = temp_ptr->P;
             }
             if(legal){
-                P_[x][y][z].P = TempP;
+                if(P_[x][y][z].cost == TempP->cost + 1){
+                    if(y==TempP->Loc.y){
+                        P_[x][y][z].P = TempP;
+                        std::cout <<"HIT"<< std::endl;
+                    }
+                }else{
+                    P_[x][y][z].P = TempP;
+                }
                 P_[x][y][z].cost =
                     TempP->cost + 1;
                 if (!P_[x][y][z].visited && !P_[x][y][z].inserted){
@@ -217,16 +222,6 @@ bool Router::RegularRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_
         // temp = std::make_tuple(std::get<0>(temp),std::get<1>(temp),std::get<2>(temp) );
         auto endFace = (std::get<0>(*it))->getPinFacing(std::get<1>(*it));
         end.push_back(Router::updateSinglePortUsedSpace(temp, endFace));
-    }
-    for (int i = 0; i < std::get<0>(Space); i++) {
-        for (int j = 0; j < std::get<1>(Space); j++) {
-            for (int k = 0; k < std::get<2>(Space); k++) {
-                if (i == 5)
-                    std::cout << UsedSpace[i][j][k] << " ";
-            }
-            if (i == 5)
-            std::cout << std::endl;
-        }  
     }
     std::vector<Router::coord> endTemp = end;
     std::priority_queue<Router::Point*, std::vector<Router::Point*>, Router::PointCompare> Q;
@@ -262,7 +257,6 @@ bool Router::RegularRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_
         if ((TempP->Loc.x < std::get<0>(Space) - 1)&&(TempP->Loc.y < std::get<1>(Space) - 1)){
             Router::checkUpdateGraph(TempP->Loc.x+1, TempP->Loc.y+1, TempP->Loc.z, P_,Q,TempP, Space);
         }
-
         if (TempP->Loc.z && (TempP->Loc.y>1)) {
             Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y-1, TempP->Loc.z-1, P_,Q,TempP, Space);
         }
@@ -276,7 +270,6 @@ bool Router::RegularRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_
         if ((TempP->Loc.z < std::get<2>(Space) - 1)&&(TempP->Loc.y< std::get<1>(Space) - 1)) {
             Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y+1, TempP->Loc.z+1, P_,Q,TempP, Space);
         }
-
         if (TempP->Loc.x){
             Router::checkUpdateGraph(TempP->Loc.x-1, TempP->Loc.y, TempP->Loc.z, P_,Q,TempP, Space);
         }
