@@ -7,7 +7,7 @@ Placer::Placer(Design& D_) : D(D_) {}
 bool Placer::place() {
     auto& Components = D.MN.getComponents();
 
-    constexpr uint16_t Clearance = 5;
+    constexpr uint16_t Clearance = 10;
 
     uint16_t CurrentX = Clearance;
     uint16_t CurrentY = 0;
@@ -16,7 +16,7 @@ bool Placer::place() {
     uint16_t MaxZ = 0;
 
     // FIXME; Add more cells here
-    std::set<std::string> AvailableCell{"INPUT", "OUTPUT", "NOT", "AND"};
+    std::set<std::string> AvailableCell{"INPUT", "OUTPUT", "NOT", "AND", "OR"};
 
     for (auto& Component : Components) {
         // Skip already placed component

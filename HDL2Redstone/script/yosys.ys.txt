@@ -5,7 +5,7 @@ proc; fsm; opt; memory; opt
 
 techmap; opt
 
-abc -liberty {input_liberty_file} -g AND
+abc -liberty {input_liberty_file} -g AND,OR
 
 # Remove unused cells and wires
 clean

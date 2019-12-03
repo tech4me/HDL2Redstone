@@ -64,7 +64,7 @@
                     3
                 ],
                 "facing": "south",
-                "function": "(A*B)"
+                "function": "A*B"
             }
         },
         "schematic": "basic_and_gate"
@@ -122,6 +122,42 @@
             }
         },
         "schematic": "horizontal_torch_inv"
+    },
+    {
+        "is_component": true,
+        "liberty": true,
+        "name": "OR",
+        "pins": {
+            "A": {
+                "direction": "input",
+                "location": [
+                    0,
+                    1,
+                    0
+                ],
+                "facing": "north"
+            },
+            "B": {
+                "direction": "input",
+                "location": [
+                    2,
+                    1,
+                    0
+                ],
+                "facing": "north"
+            },
+            "Y": {
+                "direction": "output",
+                "location": [
+                    1,
+                    1,
+                    2
+                ],
+                "facing": "south",
+                "function": "A+B"
+            }
+        },
+        "schematic": "repeater_isolated_or_gate"
     },
     {
         "is_component": false,
