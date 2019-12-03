@@ -1,7 +1,8 @@
 #pragma once
+#include <queue>
 
 #include <Design.hpp>
-#include <queue>
+#include <Placement.hpp>
 
 namespace HDL2Redstone {
 class Router {
@@ -19,9 +20,11 @@ class Router {
       public:
         coord Loc;
         int cost;
+        int length;
         Point* P;
         bool visited;
         bool inserted;
+        HDL2Redstone::Orientation ori;
     };
     class PointCompare {
       public:
@@ -37,8 +40,8 @@ class Router {
     bool checkPointAvaliable(const Design& D, const std::tuple<int16_t, int16_t, int16_t> location);
     std::vector<std::tuple<uint16_t, uint16_t, uint16_t>>
     flatRouteDirectLine(std::tuple<uint16_t, uint16_t, uint16_t> start, std::tuple<uint16_t, uint16_t, uint16_t> end);
-    void updateUsedSpace(std::set<std::tuple<uint16_t, uint16_t, uint16_t>>& Result,
-                         std::tuple<uint16_t, uint16_t, uint16_t>& Space);
+    void updateUsedSpace(std::set<Connection::ConnectionResult,Connection::resultcomp>& Result,
+                             std::tuple<uint16_t, uint16_t, uint16_t>& Space);
     coord updateSinglePortUsedSpace(std::tuple<uint16_t, uint16_t, uint16_t> Loc, Facing Fac);
     bool*** UsedSpace;
 };

@@ -35,8 +35,8 @@ Schematic Design::exportDesign() const {
         if (Connection->getRouted()) {
             // TODO: Check this once we have something other than wire
             for (const auto& R : Connection->Result) {
-                Schem.insertSubSchematic({std::get<0>(R), std::get<1>(R), std::get<2>(R), Orientation::ZeroCW},
-                                         CellLib.getCellPtr("WIRE")->getSchematic());
+                Schem.insertSubSchematic({std::get<0>(R.coord), std::get<1>(R.coord), std::get<2>(R.coord), R.Ori},
+                                         R.CellPtr->getSchematic());
             }
             /*
             const auto& Ports = Connection->getPortConnection();

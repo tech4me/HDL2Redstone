@@ -148,9 +148,55 @@ void Schematic::insertSubSchematic(const Placement& P_, const Schematic& Schem_)
     // 3. Update block data using conversion map
     for (int32_t i = 0; i < Schem_.BlockData.size(); ++i) {
         // TODO: Handle orientation here
-        int32_t X = (i % (Schem_.Width * Schem_.Length)) % Schem_.Width + P_.X;
-        int32_t Y = i / (Schem_.Width * Schem_.Length) + P_.Y;
-        int32_t Z = (i % (Schem_.Width * Schem_.Length)) / Schem_.Width + P_.Z;
+        /*
+        int32_t TempX = P_.X;
+        int32_t TempY = P_.Y;
+        int32_t TempZ = P_.Z;
+        switch (P_.Orient) {
+            case Orientation::OneCW:
+            TempX = P_.Z;
+            TempZ = -P_.X;
+            break;
+            case Orientation::TwoCW:
+            TempX = -P_.X;
+            TempZ = -P_.Z;
+            break;
+            case Orientation::ThreeCW:
+            TempX = -P_.Z;
+            TempZ = P_.X;
+            break;
+            default:
+            break;
+        }
+        std::cout << TempX << std::endl;
+        std::cout << TempY << std::endl;
+        std::cout << TempZ << std::endl;
+        */
+        int32_t X = (i % (Schem_.Width * Schem_.Length)) % Schem_.Width;
+        int32_t Y = i / (Schem_.Width * Schem_.Length);
+        int32_t Z = (i % (Schem_.Width * Schem_.Length)) / Schem_.Width;
+        int32_t Temp;
+        switch (P_.Orient) {
+            case Orientation::OneCW:
+            Temp = X;
+            X = Z;
+            Z = -Temp;
+            break;
+            case Orientation::TwoCW:
+            X = -X;
+            Z = -Z;
+            break;
+            case Orientation::ThreeCW:
+            Temp = X;
+            X = -Z;
+            Z = Temp;
+            break;
+            default:
+            break;
+        }
+        X += P_.X;
+        Y += P_.Y;
+        Z += P_.Z;
         // Bound check
         if (X < 0 || X >= Width || Y < 0 || Y >= Height || Z < 0 || Z >= Length) {
             throw Exception("Block:" + Schem_.InvertPalette.at(i) + " X:" + std::to_string(X) +

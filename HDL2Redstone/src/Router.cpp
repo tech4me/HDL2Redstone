@@ -129,6 +129,8 @@ void Router::route(Design& D) {
             for (int j = 0; j < std::get<1>(Space); j++) {
                 for (int k = 0; k < std::get<2>(Space); k++) {
                     P_[i][j][k].cost = std::get<0>(Space) * std::get<1>(Space) * std::get<2>(Space);
+                    P_[i][j][k].length = -1;
+                    P_[i][j][k].ori = HDL2Redstone::Orientation::ZeroCW;
                     P_[i][j][k].P = NULL;
                     P_[i][j][k].visited = 0;
                     P_[i][j][k].inserted = 0;
@@ -184,12 +186,31 @@ void Router::checkUpdateGraph(uint16_t x, uint16_t y, uint16_t z, Router::Point*
                 temp_ptr = temp_ptr->P;
             }
             if (legal) {
+                int set = 0;
                 if (P_[x][y][z].cost == TempP->cost + 1) {
                     if (y == TempP->Loc.y) {
+                        set = 1;
                         P_[x][y][z].P = TempP;
                     }
                 } else {
+                    set = 1;
                     P_[x][y][z].P = TempP;
+                }
+                if(set){
+                    if(TempP->length <=12){
+                        if(TempP->Loc.x > x){
+                            P_[x][y][z].ori = HDL2Redstone::Orientation::OneCW;
+                        }else if(TempP->Loc.x < x){
+                            P_[x][y][z].ori = HDL2Redstone::Orientation::ThreeCW;
+                        }else if(TempP->Loc.z > z){
+                            P_[x][y][z].ori = HDL2Redstone::Orientation::TwoCW;
+                        }else if(TempP->Loc.z < z){
+                            P_[x][y][z].ori = HDL2Redstone::Orientation::ZeroCW;
+                        }
+                        P_[x][y][z].length = TempP->length + 1;
+                    }else{
+                        P_[x][y][z].length = 0;
+                    }
                 }
                 P_[x][y][z].cost = TempP->cost + 1;
                 if (!P_[x][y][z].visited && !P_[x][y][z].inserted) {
@@ -225,6 +246,7 @@ bool Router::RegularRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_
     std::vector<Router::coord> endTemp = end;
     std::priority_queue<Router::Point*, std::vector<Router::Point*>, Router::PointCompare> Q;
     P_[start.x][start.y][start.z].cost = 0;
+    P_[start.x][start.y][start.z].length = 1;
     P_[start.x][start.y][start.z].inserted = 1;
     Q.push(&P_[start.x][start.y][start.z]);
     bool done = 0;
@@ -243,58 +265,92 @@ bool Router::RegularRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_
         }
         if (endTemp.empty())
             break;
-        if (TempP->Loc.x && (TempP->Loc.y > 1)) {
+        if (TempP->Loc.x && (TempP->Loc.y > 1) &&(TempP->length<=12)) {
             Router::checkUpdateGraph(TempP->Loc.x - 1, TempP->Loc.y - 1, TempP->Loc.z, P_, Q, TempP, Space);
         }
-        if (TempP->Loc.x && (TempP->Loc.y < std::get<1>(Space) - 1)) {
+        if (TempP->Loc.x && (TempP->Loc.y < std::get<1>(Space) - 1)&&(TempP->length<=12 || TempP->ori == HDL2Redstone::Orientation::OneCW)) {
             Router::checkUpdateGraph(TempP->Loc.x - 1, TempP->Loc.y + 1, TempP->Loc.z, P_, Q, TempP, Space);
         }
 
-        if ((TempP->Loc.x < std::get<0>(Space) - 1) && (TempP->Loc.y > 1)) {
+        if ((TempP->Loc.x < std::get<0>(Space) - 1) && (TempP->Loc.y > 1)&&(TempP->length<=12)) {
             Router::checkUpdateGraph(TempP->Loc.x + 1, TempP->Loc.y - 1, TempP->Loc.z, P_, Q, TempP, Space);
         }
-        if ((TempP->Loc.x < std::get<0>(Space) - 1) && (TempP->Loc.y < std::get<1>(Space) - 1)) {
+        if ((TempP->Loc.x < std::get<0>(Space) - 1) && (TempP->Loc.y < std::get<1>(Space) - 1)&&(TempP->length<=12 || TempP->ori == HDL2Redstone::Orientation::ThreeCW)) {
             Router::checkUpdateGraph(TempP->Loc.x + 1, TempP->Loc.y + 1, TempP->Loc.z, P_, Q, TempP, Space);
         }
-        if (TempP->Loc.z && (TempP->Loc.y > 1)) {
+        if (TempP->Loc.z && (TempP->Loc.y > 1)&&(TempP->length<=12)) {
             Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y - 1, TempP->Loc.z - 1, P_, Q, TempP, Space);
         }
-        if (TempP->Loc.z && (TempP->Loc.y < std::get<1>(Space) - 1)) {
+        if (TempP->Loc.z && (TempP->Loc.y < std::get<1>(Space) - 1)&&(TempP->length<=12 || TempP->ori == HDL2Redstone::Orientation::TwoCW)) {
             Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y + 1, TempP->Loc.z - 1, P_, Q, TempP, Space);
         }
 
-        if ((TempP->Loc.z < std::get<2>(Space) - 1) && (TempP->Loc.y > 1)) {
+        if ((TempP->Loc.z < std::get<2>(Space) - 1) && (TempP->Loc.y > 1)&&(TempP->length<=12)) {
             Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y - 1, TempP->Loc.z + 1, P_, Q, TempP, Space);
         }
-        if ((TempP->Loc.z < std::get<2>(Space) - 1) && (TempP->Loc.y < std::get<1>(Space) - 1)) {
+        if ((TempP->Loc.z < std::get<2>(Space) - 1) && (TempP->Loc.y < std::get<1>(Space) - 1)&&(TempP->length<=12 || TempP->ori == HDL2Redstone::Orientation::ZeroCW)) {
             Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y + 1, TempP->Loc.z + 1, P_, Q, TempP, Space);
         }
-        if (TempP->Loc.x) {
+        if (TempP->Loc.x&&(TempP->length<=12 || TempP->ori == HDL2Redstone::Orientation::OneCW)) {
             Router::checkUpdateGraph(TempP->Loc.x - 1, TempP->Loc.y, TempP->Loc.z, P_, Q, TempP, Space);
         }
-        if (TempP->Loc.x < std::get<0>(Space) - 1) {
+        if (TempP->Loc.x < std::get<0>(Space) - 1&&(TempP->length<=12 || TempP->ori == HDL2Redstone::Orientation::ThreeCW)) {
             Router::checkUpdateGraph(TempP->Loc.x + 1, TempP->Loc.y, TempP->Loc.z, P_, Q, TempP, Space);
         }
-        if (TempP->Loc.z) {
+        if (TempP->Loc.z&&(TempP->length<=12 || TempP->ori == HDL2Redstone::Orientation::TwoCW)) {
             Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y, TempP->Loc.z - 1, P_, Q, TempP, Space);
         }
-        if (TempP->Loc.z < std::get<2>(Space) - 1) {
+        if (TempP->Loc.z < std::get<2>(Space) - 1&&(TempP->length<=12 || TempP->ori == HDL2Redstone::Orientation::ZeroCW)) {
             Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y, TempP->Loc.z + 1, P_, Q, TempP, Space);
         }
     }
-    std::set<std::tuple<uint16_t, uint16_t, uint16_t>> Result;
+    //std::set<HDL2Redstone::Connection::ConnectionResult,HDL2Redstone::Connection::resultcomp> Result;
     C.setRouted(0);
     // if (endTemp.empty()) {
     Point* ptr = NULL;
     for (auto it : end) {
         if (P_[it.x][it.y][it.z].P) {
             C.setRouted(1);
-            Result.insert(std::make_tuple(it.x, it.y - 1, it.z));
+            uint16_t TempX, TempY, TempZ;
+            TempX = it.x;
+            TempY = it.y;
+            TempZ = it.z;
+            // if (P_[it.x][it.y][it.z].ori == Orientation::ZeroCW) {
+            // } else if (P_[it.x][it.y][it.z].ori == Orientation::OneCW) {
+            //     TempX = it.x + 1;
+            // } else if (P_[it.x][it.y][it.z].ori == Orientation::TwoCW) {
+            //     TempX = it.x + 1;
+            //     TempZ = it.z + 1;
+            // } else {
+            //     TempZ = it.z + 1;
+            // }
+            if(P_[it.x][it.y][it.z].length>=13){
+                C.Result.insert(Connection::ConnectionResult(std::make_tuple(TempX, TempY - 1, TempZ),D.CellLib.getCellPtr("BUF"),P_[it.x][it.y][it.z].ori));
+            }else{
+                C.Result.insert(Connection::ConnectionResult(std::make_tuple(TempX, TempY - 1, TempZ),D.CellLib.getCellPtr("WIRE"),P_[it.x][it.y][it.z].ori));
+            }
             // std::cout << "SUCCESS routing to "
             //     <<it.x<<", "<<it.y<<", "<<it.z<<std::endl;
             ptr = P_[it.x][it.y][it.z].P;
             while (ptr != NULL) {
-                Result.insert(std::make_tuple(ptr->Loc.x, ptr->Loc.y - 1, ptr->Loc.z));
+                uint16_t TempX, TempY, TempZ;
+                TempX = ptr->Loc.x;
+                TempY = ptr->Loc.y;
+                TempZ = ptr->Loc.z;
+                // if (P_[ptr->Loc.x][ptr->Loc.y][ptr->Loc.z].ori == Orientation::ZeroCW) {
+                // } else if (P_[ptr->Loc.x][ptr->Loc.y][ptr->Loc.z].ori == Orientation::OneCW) {
+                //     TempX = ptr->Loc.x + 1;
+                // } else if (P_[ptr->Loc.x][ptr->Loc.y][ptr->Loc.z].ori == Orientation::TwoCW) {
+                //     TempX = ptr->Loc.x + 1;
+                //     TempZ = ptr->Loc.z + 1;
+                // } else {
+                //     TempZ = ptr->Loc.z + 1;
+                // }
+                if(ptr->length>=13){
+                    C.Result.insert(Connection::ConnectionResult(std::make_tuple(TempX, TempY - 1, TempZ),D.CellLib.getCellPtr("BUF"),ptr->ori));
+                }else{
+                    C.Result.insert(Connection::ConnectionResult(std::make_tuple(TempX, TempY - 1, TempZ),D.CellLib.getCellPtr("WIRE"),ptr->ori));
+                }
                 // std::cout << "routing to "
                 // <<ptr->Loc.x<<", "<<ptr->Loc.y<<", "<<ptr->Loc.z<<std::endl;
                 ptr = ptr->P;
@@ -305,7 +361,7 @@ bool Router::RegularRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_
         }
     }
     //}
-    updateUsedSpace(Result, Space);
+    updateUsedSpace(C.Result, Space);
 
     // debugging print
     /*
@@ -319,101 +375,101 @@ bool Router::RegularRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_
             std::cout << std::endl;
         }
     */
-    C.Result = Result;
+    //C.Result = Result;
     return true;
 }
-bool Router::flatRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_t, uint16_t>& Space,
-                       Router::Point***& P_) {
-    // implement dijkstra
-    Router::coord start;
-    std::vector<Router::coord> end;
-    std::tuple<uint16_t, uint16_t, uint16_t> startPin;
-    // std::tuple<uint16_t, uint16_t, uint16_t> endPin;
+// bool Router::flatRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_t, uint16_t>& Space,
+//                        Router::Point***& P_) {
+//     // implement dijkstra
+//     Router::coord start;
+//     std::vector<Router::coord> end;
+//     std::tuple<uint16_t, uint16_t, uint16_t> startPin;
+//     // std::tuple<uint16_t, uint16_t, uint16_t> endPin;
 
-    const std::vector<std::tuple<Component*, std::string, Connection::Parameters>> PortConnection_ =
-        C.getPortConnection();
+//     const std::vector<std::tuple<Component*, std::string, Connection::Parameters>> PortConnection_ =
+//         C.getPortConnection();
 
-    // source
-    auto SrcFacing = (std::get<0>(PortConnection_[0]))->getPinFacing(std::get<1>(PortConnection_[0]));
-    startPin = (std::get<0>(PortConnection_[0]))->getPinLocation(std::get<1>(PortConnection_[0]));
-    start = Router::updateSinglePortUsedSpace(startPin, SrcFacing);
-    for (auto it = PortConnection_.begin() + 1; it != PortConnection_.end(); ++it) {
-        auto temp = std::get<0>(*it)->getPinLocation(std::get<1>(*it));
-        // endPin.push_back(temp);
-        // temp = std::make_tuple(std::get<0>(temp),std::get<1>(temp),std::get<2>(temp) );
-        auto endFace = (std::get<0>(*it))->getPinFacing(std::get<1>(*it));
-        end.push_back(Router::updateSinglePortUsedSpace(temp, endFace));
-    }
-    std::vector<Router::coord> endTemp = end;
-    std::priority_queue<Router::Point*, std::vector<Router::Point*>, Router::PointCompare> Q;
-    P_[start.x][start.y][start.z].cost = 0;
-    P_[start.x][start.y][start.z].inserted = 1;
-    Q.push(&P_[start.x][start.y][start.z]);
-    bool done = 0;
+//     // source
+//     auto SrcFacing = (std::get<0>(PortConnection_[0]))->getPinFacing(std::get<1>(PortConnection_[0]));
+//     startPin = (std::get<0>(PortConnection_[0]))->getPinLocation(std::get<1>(PortConnection_[0]));
+//     start = Router::updateSinglePortUsedSpace(startPin, SrcFacing);
+//     for (auto it = PortConnection_.begin() + 1; it != PortConnection_.end(); ++it) {
+//         auto temp = std::get<0>(*it)->getPinLocation(std::get<1>(*it));
+//         // endPin.push_back(temp);
+//         // temp = std::make_tuple(std::get<0>(temp),std::get<1>(temp),std::get<2>(temp) );
+//         auto endFace = (std::get<0>(*it))->getPinFacing(std::get<1>(*it));
+//         end.push_back(Router::updateSinglePortUsedSpace(temp, endFace));
+//     }
+//     std::vector<Router::coord> endTemp = end;
+//     std::priority_queue<Router::Point*, std::vector<Router::Point*>, Router::PointCompare> Q;
+//     P_[start.x][start.y][start.z].cost = 0;
+//     P_[start.x][start.y][start.z].inserted = 1;
+//     Q.push(&P_[start.x][start.y][start.z]);
+//     bool done = 0;
 
-    while (!Q.empty()) {
-        Router::Point* TempP = Q.top();
-        Q.pop();
-        TempP->visited = 1;
-        for (auto it = endTemp.begin(); it != endTemp.end(); ++it) {
-            if ((TempP->Loc.x == it->x) && (TempP->Loc.y == it->y) && (TempP->Loc.z == it->z)) {
-                // std::cout <<"Location: "<<std::get<0>(TempP->Loc)<<" "<<std::get<1>(TempP->Loc)<<"
-                // "<<std::get<2>(TempP->Loc)<<std::endl;
-                endTemp.erase(it);
-                break;
-            }
-        }
-        if (endTemp.empty())
-            break;
-        if (TempP->Loc.x) {
-            Router::checkUpdateGraph(TempP->Loc.x - 1, TempP->Loc.y, TempP->Loc.z, P_, Q, TempP, Space);
-        }
-        if (TempP->Loc.x < std::get<0>(Space) - 1) {
-            Router::checkUpdateGraph(TempP->Loc.x + 1, TempP->Loc.y, TempP->Loc.z, P_, Q, TempP, Space);
-        }
-        if (TempP->Loc.z) {
-            Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y, TempP->Loc.z - 1, P_, Q, TempP, Space);
-        }
-        if (TempP->Loc.z < std::get<2>(Space) - 1) {
-            Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y, TempP->Loc.z + 1, P_, Q, TempP, Space);
-        }
-    }
-    std::set<std::tuple<uint16_t, uint16_t, uint16_t>> Result;
-    if (endTemp.empty()) {
-        Point* ptr = NULL;
-        for (auto it : end) {
-            Result.insert(std::make_tuple(it.x, it.y - 1, it.z));
-            ptr = P_[it.x][it.y][it.z].P;
-            while (ptr != NULL) {
-                Result.insert(std::make_tuple(ptr->Loc.x, ptr->Loc.y - 1, ptr->Loc.z));
-                ptr = ptr->P;
-            }
-        }
-    }
-    updateUsedSpace(Result, Space);
+//     while (!Q.empty()) {
+//         Router::Point* TempP = Q.top();
+//         Q.pop();
+//         TempP->visited = 1;
+//         for (auto it = endTemp.begin(); it != endTemp.end(); ++it) {
+//             if ((TempP->Loc.x == it->x) && (TempP->Loc.y == it->y) && (TempP->Loc.z == it->z)) {
+//                 // std::cout <<"Location: "<<std::get<0>(TempP->Loc)<<" "<<std::get<1>(TempP->Loc)<<"
+//                 // "<<std::get<2>(TempP->Loc)<<std::endl;
+//                 endTemp.erase(it);
+//                 break;
+//             }
+//         }
+//         if (endTemp.empty())
+//             break;
+//         if (TempP->Loc.x) {
+//             Router::checkUpdateGraph(TempP->Loc.x - 1, TempP->Loc.y, TempP->Loc.z, P_, Q, TempP, Space);
+//         }
+//         if (TempP->Loc.x < std::get<0>(Space) - 1) {
+//             Router::checkUpdateGraph(TempP->Loc.x + 1, TempP->Loc.y, TempP->Loc.z, P_, Q, TempP, Space);
+//         }
+//         if (TempP->Loc.z) {
+//             Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y, TempP->Loc.z - 1, P_, Q, TempP, Space);
+//         }
+//         if (TempP->Loc.z < std::get<2>(Space) - 1) {
+//             Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y, TempP->Loc.z + 1, P_, Q, TempP, Space);
+//         }
+//     }
+//     std::set<std::tuple<uint16_t, uint16_t, uint16_t>> Result;
+//     if (endTemp.empty()) {
+//         Point* ptr = NULL;
+//         for (auto it : end) {
+//             Result.insert(std::make_tuple(it.x, it.y - 1, it.z));
+//             ptr = P_[it.x][it.y][it.z].P;
+//             while (ptr != NULL) {
+//                 Result.insert(std::make_tuple(ptr->Loc.x, ptr->Loc.y - 1, ptr->Loc.z));
+//                 ptr = ptr->P;
+//             }
+//         }
+//     }
+//     updateUsedSpace(Result, Space);
 
-    // debugging print
-    /*
-        for (int i = 0; i < std::get<0>(Space); i++) {
-            for (int j = 0; j < std::get<1>(Space); j++) {
-                for (int k = 0; k < std::get<2>(Space); k++) {
-                    if (j == 1)
-                        std::cout << UsedSpace[i][j][k] << " ";
-                }
-            }
-            std::cout << std::endl;
-        }
-    */
-    C.Result = Result;
-    return true;
-}
-void Router::updateUsedSpace(std::set<std::tuple<uint16_t, uint16_t, uint16_t>>& Result,
+//     // debugging print
+//     /*
+//         for (int i = 0; i < std::get<0>(Space); i++) {
+//             for (int j = 0; j < std::get<1>(Space); j++) {
+//                 for (int k = 0; k < std::get<2>(Space); k++) {
+//                     if (j == 1)
+//                         std::cout << UsedSpace[i][j][k] << " ";
+//                 }
+//             }
+//             std::cout << std::endl;
+//         }
+//     */
+//     C.Result = Result;
+//     return true;
+// }
+void Router::updateUsedSpace(std::set<Connection::ConnectionResult,Connection::resultcomp>& Result,
                              std::tuple<uint16_t, uint16_t, uint16_t>& Space) {
     for (const auto& entry : Result) {
         Router::coord entry_temp;
-        entry_temp.x = std::get<0>(entry);
-        entry_temp.y = std::get<1>(entry);
-        entry_temp.z = std::get<2>(entry);
+        entry_temp.x = std::get<0>(entry.coord);
+        entry_temp.y = std::get<1>(entry.coord);
+        entry_temp.z = std::get<2>(entry.coord);
         UsedSpace[entry_temp.x][entry_temp.y + 1][entry_temp.z] = 1;
         UsedSpace[entry_temp.x][entry_temp.y][entry_temp.z] = 1;
         if (entry_temp.y < std::get<1>(Space) - 2) {
