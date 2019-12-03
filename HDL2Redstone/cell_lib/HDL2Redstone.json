@@ -108,16 +108,16 @@
                     1,
                     0
                 ],
-                "facing": "west"
+                "facing": "north"
             },
             "Y": {
                 "direction": "output",
                 "location": [
-                    3,
+                    0,
                     1,
-                    0
+                    3
                 ],
-                "facing": "east",
+                "facing": "south",
                 "function": "A'"
             }
         },

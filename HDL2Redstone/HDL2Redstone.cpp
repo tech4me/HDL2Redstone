@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
             DesignConstraint DC;
             /*
             DC.addForcedPlacement("a", {0, 0, 0, Orientation::ZeroCW});
-            DC.addForcedPlacement("b", {5, 5, 0, Orientation::ZeroCW});
+            DC.addForcedPlacement("b", {4, 0, 0, Orientation::ZeroCW});
             DC.addForcedPlacement("c", {1, 0, 19, Orientation::ZeroCW});
             */
             /*
@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
             DC.addForcedPlacement("x", {40, 0, 0, Orientation::ZeroCW});
             DC.addForcedPlacement("dout", {30, 0, 49, Orientation::ZeroCW});
 
-            Design D(50, 20, 50, "design.blif", CL, DC);
+            Design D(50, 50, 50, "design.blif", CL, DC);
             std::cout << D;
             std::cout << "Now Running Place & Route..." << std::endl;
             if (!D.doPlaceAndRoute()) {
