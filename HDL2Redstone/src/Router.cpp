@@ -6,6 +6,8 @@
 #include <Connection.hpp>
 #include <Router.hpp>
 
+#define MAX_NUM_OF_WIRE 12
+
 using namespace HDL2Redstone;
 Router::coord Router::updateSinglePortUsedSpace(std::tuple<uint16_t, uint16_t, uint16_t> Loc, Facing Fac) {
     Router::coord ret;
@@ -197,7 +199,7 @@ void Router::checkUpdateGraph(uint16_t x, uint16_t y, uint16_t z, Router::Point*
                     P_[x][y][z].P = TempP;
                 }
                 if(set){
-                    if(TempP->length <=12){
+                    if(TempP->length <=MAX_NUM_OF_WIRE){
                         if(TempP->Loc.x > x){
                             P_[x][y][z].ori = HDL2Redstone::Orientation::OneCW;
                         }else if(TempP->Loc.x < x){
@@ -209,7 +211,7 @@ void Router::checkUpdateGraph(uint16_t x, uint16_t y, uint16_t z, Router::Point*
                         }
                         P_[x][y][z].length = TempP->length + 1;
                     }else{
-                        P_[x][y][z].length = 0;
+                        P_[x][y][z].length = 1;
                     }
                 }
                 P_[x][y][z].cost = TempP->cost + 1;
@@ -265,42 +267,42 @@ bool Router::RegularRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_
         }
         if (endTemp.empty())
             break;
-        if (TempP->Loc.x && (TempP->Loc.y > 1) &&(TempP->length<=12)) {
+        if (TempP->Loc.x && (TempP->Loc.y > 1) &&(TempP->length<=MAX_NUM_OF_WIRE)) {
             Router::checkUpdateGraph(TempP->Loc.x - 1, TempP->Loc.y - 1, TempP->Loc.z, P_, Q, TempP, Space);
         }
-        if (TempP->Loc.x && (TempP->Loc.y < std::get<1>(Space) - 1)&&(TempP->length<=12 || TempP->ori == HDL2Redstone::Orientation::OneCW)) {
+        if (TempP->Loc.x && (TempP->Loc.y < std::get<1>(Space) - 1)&&(TempP->length<=MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::OneCW)) {
             Router::checkUpdateGraph(TempP->Loc.x - 1, TempP->Loc.y + 1, TempP->Loc.z, P_, Q, TempP, Space);
         }
 
-        if ((TempP->Loc.x < std::get<0>(Space) - 1) && (TempP->Loc.y > 1)&&(TempP->length<=12)) {
+        if ((TempP->Loc.x < std::get<0>(Space) - 1) && (TempP->Loc.y > 1)&&(TempP->length<=MAX_NUM_OF_WIRE)) {
             Router::checkUpdateGraph(TempP->Loc.x + 1, TempP->Loc.y - 1, TempP->Loc.z, P_, Q, TempP, Space);
         }
-        if ((TempP->Loc.x < std::get<0>(Space) - 1) && (TempP->Loc.y < std::get<1>(Space) - 1)&&(TempP->length<=12 || TempP->ori == HDL2Redstone::Orientation::ThreeCW)) {
+        if ((TempP->Loc.x < std::get<0>(Space) - 1) && (TempP->Loc.y < std::get<1>(Space) - 1)&&(TempP->length<=MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::ThreeCW)) {
             Router::checkUpdateGraph(TempP->Loc.x + 1, TempP->Loc.y + 1, TempP->Loc.z, P_, Q, TempP, Space);
         }
-        if (TempP->Loc.z && (TempP->Loc.y > 1)&&(TempP->length<=12)) {
+        if (TempP->Loc.z && (TempP->Loc.y > 1)&&(TempP->length<=MAX_NUM_OF_WIRE)) {
             Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y - 1, TempP->Loc.z - 1, P_, Q, TempP, Space);
         }
-        if (TempP->Loc.z && (TempP->Loc.y < std::get<1>(Space) - 1)&&(TempP->length<=12 || TempP->ori == HDL2Redstone::Orientation::TwoCW)) {
+        if (TempP->Loc.z && (TempP->Loc.y < std::get<1>(Space) - 1)&&(TempP->length<=MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::TwoCW)) {
             Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y + 1, TempP->Loc.z - 1, P_, Q, TempP, Space);
         }
 
-        if ((TempP->Loc.z < std::get<2>(Space) - 1) && (TempP->Loc.y > 1)&&(TempP->length<=12)) {
+        if ((TempP->Loc.z < std::get<2>(Space) - 1) && (TempP->Loc.y > 1)&&(TempP->length<=MAX_NUM_OF_WIRE)) {
             Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y - 1, TempP->Loc.z + 1, P_, Q, TempP, Space);
         }
-        if ((TempP->Loc.z < std::get<2>(Space) - 1) && (TempP->Loc.y < std::get<1>(Space) - 1)&&(TempP->length<=12 || TempP->ori == HDL2Redstone::Orientation::ZeroCW)) {
+        if ((TempP->Loc.z < std::get<2>(Space) - 1) && (TempP->Loc.y < std::get<1>(Space) - 1)&&(TempP->length<=MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::ZeroCW)) {
             Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y + 1, TempP->Loc.z + 1, P_, Q, TempP, Space);
         }
-        if (TempP->Loc.x&&(TempP->length<=12 || TempP->ori == HDL2Redstone::Orientation::OneCW)) {
+        if (TempP->Loc.x&&(TempP->length<=MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::OneCW)) {
             Router::checkUpdateGraph(TempP->Loc.x - 1, TempP->Loc.y, TempP->Loc.z, P_, Q, TempP, Space);
         }
-        if (TempP->Loc.x < std::get<0>(Space) - 1&&(TempP->length<=12 || TempP->ori == HDL2Redstone::Orientation::ThreeCW)) {
+        if (TempP->Loc.x < std::get<0>(Space) - 1&&(TempP->length<=MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::ThreeCW)) {
             Router::checkUpdateGraph(TempP->Loc.x + 1, TempP->Loc.y, TempP->Loc.z, P_, Q, TempP, Space);
         }
-        if (TempP->Loc.z&&(TempP->length<=12 || TempP->ori == HDL2Redstone::Orientation::TwoCW)) {
+        if (TempP->Loc.z&&(TempP->length<=MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::TwoCW)) {
             Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y, TempP->Loc.z - 1, P_, Q, TempP, Space);
         }
-        if (TempP->Loc.z < std::get<2>(Space) - 1&&(TempP->length<=12 || TempP->ori == HDL2Redstone::Orientation::ZeroCW)) {
+        if (TempP->Loc.z < std::get<2>(Space) - 1&&(TempP->length<=MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::ZeroCW)) {
             Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y, TempP->Loc.z + 1, P_, Q, TempP, Space);
         }
     }
@@ -315,16 +317,7 @@ bool Router::RegularRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_
             TempX = it.x;
             TempY = it.y;
             TempZ = it.z;
-            // if (P_[it.x][it.y][it.z].ori == Orientation::ZeroCW) {
-            // } else if (P_[it.x][it.y][it.z].ori == Orientation::OneCW) {
-            //     TempX = it.x + 1;
-            // } else if (P_[it.x][it.y][it.z].ori == Orientation::TwoCW) {
-            //     TempX = it.x + 1;
-            //     TempZ = it.z + 1;
-            // } else {
-            //     TempZ = it.z + 1;
-            // }
-            if(P_[it.x][it.y][it.z].length>=13){
+            if(P_[it.x][it.y][it.z].length>=MAX_NUM_OF_WIRE+1){
                 C.Result.insert(Connection::ConnectionResult(std::make_tuple(TempX, TempY - 1, TempZ),D.CellLib.getCellPtr("BUF"),P_[it.x][it.y][it.z].ori));
             }else{
                 C.Result.insert(Connection::ConnectionResult(std::make_tuple(TempX, TempY - 1, TempZ),D.CellLib.getCellPtr("WIRE"),P_[it.x][it.y][it.z].ori));
@@ -337,16 +330,7 @@ bool Router::RegularRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_
                 TempX = ptr->Loc.x;
                 TempY = ptr->Loc.y;
                 TempZ = ptr->Loc.z;
-                // if (P_[ptr->Loc.x][ptr->Loc.y][ptr->Loc.z].ori == Orientation::ZeroCW) {
-                // } else if (P_[ptr->Loc.x][ptr->Loc.y][ptr->Loc.z].ori == Orientation::OneCW) {
-                //     TempX = ptr->Loc.x + 1;
-                // } else if (P_[ptr->Loc.x][ptr->Loc.y][ptr->Loc.z].ori == Orientation::TwoCW) {
-                //     TempX = ptr->Loc.x + 1;
-                //     TempZ = ptr->Loc.z + 1;
-                // } else {
-                //     TempZ = ptr->Loc.z + 1;
-                // }
-                if(ptr->length>=13){
+                if(ptr->length>=MAX_NUM_OF_WIRE+1){
                     C.Result.insert(Connection::ConnectionResult(std::make_tuple(TempX, TempY - 1, TempZ),D.CellLib.getCellPtr("BUF"),ptr->ori));
                 }else{
                     C.Result.insert(Connection::ConnectionResult(std::make_tuple(TempX, TempY - 1, TempZ),D.CellLib.getCellPtr("WIRE"),ptr->ori));
@@ -505,39 +489,7 @@ void Router::updateUsedSpace(std::set<Connection::ConnectionResult,Connection::r
         }
     }
 }
-/*
-bool Router::updateUsedSpace(Connection& C, std::tuple<uint16_t, uint16_t, uint16_t> bound) {
-    const std::vector<std::tuple<Component*, std::string, Connection::Parameters>> PortConnection_ =
-        C.getPortConnection();
-    if (PortConnection_.empty()) {
-        return false;
-    }
 
-    for (auto const& k : PortConnection_) {
-        if (!(std::get<2>(k).getParameters().empty())) {
-            const std::vector<std::tuple<uint16_t, uint16_t, uint16_t>> tempConnection = std::get<2>(k).getParameters();
-            for (auto const& i : tempConnection) {
-                UsedSpace[std::get<0>(i)][std::get<1>(i)][std::get<2>(i)] = 1;
-                if (std::get<0>(i) > 0)
-                    UsedSpace[std::get<0>(i) - 1][std::get<1>(i)][std::get<2>(i)] = 1;
-                if (std::get<0>(i) < std::get<0>(bound) - 1)
-                    UsedSpace[std::get<0>(i) + 1][std::get<1>(i)][std::get<2>(i)] = 1;
-                // TODO veritcal range should be reconsidered
-                if (std::get<1>(i) > 0)
-                    UsedSpace[std::get<0>(i)][std::get<1>(i) - 1][std::get<2>(i)] = 1;
-                if (std::get<1>(i) < std::get<1>(bound) - 1)
-                    UsedSpace[std::get<0>(i)][std::get<1>(i) + 1][std::get<2>(i)] =
-                        1;
-                if (std::get<2>(i) > 0)
-                    UsedSpace[std::get<0>(i)][std::get<1>(i)][std::get<2>(i) - 1] = 1;
-                if (std::get<2>(i) < std::get<2>(bound) - 1)
-                    UsedSpace[std::get<0>(i)][std::get<1>(i)][std::get<2>(i) + 1] = 1;
-            }
-        }
-    }
-    return true;
-}
-*/
 bool Router::checkSingleRoute(const Design& D,
                               const std::vector<std::tuple<uint16_t, uint16_t, uint16_t>> connection_points) {
     auto& Components_ = D.getModuleNetlist().getComponents();
