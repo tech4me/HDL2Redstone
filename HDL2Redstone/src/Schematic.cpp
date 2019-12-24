@@ -177,21 +177,21 @@ void Schematic::insertSubSchematic(const Placement& P_, const Schematic& Schem_)
         int32_t Z = (i % (Schem_.Width * Schem_.Length)) / Schem_.Width;
         int32_t Temp;
         switch (P_.Orient) {
-            case Orientation::OneCW:
+        case Orientation::OneCW:
             Temp = X;
             X = Z;
             Z = -Temp;
             break;
-            case Orientation::TwoCW:
+        case Orientation::TwoCW:
             X = -X;
             Z = -Z;
             break;
-            case Orientation::ThreeCW:
+        case Orientation::ThreeCW:
             Temp = X;
             X = -Z;
             Z = Temp;
             break;
-            default:
+        default:
             break;
         }
         X += P_.X;
