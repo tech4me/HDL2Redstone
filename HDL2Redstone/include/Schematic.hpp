@@ -25,7 +25,7 @@ class Schematic {
     void setHeight(uint16_t Height_) { Height = Height_; }
     void setLength(uint16_t Length_) { Length = Length_; }
 
-    void insertSubSchematic(const Placement& P_, const Schematic& Schem_);
+    void insertSubSchematic(const Placement& P_, const Schematic& Schem_, const std::string& Type_, const int32_t& RouterSet_);
     void exportSchematic(const std::string& File_) const;
 
   private:
@@ -39,6 +39,8 @@ class Schematic {
     int32_t PaletteMax;
     std::map<int32_t, std::string> InvertPalette;
     std::vector<int32_t> BlockData;
+    // for debug
+    std::vector<std::tuple<std::string, int32_t>> BlockOrigin;
 
     friend std::ostream& operator<<(std::ostream& out, const Schematic& Schematic_);
 };

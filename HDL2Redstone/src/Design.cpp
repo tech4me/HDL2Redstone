@@ -28,7 +28,7 @@ Schematic Design::exportDesign() const {
     Schematic Schem(Width, Height, Length);
     for (const auto& Component : MN.getComponents()) {
         if (Component->getPlaced()) {
-            Schem.insertSubSchematic(Component->getPlacement(), Component->getSchematic());
+            Schem.insertSubSchematic(Component->getPlacement(), Component->getSchematic(), Component->getType(), 0); //last 2 arguments for debug
         }
     }
     for (const auto& Connection : MN.getConnections()) {
@@ -36,7 +36,7 @@ Schematic Design::exportDesign() const {
             // TODO: Check this once we have something other than wire
             for (const auto& R : Connection->Result) {
                 Schem.insertSubSchematic({std::get<0>(R.coord), std::get<1>(R.coord), std::get<2>(R.coord), R.Ori},
-                                         R.CellPtr->getSchematic());
+                                         R.CellPtr->getSchematic(), R.CellPtr->getType(), 1); // last 2 arguments for debug
             }
             /*
             const auto& Ports = Connection->getPortConnection();
