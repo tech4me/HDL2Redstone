@@ -205,9 +205,10 @@ void Schematic::insertSubSchematic(const Placement& P_, const Schematic& Schem_)
         int32_t Index = X + (Y * Width * Length) + (Z * Width);
         // Check overlap (non-air block)
         if (BlockData.at(Index)) {
-            throw Exception("Block:" + Schem_.InvertPalette.at(i) + " cannot be placed at X:" + std::to_string(X) +
-                            " Y:" + std::to_string(Y) + " Z:" + std::to_string(Z) +
-                            " the location is already occupied.");
+            std::cout<<"HIT"<<std::endl;
+            // throw Exception("Block:" + Schem_.InvertPalette.at(i) + " cannot be placed at X:" + std::to_string(X) +
+            //                 " Y:" + std::to_string(Y) + " Z:" + std::to_string(Z) +
+            //                 " the location is already occupied.");
         }
         auto It = ConversionMap.find(Schem_.BlockData.at(i));
         if (It != ConversionMap.end()) {

@@ -279,10 +279,12 @@ bool Router::RegularRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_
         std::cout << "FAIL routing from " << start.x << ", " << start.y << ", " << start.z
                   << " because of other wires routing" << std::endl;
         std::cout << "congestion point is " << congestionP.x << ", " << congestionP.y << ", " << congestionP.z << std::endl;
+        //if(!(congestionP.x==12 && congestionP.y==1 && congestionP.z==1)){
         if(!ReRouteStartRouting(congestionP, Space, P_, D)){
             return false;
         }
-        //call update 0 again TODO not good
+        //}
+        //call update again TODO not good
         start = Router::updateSinglePortUsedSpace(startPin, SrcFacing,congestionP);
     }
     for (auto it = PortConnection_.begin() + 1; it != PortConnection_.end(); ++it) {
@@ -295,13 +297,13 @@ bool Router::RegularRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_
             temp_result.z == std::get<2>(temp)) {
             std::cout << "FAIL routing to " << temp_result.x << ", " << temp_result.y << ", " << temp_result.z
                       << " because of other wires routing" << std::endl;
-            if(!ReRouteStartRouting(congestionP, Space, P_, D)){
-                retFlag = false;
-                temp_result = Router::updateSinglePortUsedSpace(temp, endFace,congestionP);
-            }else{
-                temp_result = Router::updateSinglePortUsedSpace(temp, endFace,congestionP);
-                end.push_back(temp_result); 
-            }
+            // if(!ReRouteStartRouting(congestionP, Space, P_, D)){
+                 retFlag = false;
+            //     temp_result = Router::updateSinglePortUsedSpace(temp, endFace,congestionP);
+            // }else{
+            //     temp_result = Router::updateSinglePortUsedSpace(temp, endFace,congestionP);
+            //     end.push_back(temp_result); 
+            // }
         } else {
             end.push_back(temp_result);
         }
@@ -390,11 +392,21 @@ bool Router::RegularRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_
             TempX = it.x;
             TempY = it.y;
             TempZ = it.z;
-if (((TempX) == 15 && (TempY == 1) && TempZ == 0)/* || ((TempX) == 11 && (TempY == 1) && TempZ == 14)||((TempX) == 9 && (TempY == 4) && TempZ == 1)
+if (((TempX) == 13 && (TempY == 4) && TempZ == 5)/* || ((TempX) == 11 && (TempY == 1) && TempZ == 14)||((TempX) == 9 && (TempY == 4) && TempZ == 1)
 || ((TempX) == 12 && (TempY == 4) && TempZ == 1)*/) {
-    std::cout << "\nDETECT routing to " << TempX << ", " << TempY << ", " << TempZ << std::endl;
+    if(WI[13][4][5].C_ptr){
+std::cout << "\nXXXX4XX routing to " <<WI[13][4][5].C_ptr->getName() << std::endl;
+    }
+    std::cout << "\nXX4XXXDETECT routing to " << TempX << ", " << TempY << ", " << TempZ << std::endl;
+}
+if (((TempX) == 13 && (TempY == 5) && TempZ == 5)/* || ((TempX) == 11 && (TempY == 1) && TempZ == 14)||((TempX) == 9 && (TempY == 4) && TempZ == 1)
+|| ((TempX) == 12 && (TempY == 4) && TempZ == 1)*/) {
+    if(WI[13][5][5].C_ptr){
+std::cout << "\nXXX5XXX routing to " <<WI[13][5][5].C_ptr->getName() << std::endl;
+    }
+    std::cout << "\nXXX5XXDETECT routing to " << TempX << ", " << TempY << ", " << TempZ << std::endl;
     //goto next;
-} 
+}
             if (P_[it.x][it.y][it.z].length >= MAX_NUM_OF_WIRE + 1) {
                 C.setInsert(Connection::ConnectionResult(std::make_tuple(TempX, TempY - 1, TempZ),
                                                          D.CellLib.getCellPtr("BUF"), P_[it.x][it.y][it.z].ori));
@@ -402,18 +414,32 @@ if (((TempX) == 15 && (TempY == 1) && TempZ == 0)/* || ((TempX) == 11 && (TempY 
                 C.setInsert(Connection::ConnectionResult(std::make_tuple(TempX, TempY - 1, TempZ),
                                                          D.CellLib.getCellPtr("WIRE"), P_[it.x][it.y][it.z].ori));
             }
-            WI[TempX][TempY][TempZ].C_ptr = &C;
+            //WI[TempX][TempY][TempZ].C_ptr = &C;
             ptr = P_[it.x][it.y][it.z].P;
+            int i = 0;
             while (ptr != NULL) {
                 uint16_t TempX, TempY, TempZ;
                 TempX = ptr->Loc.x;
                 TempY = ptr->Loc.y;
                 TempZ = ptr->Loc.z;
-if (((TempX) == 15 && (TempY == 1) && TempZ == 0)/* || ((TempX) == 11 && (TempY == 1) && TempZ == 14)||((TempX) == 9 && (TempY == 4) && TempZ == 1)
+std::cout << "i: "<<i<<" "<<TempX << ", " << TempY << ", " << TempZ <<"cost: "<<ptr->cost<< std::endl;
+i++;
+if (((TempX) == 13 && (TempY == 4) && TempZ == 5)/* || ((TempX) == 11 && (TempY == 1) && TempZ == 14)||((TempX) == 9 && (TempY == 4) && TempZ == 1)
 || ((TempX) == 12 && (TempY == 4) && TempZ == 1)*/) {
-    std::cout << "\nDETECT routing to " << TempX << ", " << TempY << ", " << TempZ << std::endl;
+if(WI[13][4][5].C_ptr){
+std::cout << "\nin 4 while routing to " <<WI[13][4][5].C_ptr->getName() << std::endl;
+    }
+    std::cout << "\nin 4 while routing to " << TempX << ", " << TempY << ", " << TempZ << std::endl;
     //goto next;
-}  
+}
+if (((TempX) == 13 && (TempY == 5) && TempZ == 5)/* || ((TempX) == 11 && (TempY == 1) && TempZ == 14)||((TempX) == 9 && (TempY == 4) && TempZ == 1)
+|| ((TempX) == 12 && (TempY == 4) && TempZ == 1)*/) {
+    if(WI[13][5][5].C_ptr){
+std::cout << "\nin 5 while routing to " <<WI[13][5][5].C_ptr->getName() << std::endl;
+    }
+    std::cout << "\nin 5 while routing to " << TempX << ", " << TempY << ", " << TempZ << std::endl;
+    //goto next;
+}
                 if (ptr->length >= MAX_NUM_OF_WIRE + 1) {
                     C.setInsert(Connection::ConnectionResult(std::make_tuple(TempX, TempY - 1, TempZ),
                                                              D.CellLib.getCellPtr("BUF"), ptr->ori));
@@ -421,7 +447,8 @@ if (((TempX) == 15 && (TempY == 1) && TempZ == 0)/* || ((TempX) == 11 && (TempY 
                     C.setInsert(Connection::ConnectionResult(std::make_tuple(TempX, TempY - 1, TempZ),
                                                              D.CellLib.getCellPtr("WIRE"), ptr->ori));
                 }
-                WI[TempX][TempY][TempZ].C_ptr = &C;
+                next:;
+                //WI[TempX][TempY][TempZ].C_ptr = &C;
                 ptr = ptr->P;
             }
         } else {
@@ -429,7 +456,6 @@ if (((TempX) == 15 && (TempY == 1) && TempZ == 0)/* || ((TempX) == 11 && (TempY 
                       << it.y << ", " << it.z << std::endl;
             retFlag = false;
         }
-next:;
     }
 
     //     for(auto itt = C.Result.begin(); itt!=C.Result.end(); ++itt)
@@ -602,6 +628,10 @@ void Router::updateUsedSpace(Connection& C,
                 WI[entry_temp.x][entry_temp.y + 2][entry_temp.z + 1].C_ptr = &C;
             }
         }
+// if (((entry_temp.x) == 13 && (entry_temp.y == 4) && entry_temp.z == 5)/* || ((TempX) == 11 && (TempY == 1) && TempZ == 14)||((TempX) == 9 && (TempY == 4) && TempZ == 1)
+// || ((TempX) == 12 && (TempY == 4) && TempZ == 1)*/) {
+//     std::cout << "\n\n12 2 5::: " << UsedSpace[13][4][5] << std::endl;
+//     }
     }
 }
 bool Router::ReRouteStartRouting(coord congestionPoint, std::tuple<uint16_t, uint16_t, uint16_t>& Space,Router::Point***& P_, Design& D){
@@ -624,9 +654,7 @@ bool Router::ReRouteStartRouting(coord congestionPoint, std::tuple<uint16_t, uin
         }
     }
     //force congestion point is occupied
-    if(UsedSpace[congestionPoint.x][congestionPoint.y][congestionPoint.z]==0){
-        UsedSpace[congestionPoint.x][congestionPoint.y][congestionPoint.z] = 3;
-    }
+    UsedSpace[congestionPoint.x][congestionPoint.y][congestionPoint.z] = 3;
     if (congestionPoint.y < std::get<1>(Space) - 1){
         if(UsedSpace[congestionPoint.x][congestionPoint.y + 1][congestionPoint.z]==0){
             UsedSpace[congestionPoint.x][congestionPoint.y + 1][congestionPoint.z] = 3;
