@@ -46,7 +46,7 @@ class Connection {
     const std::vector<std::tuple<Component*, std::string, Connection::Parameters>>& getPortConnection() const;
     // add component port to sink
     void addSink(Component* ComponentPtr_, const std::string& PortName_);
-    std::set<std::tuple<uint16_t, uint16_t, uint16_t>> checkRouteResult();
+    std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t>> checkRouteResult();
 
   private:
     bool Routed;

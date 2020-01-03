@@ -16,9 +16,9 @@ void Connection::addSink(Component* ComponentPtr_, const std::string& PortName_)
     PortConnection.push_back(std::make_tuple(ComponentPtr_, PortName_, Connection::Parameters()));
 }
 
-std::set<std::tuple<uint16_t, uint16_t, uint16_t>> Connection::checkRouteResult() {
+std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t>> Connection::checkRouteResult() {
     std::map<std::tuple<uint16_t, uint16_t, uint16_t>, uint16_t> ResultsMap;
-    std::set<std::tuple<uint16_t, uint16_t, uint16_t>> IllegalPoints;
+    std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t>> IllegalPoints;
     for (const auto R : Result) {
         // std::cout<<"in check route result, " <<std::get<0>(R.coord)<<" "<<std::get<1>(R.coord)<<"
         // "<<std::get<2>(R.coord)<<std::endl;
@@ -26,15 +26,15 @@ std::set<std::tuple<uint16_t, uint16_t, uint16_t>> Connection::checkRouteResult(
         if (it != ResultsMap.end()) {
             switch (it->second) {
             case 0:
-                IllegalPoints.insert({std::get<0>(R.coord), std::get<1>(R.coord) - 1, std::get<2>(R.coord)});
+                IllegalPoints.insert({std::get<0>(R.coord), std::get<1>(R.coord) - 1, std::get<2>(R.coord), 0});
                 break;
             case 1:
             case 2:
             case 3:
-                IllegalPoints.insert({std::get<0>(R.coord), std::get<1>(R.coord), std::get<2>(R.coord)});
+                IllegalPoints.insert({std::get<0>(R.coord), std::get<1>(R.coord), std::get<2>(R.coord), 1});
                 break;
             case 4:
-                IllegalPoints.insert({std::get<0>(R.coord), std::get<1>(R.coord) + 1, std::get<2>(R.coord)});
+                IllegalPoints.insert({std::get<0>(R.coord), std::get<1>(R.coord) + 1, std::get<2>(R.coord), 0});
                 break;
             default:
                 std::cout << "wrong" << std::endl;

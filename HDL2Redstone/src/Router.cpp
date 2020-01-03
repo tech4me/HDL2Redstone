@@ -373,9 +373,10 @@ bool Router::RegularRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_
     // for debug
     auto IllegalPoints = C.checkRouteResult();
     if (!IllegalPoints.empty()) {
-        std::cout << "there are illegal points in route result!" /*<<" size: "<<IllegalPoints.size()*/ << std::endl;
+        std::cout << "there are illegal points in route result!" << std::endl;
         for (const auto IP : IllegalPoints) {
-            std::cout << "  " << std::get<0>(IP) << " " << std::get<1>(IP) << " " << std::get<2>(IP) << std::endl;
+            std::cout << "  " << std::get<0>(IP) << " " << std::get<1>(IP) << " " << std::get<2>(IP)
+                      << " overlap: " << std::get<3>(IP) << std::endl;
         }
     }
     return true;
