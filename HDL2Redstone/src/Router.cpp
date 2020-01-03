@@ -289,8 +289,6 @@ bool Router::RegularRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_
     }
     for (auto it = PortConnection_.begin() + 1; it != PortConnection_.end(); ++it) {
         auto temp = std::get<0>(*it)->getPinLocation(std::get<1>(*it));
-        // endPin.push_back(temp);
-        // temp = std::make_tuple(std::get<0>(temp),std::get<1>(temp),std::get<2>(temp) );
         auto endFace = (std::get<0>(*it))->getPinFacing(std::get<1>(*it));
         auto temp_result = Router::updateSinglePortUsedSpace(temp, endFace,congestionP);
         if (temp_result.x == std::get<0>(temp) && temp_result.y == std::get<1>(temp) &&
@@ -381,9 +379,7 @@ bool Router::RegularRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_
             Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y + 1, TempP->Loc.z + 1, P_, Q, TempP, Space);
         }
     }
-    // std::set<HDL2Redstone::Connection::ConnectionResult,HDL2Redstone::Connection::resultcomp> Result;
     C.setRouted(0);
-    // if (endTemp.empty()) {
     Point* ptr = NULL;
     for (auto it : end) {
         if (P_[it.x][it.y][it.z].P) {
@@ -392,21 +388,6 @@ bool Router::RegularRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_
             TempX = it.x;
             TempY = it.y;
             TempZ = it.z;
-if (((TempX) == 13 && (TempY == 4) && TempZ == 5)/* || ((TempX) == 11 && (TempY == 1) && TempZ == 14)||((TempX) == 9 && (TempY == 4) && TempZ == 1)
-|| ((TempX) == 12 && (TempY == 4) && TempZ == 1)*/) {
-    if(WI[13][4][5].C_ptr){
-std::cout << "\nXXXX4XX routing to " <<WI[13][4][5].C_ptr->getName() << std::endl;
-    }
-    std::cout << "\nXX4XXXDETECT routing to " << TempX << ", " << TempY << ", " << TempZ << std::endl;
-}
-if (((TempX) == 13 && (TempY == 5) && TempZ == 5)/* || ((TempX) == 11 && (TempY == 1) && TempZ == 14)||((TempX) == 9 && (TempY == 4) && TempZ == 1)
-|| ((TempX) == 12 && (TempY == 4) && TempZ == 1)*/) {
-    if(WI[13][5][5].C_ptr){
-std::cout << "\nXXX5XXX routing to " <<WI[13][5][5].C_ptr->getName() << std::endl;
-    }
-    std::cout << "\nXXX5XXDETECT routing to " << TempX << ", " << TempY << ", " << TempZ << std::endl;
-    //goto next;
-}
             if (P_[it.x][it.y][it.z].length >= MAX_NUM_OF_WIRE + 1) {
                 C.setInsert(Connection::ConnectionResult(std::make_tuple(TempX, TempY - 1, TempZ),
                                                          D.CellLib.getCellPtr("BUF"), P_[it.x][it.y][it.z].ori));
@@ -416,30 +397,11 @@ std::cout << "\nXXX5XXX routing to " <<WI[13][5][5].C_ptr->getName() << std::end
             }
             //WI[TempX][TempY][TempZ].C_ptr = &C;
             ptr = P_[it.x][it.y][it.z].P;
-            int i = 0;
             while (ptr != NULL) {
                 uint16_t TempX, TempY, TempZ;
                 TempX = ptr->Loc.x;
                 TempY = ptr->Loc.y;
                 TempZ = ptr->Loc.z;
-std::cout << "i: "<<i<<" "<<TempX << ", " << TempY << ", " << TempZ <<"cost: "<<ptr->cost<< std::endl;
-i++;
-if (((TempX) == 13 && (TempY == 4) && TempZ == 5)/* || ((TempX) == 11 && (TempY == 1) && TempZ == 14)||((TempX) == 9 && (TempY == 4) && TempZ == 1)
-|| ((TempX) == 12 && (TempY == 4) && TempZ == 1)*/) {
-if(WI[13][4][5].C_ptr){
-std::cout << "\nin 4 while routing to " <<WI[13][4][5].C_ptr->getName() << std::endl;
-    }
-    std::cout << "\nin 4 while routing to " << TempX << ", " << TempY << ", " << TempZ << std::endl;
-    //goto next;
-}
-if (((TempX) == 13 && (TempY == 5) && TempZ == 5)/* || ((TempX) == 11 && (TempY == 1) && TempZ == 14)||((TempX) == 9 && (TempY == 4) && TempZ == 1)
-|| ((TempX) == 12 && (TempY == 4) && TempZ == 1)*/) {
-    if(WI[13][5][5].C_ptr){
-std::cout << "\nin 5 while routing to " <<WI[13][5][5].C_ptr->getName() << std::endl;
-    }
-    std::cout << "\nin 5 while routing to " << TempX << ", " << TempY << ", " << TempZ << std::endl;
-    //goto next;
-}
                 if (ptr->length >= MAX_NUM_OF_WIRE + 1) {
                     C.setInsert(Connection::ConnectionResult(std::make_tuple(TempX, TempY - 1, TempZ),
                                                              D.CellLib.getCellPtr("BUF"), ptr->ori));
@@ -465,109 +427,14 @@ std::cout << "\nin 5 while routing to " <<WI[13][5][5].C_ptr->getName() << std::
     //         std::cout << "in while SUCCESS routing to "
     //                      <<std::get<0>(itt->coord)<<", "<<std::get<1>(itt->coord)<<", "<<std::get<2>(itt->coord)<<std::endl;
     //     }
-    
+    std::set<std::tuple<uint16_t, uint16_t, uint16_t>> IllegalPoints = C.checkRouteResult();
+    if(!IllegalPoints.empty()){
+        return ReRouteIllegal(C, IllegalPoints, Space, P_, D);
+    }
     updateUsedSpace(C, Space);
-
-    // debugging print
-    /*
-        for (int i = 0; i < std::get<0>(Space); i++) {
-            for (int j = 0; j < std::get<1>(Space); j++) {
-                for (int k = 0; k < std::get<2>(Space); k++) {
-                    if (j == 1)
-                        std::cout << UsedSpace[i][j][k] << " ";
-                }
-            }
-            std::cout << std::endl;
-        }
-    */
-    // C.Result = Result;
     return retFlag;
 }
-// bool Router::flatRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_t, uint16_t>& Space,
-//                        Router::Point***& P_) {
-//     // implement dijkstra
-//     Router::coord start;
-//     std::vector<Router::coord> end;
-//     std::tuple<uint16_t, uint16_t, uint16_t> startPin;
-//     // std::tuple<uint16_t, uint16_t, uint16_t> endPin;
 
-//     const std::vector<std::tuple<Component*, std::string, Connection::Parameters>> PortConnection_ =
-//         C.getPortConnection();
-
-//     // source
-//     auto SrcFacing = (std::get<0>(PortConnection_[0]))->getPinFacing(std::get<1>(PortConnection_[0]));
-//     startPin = (std::get<0>(PortConnection_[0]))->getPinLocation(std::get<1>(PortConnection_[0]));
-//     start = Router::updateSinglePortUsedSpace(startPin, SrcFacing);
-//     for (auto it = PortConnection_.begin() + 1; it != PortConnection_.end(); ++it) {
-//         auto temp = std::get<0>(*it)->getPinLocation(std::get<1>(*it));
-//         // endPin.push_back(temp);
-//         // temp = std::make_tuple(std::get<0>(temp),std::get<1>(temp),std::get<2>(temp) );
-//         auto endFace = (std::get<0>(*it))->getPinFacing(std::get<1>(*it));
-//         end.push_back(Router::updateSinglePortUsedSpace(temp, endFace));
-//     }
-//     std::vector<Router::coord> endTemp = end;
-//     std::priority_queue<Router::Point*, std::vector<Router::Point*>, Router::PointCompare> Q;
-//     P_[start.x][start.y][start.z].cost = 0;
-//     P_[start.x][start.y][start.z].inserted = 1;
-//     Q.push(&P_[start.x][start.y][start.z]);
-//     bool done = 0;
-
-//     while (!Q.empty()) {
-//         Router::Point* TempP = Q.top();
-//         Q.pop();
-//         TempP->visited = 1;
-//         for (auto it = endTemp.begin(); it != endTemp.end(); ++it) {
-//             if ((TempP->Loc.x == it->x) && (TempP->Loc.y == it->y) && (TempP->Loc.z == it->z)) {
-//                 // std::cout <<"Location: "<<std::get<0>(TempP->Loc)<<" "<<std::get<1>(TempP->Loc)<<"
-//                 // "<<std::get<2>(TempP->Loc)<<std::endl;
-//                 endTemp.erase(it);
-//                 break;
-//             }
-//         }
-//         if (endTemp.empty())
-//             break;
-//         if (TempP->Loc.x) {
-//             Router::checkUpdateGraph(TempP->Loc.x - 1, TempP->Loc.y, TempP->Loc.z, P_, Q, TempP, Space);
-//         }
-//         if (TempP->Loc.x < std::get<0>(Space) - 1) {
-//             Router::checkUpdateGraph(TempP->Loc.x + 1, TempP->Loc.y, TempP->Loc.z, P_, Q, TempP, Space);
-//         }
-//         if (TempP->Loc.z) {
-//             Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y, TempP->Loc.z - 1, P_, Q, TempP, Space);
-//         }
-//         if (TempP->Loc.z < std::get<2>(Space) - 1) {
-//             Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y, TempP->Loc.z + 1, P_, Q, TempP, Space);
-//         }
-//     }
-//     std::set<std::tuple<uint16_t, uint16_t, uint16_t>> Result;
-//     if (endTemp.empty()) {
-//         Point* ptr = NULL;
-//         for (auto it : end) {
-//             Result.insert(std::make_tuple(it.x, it.y - 1, it.z));
-//             ptr = P_[it.x][it.y][it.z].P;
-//             while (ptr != NULL) {
-//                 Result.insert(std::make_tuple(ptr->Loc.x, ptr->Loc.y - 1, ptr->Loc.z));
-//                 ptr = ptr->P;
-//             }
-//         }
-//     }
-//     updateUsedSpace(Result, Space);
-
-//     // debugging print
-//     /*
-//         for (int i = 0; i < std::get<0>(Space); i++) {
-//             for (int j = 0; j < std::get<1>(Space); j++) {
-//                 for (int k = 0; k < std::get<2>(Space); k++) {
-//                     if (j == 1)
-//                         std::cout << UsedSpace[i][j][k] << " ";
-//                 }
-//             }
-//             std::cout << std::endl;
-//         }
-//     */
-//     C.Result = Result;
-//     return true;
-// }
 void Router::updateUsedSpace(Connection& C,
                              std::tuple<uint16_t, uint16_t, uint16_t>& Space) {
     std::set<Connection::ConnectionResult, Connection::resultcomp>& Result = C.Result;
@@ -628,11 +495,51 @@ void Router::updateUsedSpace(Connection& C,
                 WI[entry_temp.x][entry_temp.y + 2][entry_temp.z + 1].C_ptr = &C;
             }
         }
-// if (((entry_temp.x) == 13 && (entry_temp.y == 4) && entry_temp.z == 5)/* || ((TempX) == 11 && (TempY == 1) && TempZ == 14)||((TempX) == 9 && (TempY == 4) && TempZ == 1)
-// || ((TempX) == 12 && (TempY == 4) && TempZ == 1)*/) {
-//     std::cout << "\n\n12 2 5::: " << UsedSpace[13][4][5] << std::endl;
-//     }
     }
+}
+bool Router::ReRouteIllegal(Connection& C, std::set<std::tuple<uint16_t, uint16_t, uint16_t>>& congestionPoints, std::tuple<uint16_t, uint16_t, uint16_t>& Space,Router::Point***& P_, Design& D){
+    std::string rollback_wire_name = C.getName();
+    std::cout << "Wire "<<rollback_wire_name<<" routing illegal: "<< std::endl;
+    for(auto it = congestionPoints.begin(); it!=congestionPoints.end(); ++it){
+        std::cout <<"    "<<std::get<0>(*it)<<", "<<std::get<1>(*it)<<", "<<std::get<2>(*it)<<std::endl;
+        if(test_times==2){test_times=0;
+        UsedSpace[std::get<0>(*it)][std::get<1>(*it)][std::get<2>(*it)] = 
+            (UsedSpace[std::get<0>(*it)][std::get<1>(*it)][std::get<2>(*it)]==3)?0:UsedSpace[std::get<0>(*it)][std::get<1>(*it)][std::get<2>(*it)];
+            UsedSpace[std::get<0>(*it)][std::get<1>(*it)+1][std::get<2>(*it)] = 3;
+        }else{
+            UsedSpace[std::get<0>(*it)][std::get<1>(*it)][std::get<2>(*it)] = (UsedSpace[std::get<0>(*it)][std::get<1>(*it)][std::get<2>(*it)]==1)?1:3;
+        }
+    }
+    //route congested wire again
+    for (int i = 0; i < std::get<0>(Space); i++) {
+        for (int j = 0; j < std::get<1>(Space); j++) {
+            for (int k = 0; k < std::get<2>(Space); k++) {
+                P_[i][j][k].cost = std::get<0>(Space) * std::get<1>(Space) * std::get<2>(Space);
+                P_[i][j][k].length = -1;
+                P_[i][j][k].ori = HDL2Redstone::Orientation::ZeroCW;
+                P_[i][j][k].P = NULL;
+                P_[i][j][k].visited = 0;
+                P_[i][j][k].inserted = 0;
+            }
+        }
+    }
+    C.Result.clear();
+    std::cout << "ReRouting for Illegal: " << rollback_wire_name << std::endl;
+    bool ReRouteFlag = RegularRoute(D, C, Space, P_);
+    for(auto it = congestionPoints.begin(); it!=congestionPoints.end(); ++it){
+        if(UsedSpace[std::get<0>(*it)][std::get<1>(*it)][std::get<2>(*it)]==3){
+            UsedSpace[std::get<0>(*it)][std::get<1>(*it)][std::get<2>(*it)] = 0;
+        }
+        if(UsedSpace[std::get<0>(*it)][std::get<1>(*it)+1][std::get<2>(*it)]==3){
+            UsedSpace[std::get<0>(*it)][std::get<1>(*it)+1][std::get<2>(*it)] = 0;
+        }
+    }
+    if(ReRouteFlag){
+        std::cout << "ReRouting for Illegal Success: " << rollback_wire_name<< std::endl;
+        return true;
+    }
+    std::cout << "ReRouting for Illegal Failed: " << rollback_wire_name<< std::endl;
+    return false;
 }
 bool Router::ReRouteStartRouting(coord congestionPoint, std::tuple<uint16_t, uint16_t, uint16_t>& Space,Router::Point***& P_, Design& D){
     auto C_ptr = WI[congestionPoint.x][congestionPoint.y][congestionPoint.z].C_ptr;
@@ -753,138 +660,39 @@ bool Router::ReRouteStartRouting(coord congestionPoint, std::tuple<uint16_t, uin
     std::cout << "ReRouting Failed: " << rollback_wire_name<< std::endl;
     return false;
 }
-bool Router::checkSingleRoute(const Design& D,
-                              const std::vector<std::tuple<uint16_t, uint16_t, uint16_t>> connection_points) {
-    auto& Components_ = D.getModuleNetlist().getComponents();
-    auto& Connections_ = D.getModuleNetlist().getConnections();
-    std::vector<std::pair<std::tuple<uint16_t, uint16_t, uint16_t>, std::tuple<uint16_t, uint16_t, uint16_t>>>
-        UsedComponentSpace;
-    std::vector<std::vector<std::tuple<uint16_t, uint16_t, uint16_t>>> UsedConnectionSpace;
-    for (auto const& i : Components_) {
-        UsedComponentSpace.push_back(i->getRange());
-    } // TO DO: move in design.route
-    for (auto const& j : Connections_) {
-        const std::vector<std::tuple<Component*, std::string, Connection::Parameters>> PortConnection_ =
-            j->getPortConnection();
-        for (auto const& k : PortConnection_) {
-            if (!(std::get<2>(k).getParameters().empty())) {
-                UsedConnectionSpace.push_back(std::get<2>(k).getParameters());
-            }
-        }
-    } // TD DO: move in design.route
-    for (auto const& l0 : connection_points) {
-        for (auto const& l1 : UsedComponentSpace) {
-            if ((std::get<0>(l0) > std::get<0>(l1.second) + 1) || (std::get<0>(l0) < std::get<0>(l1.first) - 1) ||
-                (std::get<1>(l0) > std::get<1>(l1.second) + 1) || (std::get<1>(l0) < std::get<1>(l1.first) - 1) ||
-                (std::get<2>(l0) > std::get<2>(l1.second) + 1) || (std::get<2>(l0) < std::get<2>(l1.first) - 1))
-                return false;
-        }
-        for (auto const& l2 : UsedConnectionSpace) {
-            for (auto const& l3 : l2) {
-                if ((l0 == std::make_tuple(std::get<0>(l3) - 1, std::get<1>(l3), std::get<2>(l3))) ||
-                    (l0 == std::make_tuple(std::get<0>(l3) + 1, std::get<1>(l3), std::get<2>(l3))) ||
-                    (l0 == std::make_tuple(std::get<0>(l3), std::get<1>(l3) + 1, std::get<2>(l3))) ||
-                    (l0 == std::make_tuple(std::get<0>(l3), std::get<1>(l3) - 1, std::get<2>(l3))) ||
-                    (l0 == std::make_tuple(std::get<0>(l3), std::get<1>(l3), std::get<2>(l3) + 1)) ||
-                    (l0 == std::make_tuple(std::get<0>(l3), std::get<1>(l3), std::get<2>(l3) - 1)) ||
-                    (l0 == std::make_tuple(std::get<0>(l3), std::get<1>(l3), std::get<2>(l3))))
-                    return false;
-            }
-        }
-    }
-    return true;
-}
 
-std::vector<std::tuple<uint16_t, uint16_t, uint16_t>>
-Router::flatRouteDirectLine(std::tuple<uint16_t, uint16_t, uint16_t> start,
-                            std::tuple<uint16_t, uint16_t, uint16_t> end) {
-    // Note: Here implement with tuple<x,z,y>
-    std::vector<std::tuple<uint16_t, uint16_t, uint16_t>> result;
-    // result.push_back(start);
-    uint16_t x_distance = abs(std::get<0>(start) - std::get<0>(end)) + 1;
-    uint16_t z_distance = abs(std::get<1>(start) - std::get<1>(end)) + 1;
-    uint16_t x_dir;
-    uint16_t z_dir;
-    if (std::get<0>(start) - std::get<0>(end) > 0) {
-        x_dir = -1;
-    } else if (std::get<0>(start) - std::get<0>(end) < 0) {
-        x_dir = 1;
-    } else {
-        x_dir = 0;
-    }
+/*std::set<std::tuple<uint16_t, uint16_t, uint16_t>> checkRouteResult () {
+    std::map<std::tuple<uint16_t, uint16_t, uint16_t>, uint16_t> ResultsMap;
+    std::set<std::tuple<uint16_t, uint16_t, uint16_t>> IllegalPoints;
+    for (const auto R : Result) {
+        const auto it = ResultsMap.find(R.coord);
+    if (it != ResultsMap.end()) {
+        switch (it->second) {
+            case 0:
+            IllegalPoints.insert({std::get<0>(R.coord), std::get<1>(R.coord)-1, std::get<2>(R.coord)});
+            break;
+        case 1,2,3:
+            IllegalPoints.insert({std::get<0>(R.coord), std::get<1>(R.coord), std::get<2>(R.coord)});
+            break;
+        case 4:
+            IllegalPoints.insert({std::get<0>(R.coord), std::get<1>(R.coord)+1, std::get<2>(R.coord)});
+            break;
+        default:
+            std::cout<<"wrong"<<std::endl;
+            break;
 
-    if (std::get<1>(start) - std::get<1>(end) > 0) {
-        z_dir = -1;
-    } else if (std::get<1>(start) - std::get<1>(end) < 0) {
-        z_dir = 1;
-    } else {
-        z_dir = 0;
-    }
-
-    if (x_dir == 0) {
-        for (uint16_t i = 0; i < z_distance; i++) {
-            result.push_back(std::make_tuple(std::get<0>(start), std::get<1>(start) + i, std::get<2>(start)));
-        }
-        return result;
-    }
-    if (z_dir == 0) {
-        for (uint16_t i = 0; i < x_distance; i++) {
-            result.push_back(std::make_tuple(std::get<0>(start) + i, std::get<1>(start), std::get<2>(start)));
-        }
-        return result;
-    }
-
-    uint16_t step;
-    uint16_t remainder;
-    uint16_t x_repair = 1;
-    uint16_t z_repair = 0;
-    if (x_distance >= z_distance) {
-        remainder = x_distance % z_distance;
-        step = x_distance / z_distance;
-
-        if (remainder > 0) {
-            remainder = x_distance % (z_distance - 1);
-            step = x_distance / (z_distance - 1);
-        } // TODO: need to re-update
-
-        for (uint16_t i = 0; i < z_distance - 1; i++) {
-            for (uint16_t j = 0; j < step; j++) {
-                result.push_back(std::make_tuple(std::get<0>(start) + x_dir * (j + step * i),
-                                                 std::get<1>(start) + z_dir * i, std::get<2>(start)));
-            }
-            result.push_back(std::make_tuple(std::get<0>(start) + x_dir * ((i + 1) * step - 1 + x_repair),
-                                             std::get<1>(start) + z_dir * (i + z_repair), std::get<2>(start)));
-            uint16_t temp_repair = x_repair;
-            x_repair = z_repair;
-            z_repair = temp_repair;
-        }
-        for (uint16_t k = 0; k < remainder; k++) {
-            result.push_back(std::make_tuple(std::get<0>(start) + x_dir * (k + (z_distance - 1) * step),
-                                             std::get<1>(end), std::get<2>(start)));
         }
     } else {
-        remainder = z_distance % x_distance;
-        step = z_distance / x_distance;
-        if (remainder > 0) {
-            remainder = z_distance % (x_distance - 1);
-            step = z_distance / (x_distance - 1);
-        } // TODO: need to re-update
-        for (uint16_t i = 0; i < x_distance - 1; i++) {
-            for (uint16_t j = 0; j < step; j++) {
-                result.push_back(std::make_tuple(std::get<0>(start) + x_dir * i,
-                                                 std::get<1>(start) + z_dir * (j + step * i), std::get<2>(start)));
-            }
-            result.push_back(std::make_tuple(std::get<0>(start) + x_dir * (i + x_repair),
-                                             std::get<1>(start) + z_dir * ((i + 1) * step - 1 + z_repair),
-                                             std::get<2>(start)));
-            uint16_t temp_repair = x_repair;
-            x_repair = z_repair;
-            z_repair = temp_repair;
-        }
-        for (uint16_t k = 0; k < remainder; k++) {
-            result.push_back(std::make_tuple(
-                std::get<0>(end), std::get<1>(start) + z_dir * (k + (x_distance - 1) * step), std::get<2>(start)));
-        }
+        uint16_t x = std::get<0>(R.coord);
+        uint16_t y = std::get<1>(R.coord);
+        uint16_t z = std::get<2>(R.coord);
+        ResultsMap.insert({x,y+2,z}, 0);
+        ResultsMap.insert({x,y+1,z}, 1);
+            ResultsMap.insert({x,y,z}, 2);
+        ResultsMap.insert({x,y-1,z}, 3);
+        ResultsMap.insert({x,y-2,z}, 4);
+
     }
-    return result;
-}
+    return IllegalPoints;
+    }
+}*/

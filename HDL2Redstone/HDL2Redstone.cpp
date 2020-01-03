@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
                 std::cout << "Place/Route failed!!!" << std::endl;
                 return 1;
             }
-            std::cout << D;
+            //std::cout << D;
             D.exportDesign().exportSchematic("design.schem");
         } else {
             throw Exception("Incorrect number of arguments provided.");
