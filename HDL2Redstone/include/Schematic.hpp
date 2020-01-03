@@ -25,7 +25,8 @@ class Schematic {
     void setHeight(uint16_t Height_) { Height = Height_; }
     void setLength(uint16_t Length_) { Length = Length_; }
 
-    void insertSubSchematic(const Placement& P_, const Schematic& Schem_, const std::string& Type_, const int32_t& RouterSet_);
+    void insertSubSchematic(const Placement& P_, const Schematic& Schem_, const std::string& Type_,
+                            const int32_t& RouterSet_);
     void exportSchematic(const std::string& File_) const;
 
   private:

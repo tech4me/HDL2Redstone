@@ -40,8 +40,8 @@ class Router {
     bool checkPointAvaliable(const Design& D, const std::tuple<int16_t, int16_t, int16_t> location);
     std::vector<std::tuple<uint16_t, uint16_t, uint16_t>>
     flatRouteDirectLine(std::tuple<uint16_t, uint16_t, uint16_t> start, std::tuple<uint16_t, uint16_t, uint16_t> end);
-    void updateUsedSpace(std::set<Connection::ConnectionResult,Connection::resultcomp>& Result,
-                             std::tuple<uint16_t, uint16_t, uint16_t>& Space);
+    void updateUsedSpace(std::set<Connection::ConnectionResult, Connection::resultcomp>& Result,
+                         std::tuple<uint16_t, uint16_t, uint16_t>& Space);
     coord updateSinglePortUsedSpace(std::tuple<uint16_t, uint16_t, uint16_t> Loc, Facing Fac);
     bool*** UsedSpace;
 };

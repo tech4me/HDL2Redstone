@@ -21,23 +21,24 @@ class Connection {
       private:
         std::vector<std::tuple<uint16_t, uint16_t, uint16_t>> connection_points;
     };
-    class ConnectionResult{
+    class ConnectionResult {
       public:
-      ConnectionResult(std::tuple<uint16_t, uint16_t, uint16_t> coord_, const HDL2Redstone::Cell * CellPtr_,HDL2Redstone::Orientation Ori_){
-        coord = coord_;
-        CellPtr = CellPtr_;
-        Ori = Ori_;
-      };
-      std::tuple<uint16_t, uint16_t, uint16_t> coord;
-      const HDL2Redstone::Cell * CellPtr;
-      HDL2Redstone::Orientation Ori;
+        ConnectionResult(std::tuple<uint16_t, uint16_t, uint16_t> coord_, const HDL2Redstone::Cell* CellPtr_,
+                         HDL2Redstone::Orientation Ori_) {
+            coord = coord_;
+            CellPtr = CellPtr_;
+            Ori = Ori_;
+        };
+        std::tuple<uint16_t, uint16_t, uint16_t> coord;
+        const HDL2Redstone::Cell* CellPtr;
+        HDL2Redstone::Orientation Ori;
     };
     struct resultcomp {
-      bool operator() (const ConnectionResult& lhs, 
-        const ConnectionResult& rhs) const
-      {return lhs.coord<rhs.coord;} //TODO: check repeater is higher level than wire, cant be replaced
+        bool operator()(const ConnectionResult& lhs, const ConnectionResult& rhs) const {
+            return lhs.coord < rhs.coord;
+        } // TODO: check repeater is higher level than wire, cant be replaced
     };
-    std::set<ConnectionResult,resultcomp> Result;
+    std::set<ConnectionResult, resultcomp> Result;
     Connection(const std::string& Name_, Component* ComponentPtr_, const std::string& PortName_);
     bool getRouted() const { return Routed; }
     void setRouted(bool Routed_) { Routed = Routed_; }
@@ -45,6 +46,7 @@ class Connection {
     const std::vector<std::tuple<Component*, std::string, Connection::Parameters>>& getPortConnection() const;
     // add component port to sink
     void addSink(Component* ComponentPtr_, const std::string& PortName_);
+    std::set<std::tuple<uint16_t, uint16_t, uint16_t>> checkRouteResult();
 
   private:
     bool Routed;

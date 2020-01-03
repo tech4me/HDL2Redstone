@@ -38,7 +38,8 @@ static constexpr auto SCHEM_BIOME_DATA = "BiomeData";
 
 Schematic::Schematic(uint16_t Width_, uint16_t Height_, uint16_t Length_)
     : Width(Width_), Height(Height_), Length(Length_), Offset{0, 0, 0},
-      PaletteMax(1), InvertPalette{{0, "minecraft:air"}}, BlockData(Width_ * Height_ * Length_, 0), BlockOrigin(Width_ * Height_ * Length_, {"air", -1}) {}
+      PaletteMax(1), InvertPalette{{0, "minecraft:air"}}, BlockData(Width_ * Height_ * Length_, 0),
+      BlockOrigin(Width_ * Height_ * Length_, {"air", -1}) {}
 
 Schematic::Schematic(const std::string& File_) {
     std::ifstream FS(File_, std::ios::binary);
@@ -121,9 +122,10 @@ Schematic::Schematic(const std::string& File_) {
     }
 }
 
-//Type_ is schematic cell type
-//RouterSet_ is whether the block is set by Router or Placer, for debug
-void Schematic::insertSubSchematic(const Placement& P_, const Schematic& Schem_, const std::string& Type_, const int32_t& RouterSet_) {
+// Type_ is schematic cell type
+// RouterSet_ is whether the block is set by Router or Placer, for debug
+void Schematic::insertSubSchematic(const Placement& P_, const Schematic& Schem_, const std::string& Type_,
+                                   const int32_t& RouterSet_) {
     // TODO: Add schematic out-of-bound checks here
 
     // 1. Merge sub schematic palette into schematic palette, update palette, create conversion map
@@ -179,21 +181,21 @@ void Schematic::insertSubSchematic(const Placement& P_, const Schematic& Schem_,
         int32_t Z = (i % (Schem_.Width * Schem_.Length)) / Schem_.Width;
         int32_t Temp;
         switch (P_.Orient) {
-            case Orientation::OneCW:
+        case Orientation::OneCW:
             Temp = X;
             X = Z;
             Z = -Temp;
             break;
-            case Orientation::TwoCW:
+        case Orientation::TwoCW:
             X = -X;
             Z = -Z;
             break;
-            case Orientation::ThreeCW:
+        case Orientation::ThreeCW:
             Temp = X;
             X = -Z;
             Z = Temp;
             break;
-            default:
+        default:
             break;
         }
         X += P_.X;
@@ -207,13 +209,13 @@ void Schematic::insertSubSchematic(const Placement& P_, const Schematic& Schem_,
         int32_t Index = X + (Y * Width * Length) + (Z * Width);
         // Check overlap (non-air block)
         if (BlockData.at(Index)) {
-	    std::string Curr_src = RouterSet_ ? "Router" : "Placer";
-	    std::string Set_by = std::get<1>(BlockOrigin.at(Index)) ? "Router" : "Placer";
-	    std::string Cell_type = std::get<0>(BlockOrigin.at(Index));
-            throw Exception("Block:" + Schem_.InvertPalette.at(Schem_.BlockData.at(i)) + " of cell " + Type_ + " set by " + Curr_src + " cannot be placed at X:" + std::to_string(X) +
+            std::string Curr_src = RouterSet_ ? "Router" : "Placer";
+            std::string Set_by = std::get<1>(BlockOrigin.at(Index)) ? "Router" : "Placer";
+            std::string Cell_type = std::get<0>(BlockOrigin.at(Index));
+            throw Exception("Block:" + Schem_.InvertPalette.at(Schem_.BlockData.at(i)) + " of cell " + Type_ +
+                            " set by " + Curr_src + " cannot be placed at X:" + std::to_string(X) +
                             " Y:" + std::to_string(Y) + " Z:" + std::to_string(Z) +
-                            " ; location already occupied by cell " + Cell_type + " set by "
-			    + Set_by + ".");
+                            " ; location already occupied by cell " + Cell_type + " set by " + Set_by + ".");
         }
         auto It = ConversionMap.find(Schem_.BlockData.at(i));
         if (It != ConversionMap.end()) {
@@ -221,8 +223,8 @@ void Schematic::insertSubSchematic(const Placement& P_, const Schematic& Schem_,
         } else {
             BlockData.at(Index) = Schem_.BlockData.at(i);
         }
-	// for debug
-	BlockOrigin.at(Index) = std::make_tuple(Type_, RouterSet_);
+        // for debug
+        BlockOrigin.at(Index) = std::make_tuple(Type_, RouterSet_);
     }
     // TODO: not checked against real block entity info!
     for (int32_t i = 0; i < Schem_.BlockEntityPositions.size(); ++i) {
