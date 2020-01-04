@@ -155,6 +155,13 @@ void Router::route(Design& D) {
             }
         }
     }
+    /*TODO
+    check unablerouting is 1 or 2, if is 1 -> reroute, 2 -> never reroute
+    to reroute everything,
+    1. reconstruct router
+    2. keep all wires results, setRouted(0)
+    3. after routing this wire, check every wire can keep same result or reroute
+    */
     for (auto& it : Connections_) {
         it->setUnableRouting(0);
         for (int i = 0; i < std::get<0>(Space); i++) {
@@ -416,6 +423,11 @@ bool Router::RegularRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_
             std::cout << "FAIL routing from " << start.x << ", " << start.y << ", " << start.z << " to " << it.x << ", "
                       << it.y << ", " << it.z << std::endl;
             retFlag = false;
+            if(C.getUnableRouting()==0){
+                C.setUnableRouting(1);
+            }else{
+                C.setUnableRouting(2);
+            }
         }
     }
 
@@ -902,6 +914,11 @@ bool Router::HelperReRouteforIllegalRegularRoute(Design& D, Connection& C, std::
             std::cout << "FAIL routing from " << start.x << ", " << start.y << ", " << start.z << " to " << it.x << ", "
                       << it.y << ", " << it.z << std::endl;
             retFlag = false;
+            if(C.getUnableRouting()==0){
+                C.setUnableRouting(1);
+            }else{
+                C.setUnableRouting(2);
+            }
         }
     }
 
