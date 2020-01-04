@@ -58,13 +58,16 @@ class Connection {
     };
     bool getRouted() const { return Routed; }
     void setRouted(bool Routed_) { Routed = Routed_; }
+    int  getUnableRouting() const { return Unable_Routing; }
+    void setUnableRouting(int Unable_Routing_) { Unable_Routing = Unable_Routing_; }
     const std::string& getName() const;
     const std::vector<std::tuple<Component*, std::string, Connection::Parameters>>& getPortConnection() const;
     // add component port to sink
     void addSink(Component* ComponentPtr_, const std::string& PortName_);
-    std::set<std::tuple<uint16_t, uint16_t, uint16_t>> checkRouteResult();
+    std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t>> checkRouteResult();
 
   private:
+    int Unable_Routing;
     bool Routed;
     const std::string Name;
     std::vector<std::tuple<Component*, std::string, Connection::Parameters>> PortConnection;

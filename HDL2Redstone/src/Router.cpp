@@ -156,6 +156,7 @@ void Router::route(Design& D) {
         }
     }
     for (auto& it : Connections_) {
+        it->setUnableRouting(0);
         for (int i = 0; i < std::get<0>(Space); i++) {
             for (int j = 0; j < std::get<1>(Space); j++) {
                 for (int k = 0; k < std::get<2>(Space); k++) {
@@ -279,11 +280,9 @@ bool Router::RegularRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_
         std::cout << "FAIL routing from " << start.x << ", " << start.y << ", " << start.z
                   << " because of other wires routing" << std::endl;
         std::cout << "congestion point is " << congestionP.x << ", " << congestionP.y << ", " << congestionP.z << std::endl;
-        //if(!(congestionP.x==12 && congestionP.y==1 && congestionP.z==1)){
         if(!ReRouteStartRouting(congestionP, Space, P_, D)){
             return false;
         }
-        //}
         //call update again TODO not good
         start = Router::updateSinglePortUsedSpace(startPin, SrcFacing,congestionP);
     }
@@ -295,13 +294,13 @@ bool Router::RegularRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_
             temp_result.z == std::get<2>(temp)) {
             std::cout << "FAIL routing to " << temp_result.x << ", " << temp_result.y << ", " << temp_result.z
                       << " because of other wires routing" << std::endl;
-            // if(!ReRouteStartRouting(congestionP, Space, P_, D)){
-                 retFlag = false;
-            //     temp_result = Router::updateSinglePortUsedSpace(temp, endFace,congestionP);
-            // }else{
-            //     temp_result = Router::updateSinglePortUsedSpace(temp, endFace,congestionP);
-            //     end.push_back(temp_result); 
-            // }
+            if(!ReRouteStartRouting(congestionP, Space, P_, D)){
+                retFlag = false;
+                temp_result = Router::updateSinglePortUsedSpace(temp, endFace,congestionP);
+            }else{
+                temp_result = Router::updateSinglePortUsedSpace(temp, endFace,congestionP);
+                end.push_back(temp_result); 
+            }
         } else {
             end.push_back(temp_result);
         }
@@ -427,7 +426,7 @@ bool Router::RegularRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_
     //         std::cout << "in while SUCCESS routing to "
     //                      <<std::get<0>(itt->coord)<<", "<<std::get<1>(itt->coord)<<", "<<std::get<2>(itt->coord)<<std::endl;
     //     }
-    std::set<std::tuple<uint16_t, uint16_t, uint16_t>> IllegalPoints = C.checkRouteResult();
+    auto IllegalPoints = C.checkRouteResult();
     if(!IllegalPoints.empty()){
         return ReRouteIllegal(C, IllegalPoints, Space, P_, D);
     }
@@ -497,50 +496,84 @@ void Router::updateUsedSpace(Connection& C,
         }
     }
 }
-bool Router::ReRouteIllegal(Connection& C, std::set<std::tuple<uint16_t, uint16_t, uint16_t>>& congestionPoints, std::tuple<uint16_t, uint16_t, uint16_t>& Space,Router::Point***& P_, Design& D){
+bool Router::HelperReRouteIllegal(Connection& C, std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t>>& local_congestion_points, std::tuple<uint16_t, uint16_t, uint16_t>& Space,Router::Point***& P_, Design& D){
     std::string rollback_wire_name = C.getName();
-    std::cout << "Wire "<<rollback_wire_name<<" routing illegal: "<< std::endl;
-    for(auto it = congestionPoints.begin(); it!=congestionPoints.end(); ++it){
-        std::cout <<"    "<<std::get<0>(*it)<<", "<<std::get<1>(*it)<<", "<<std::get<2>(*it)<<std::endl;
-        if(test_times==2){test_times=0;
-        UsedSpace[std::get<0>(*it)][std::get<1>(*it)][std::get<2>(*it)] = 
-            (UsedSpace[std::get<0>(*it)][std::get<1>(*it)][std::get<2>(*it)]==3)?0:UsedSpace[std::get<0>(*it)][std::get<1>(*it)][std::get<2>(*it)];
-            UsedSpace[std::get<0>(*it)][std::get<1>(*it)+1][std::get<2>(*it)] = 3;
-        }else{
-            UsedSpace[std::get<0>(*it)][std::get<1>(*it)][std::get<2>(*it)] = (UsedSpace[std::get<0>(*it)][std::get<1>(*it)][std::get<2>(*it)]==1)?1:3;
-        }
-    }
-    //route congested wire again
-    for (int i = 0; i < std::get<0>(Space); i++) {
-        for (int j = 0; j < std::get<1>(Space); j++) {
-            for (int k = 0; k < std::get<2>(Space); k++) {
-                P_[i][j][k].cost = std::get<0>(Space) * std::get<1>(Space) * std::get<2>(Space);
-                P_[i][j][k].length = -1;
-                P_[i][j][k].ori = HDL2Redstone::Orientation::ZeroCW;
-                P_[i][j][k].P = NULL;
-                P_[i][j][k].visited = 0;
-                P_[i][j][k].inserted = 0;
+    bool break_loop = false;
+    do{
+        for(auto it = local_congestion_points.begin(); it!=local_congestion_points.end(); ++it){
+            if(UsedSpace[std::get<0>(*it)][std::get<1>(*it)][std::get<2>(*it)]!=1){
+                UsedSpace[std::get<0>(*it)][std::get<1>(*it)][std::get<2>(*it)] = 3;
             }
         }
-    }
-    C.Result.clear();
-    std::cout << "ReRouting for Illegal: " << rollback_wire_name << std::endl;
-    bool ReRouteFlag = RegularRoute(D, C, Space, P_);
-    for(auto it = congestionPoints.begin(); it!=congestionPoints.end(); ++it){
-        if(UsedSpace[std::get<0>(*it)][std::get<1>(*it)][std::get<2>(*it)]==3){
-            UsedSpace[std::get<0>(*it)][std::get<1>(*it)][std::get<2>(*it)] = 0;
+        //route congested wire again
+        for (int i = 0; i < std::get<0>(Space); i++) {
+            for (int j = 0; j < std::get<1>(Space); j++) {
+                for (int k = 0; k < std::get<2>(Space); k++) {
+                    P_[i][j][k].cost = std::get<0>(Space) * std::get<1>(Space) * std::get<2>(Space);
+                    P_[i][j][k].length = -1;
+                    P_[i][j][k].ori = HDL2Redstone::Orientation::ZeroCW;
+                    P_[i][j][k].P = NULL;
+                    P_[i][j][k].visited = 0;
+                    P_[i][j][k].inserted = 0;
+                }
+            }
         }
-        if(UsedSpace[std::get<0>(*it)][std::get<1>(*it)+1][std::get<2>(*it)]==3){
-            UsedSpace[std::get<0>(*it)][std::get<1>(*it)+1][std::get<2>(*it)] = 0;
+        C.Result.clear();
+        std::cout << "ReRouting for Illegal: " << rollback_wire_name << std::endl;
+        std::set<std::tuple<uint16_t, uint16_t, uint16_t>> RetIllegalPoints;
+        bool ReRouteFlag = HelperReRouteforIllegalRegularRoute(D, C, Space, P_, RetIllegalPoints);
+        for(auto it = local_congestion_points.begin(); it!=local_congestion_points.end(); ++it){
+            if(UsedSpace[std::get<0>(*it)][std::get<1>(*it)][std::get<2>(*it)]==3){
+                UsedSpace[std::get<0>(*it)][std::get<1>(*it)][std::get<2>(*it)] = 0;
+            }
         }
-    }
-    if(ReRouteFlag){
-        std::cout << "ReRouting for Illegal Success: " << rollback_wire_name<< std::endl;
-        return true;
-    }
-    std::cout << "ReRouting for Illegal Failed: " << rollback_wire_name<< std::endl;
+        if(ReRouteFlag){
+            std::cout << "ReRouting for Illegal Success: " << rollback_wire_name<< std::endl;
+            return true;
+        }else{
+            if(RetIllegalPoints.empty()){
+                std::cout << "ReRouting for Illegal Failed: " << rollback_wire_name<< std::endl;     
+                return false;
+            }
+            bool temp_reroute_flag = false;
+            std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t>> local_congestion_points_temp;
+	        for (auto nIterator = local_congestion_points.begin(); nIterator != local_congestion_points.end(); nIterator++)
+	        {
+                for (auto mIterator = RetIllegalPoints.begin(); mIterator != RetIllegalPoints.end(); mIterator++)
+	            {
+	        	    if((std::get<0>(*nIterator)==std::get<0>(*mIterator))&&(std::get<1>(*nIterator)==std::get<1>(*mIterator))&&(std::get<2>(*nIterator)==std::get<2>(*mIterator)) ){
+                        if(std::get<3>(*nIterator)==1){
+                            std::cout << "ReRouting for Illegal Failed: " << rollback_wire_name<<", Still Trying ..."<< std::endl;
+                            return false;
+                        }
+                        //std::get<3>(*nIterator) = 1;
+                        //std::get<1>(*nIterator)-= (std::get<3>(*nIterator)+1);
+                        local_congestion_points_temp.insert(std::make_tuple(std::get<0>(*nIterator),std::get<1>(*nIterator),
+                            std::get<2>(*nIterator) - (std::get<3>(*nIterator)+1), 1) );
+                        temp_reroute_flag = true;
+                    }else{
+                        local_congestion_points_temp.insert(*nIterator);
+                    }
+                }
+            }
+            local_congestion_points = local_congestion_points_temp;
+            std::cout << "ReRouting for Illegal Failed: " << rollback_wire_name<<", Still Trying ..."<< std::endl;
+            break_loop = !temp_reroute_flag;
+        }
+    }while(!break_loop);
     return false;
 }
+bool Router::ReRouteIllegal(Connection& C, std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t>>& congestionPoints, std::tuple<uint16_t, uint16_t, uint16_t>& Space,Router::Point***& P_, Design& D){   
+    std::string rollback_wire_name = C.getName();
+    std::cout << "Wire "<<rollback_wire_name<<" routing illegal: "<< std::endl;
+    std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t>> local_congestion_points;
+    for(auto it = congestionPoints.begin(); it!=congestionPoints.end(); ++it){
+        std::cout <<"    "<<std::get<0>(*it)<<", "<<std::get<1>(*it)<<", "<<std::get<2>(*it)<<std::endl;
+        local_congestion_points.insert(std::make_tuple(std::get<0>(*it),std::get<1>(*it)+std::get<3>(*it)+1,std::get<2>(*it),0));
+    }
+    return HelperReRouteIllegal(C, local_congestion_points, Space, P_, D);
+}
+
 bool Router::ReRouteStartRouting(coord congestionPoint, std::tuple<uint16_t, uint16_t, uint16_t>& Space,Router::Point***& P_, Design& D){
     auto C_ptr = WI[congestionPoint.x][congestionPoint.y][congestionPoint.z].C_ptr;
     if(!C_ptr){
@@ -696,3 +729,193 @@ bool Router::ReRouteStartRouting(coord congestionPoint, std::tuple<uint16_t, uin
     return IllegalPoints;
     }
 }*/
+bool Router::HelperReRouteforIllegalRegularRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_t, uint16_t>& Space,
+                          Router::Point***& P_, std::set<std::tuple<uint16_t, uint16_t, uint16_t>>& RetIllegalPoints) {
+    bool retFlag=true;
+    // implement dijkstra
+    Router::coord start;
+    Router::coord congestionP;
+    congestionP.x=-1;
+    congestionP.y=-1;
+    congestionP.z=-1;
+    std::vector<Router::coord> end;
+    std::tuple<uint16_t, uint16_t, uint16_t> startPin;
+    // std::tuple<uint16_t, uint16_t, uint16_t> endPin;
+
+    const std::vector<std::tuple<Component*, std::string, Connection::Parameters>> PortConnection_ =
+        C.getPortConnection();
+
+    // source
+    auto SrcFacing = (std::get<0>(PortConnection_[0]))->getPinFacing(std::get<1>(PortConnection_[0]));
+    startPin = (std::get<0>(PortConnection_[0]))->getPinLocation(std::get<1>(PortConnection_[0]));
+    start = Router::updateSinglePortUsedSpace(startPin, SrcFacing,congestionP);
+    if (start.x == std::get<0>(startPin) && start.y == std::get<1>(startPin) && start.z == std::get<2>(startPin)) {
+        std::cout << "FAIL routing from " << start.x << ", " << start.y << ", " << start.z
+                  << " because of other wires routing" << std::endl;
+        std::cout << "congestion point is " << congestionP.x << ", " << congestionP.y << ", " << congestionP.z << std::endl;
+        if(UsedSpace[congestionP.x][congestionP.y][congestionP.z]==3){//Here to check the congestion point is set as non-reachable, it should fail
+            RetIllegalPoints.insert(startPin);
+            return false;
+        }else{
+            if(!ReRouteStartRouting(congestionP, Space, P_, D)){
+                return false;
+            }
+        }
+        //call update again TODO not good
+        start = Router::updateSinglePortUsedSpace(startPin, SrcFacing,congestionP);
+    }
+    //below are end points
+    bool RetforCongestionFlag = false;
+    for (auto it = PortConnection_.begin() + 1; it != PortConnection_.end(); ++it) {
+        auto temp = std::get<0>(*it)->getPinLocation(std::get<1>(*it));
+        auto endFace = (std::get<0>(*it))->getPinFacing(std::get<1>(*it));
+        auto temp_result = Router::updateSinglePortUsedSpace(temp, endFace,congestionP);
+        if (temp_result.x == std::get<0>(temp) && temp_result.y == std::get<1>(temp) &&
+            temp_result.z == std::get<2>(temp)) {
+            std::cout << "FAIL routing to " << temp_result.x << ", " << temp_result.y << ", " << temp_result.z
+                      << " because of other wires routing" << std::endl;
+            if(UsedSpace[temp_result.x][temp_result.y][temp_result.z]==3){//Here to check the congestion point is set as non-reachable, it should fail
+                RetIllegalPoints.insert(temp);
+                RetforCongestionFlag = true;
+            }
+            if(!ReRouteStartRouting(congestionP, Space, P_, D)){
+                retFlag = false;
+                temp_result = Router::updateSinglePortUsedSpace(temp, endFace,congestionP);
+            }else{
+                temp_result = Router::updateSinglePortUsedSpace(temp, endFace,congestionP);
+                end.push_back(temp_result); 
+            }
+        } else {
+            end.push_back(temp_result);
+        }
+    }
+    if(RetforCongestionFlag){return false;}
+    
+    std::vector<Router::coord> endTemp = end;
+    std::priority_queue<Router::Point*, std::vector<Router::Point*>, Router::PointCompare> Q;
+    P_[start.x][start.y][start.z].cost = 0;
+    P_[start.x][start.y][start.z].length = 1;
+    P_[start.x][start.y][start.z].inserted = 1;
+    Q.push(&P_[start.x][start.y][start.z]);
+    bool done = 0;
+
+    while (!Q.empty()) {
+        Router::Point* TempP = Q.top();
+        Q.pop();
+        TempP->visited = 1;
+        for (auto it = endTemp.begin(); it != endTemp.end(); ++it) {
+            if ((TempP->Loc.x == it->x) && (TempP->Loc.y == it->y) && (TempP->Loc.z == it->z)) {
+                // std::cout <<"Location: "<<std::get<0>(TempP->Loc)<<" "<<std::get<1>(TempP->Loc)<<"
+                // "<<std::get<2>(TempP->Loc)<<std::endl;
+                endTemp.erase(it);
+                break;
+            }
+        }
+        if (endTemp.empty())
+            break;
+
+        if (TempP->Loc.x && (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::OneCW) &&
+            (TempP->Loc.y) % 2) {
+            Router::checkUpdateGraph(TempP->Loc.x - 1, TempP->Loc.y, TempP->Loc.z, P_, Q, TempP, Space);
+        }
+        if (TempP->Loc.x < std::get<0>(Space) - 1 &&
+            (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::ThreeCW) &&
+            (TempP->Loc.y) % 2) {
+            Router::checkUpdateGraph(TempP->Loc.x + 1, TempP->Loc.y, TempP->Loc.z, P_, Q, TempP, Space);
+        }
+        if (TempP->Loc.z && (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::TwoCW) &&
+            (TempP->Loc.y) % 2) {
+            Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y, TempP->Loc.z - 1, P_, Q, TempP, Space);
+        }
+        if (TempP->Loc.z < std::get<2>(Space) - 1 &&
+            (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::ZeroCW) &&
+            (TempP->Loc.y) % 2) {
+            Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y, TempP->Loc.z + 1, P_, Q, TempP, Space);
+        }
+
+        if (TempP->Loc.x && (TempP->Loc.y > 1) && (TempP->length <= MAX_NUM_OF_WIRE)) {
+            Router::checkUpdateGraph(TempP->Loc.x - 1, TempP->Loc.y - 1, TempP->Loc.z, P_, Q, TempP, Space);
+        }
+        if (TempP->Loc.x && (TempP->Loc.y < std::get<1>(Space) - 1) &&
+            (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::OneCW)) {
+            Router::checkUpdateGraph(TempP->Loc.x - 1, TempP->Loc.y + 1, TempP->Loc.z, P_, Q, TempP, Space);
+        }
+
+        if ((TempP->Loc.x < std::get<0>(Space) - 1) && (TempP->Loc.y > 1) && (TempP->length <= MAX_NUM_OF_WIRE)) {
+            Router::checkUpdateGraph(TempP->Loc.x + 1, TempP->Loc.y - 1, TempP->Loc.z, P_, Q, TempP, Space);
+        }
+        if ((TempP->Loc.x < std::get<0>(Space) - 1) && (TempP->Loc.y < std::get<1>(Space) - 1) &&
+            (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::ThreeCW)) {
+            Router::checkUpdateGraph(TempP->Loc.x + 1, TempP->Loc.y + 1, TempP->Loc.z, P_, Q, TempP, Space);
+        }
+        if (TempP->Loc.z && (TempP->Loc.y > 1) && (TempP->length <= MAX_NUM_OF_WIRE)) {
+            Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y - 1, TempP->Loc.z - 1, P_, Q, TempP, Space);
+        }
+        if (TempP->Loc.z && (TempP->Loc.y < std::get<1>(Space) - 1) &&
+            (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::TwoCW)) {
+            Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y + 1, TempP->Loc.z - 1, P_, Q, TempP, Space);
+        }
+
+        if ((TempP->Loc.z < std::get<2>(Space) - 1) && (TempP->Loc.y > 1) && (TempP->length <= MAX_NUM_OF_WIRE)) {
+            Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y - 1, TempP->Loc.z + 1, P_, Q, TempP, Space);
+        }
+        if ((TempP->Loc.z < std::get<2>(Space) - 1) && (TempP->Loc.y < std::get<1>(Space) - 1) &&
+            (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::ZeroCW)) {
+            Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y + 1, TempP->Loc.z + 1, P_, Q, TempP, Space);
+        }
+    }
+    C.setRouted(0);
+    Point* ptr = NULL;
+    for (auto it : end) {
+        if (P_[it.x][it.y][it.z].P) {
+            C.setRouted(1);
+            uint16_t TempX, TempY, TempZ;
+            TempX = it.x;
+            TempY = it.y;
+            TempZ = it.z;
+            if (P_[it.x][it.y][it.z].length >= MAX_NUM_OF_WIRE + 1) {
+                C.setInsert(Connection::ConnectionResult(std::make_tuple(TempX, TempY - 1, TempZ),
+                                                         D.CellLib.getCellPtr("BUF"), P_[it.x][it.y][it.z].ori));
+            } else {
+                C.setInsert(Connection::ConnectionResult(std::make_tuple(TempX, TempY - 1, TempZ),
+                                                         D.CellLib.getCellPtr("WIRE"), P_[it.x][it.y][it.z].ori));
+            }
+            //WI[TempX][TempY][TempZ].C_ptr = &C;
+            ptr = P_[it.x][it.y][it.z].P;
+            while (ptr != NULL) {
+                uint16_t TempX, TempY, TempZ;
+                TempX = ptr->Loc.x;
+                TempY = ptr->Loc.y;
+                TempZ = ptr->Loc.z;
+                if (ptr->length >= MAX_NUM_OF_WIRE + 1) {
+                    C.setInsert(Connection::ConnectionResult(std::make_tuple(TempX, TempY - 1, TempZ),
+                                                             D.CellLib.getCellPtr("BUF"), ptr->ori));
+                } else {
+                    C.setInsert(Connection::ConnectionResult(std::make_tuple(TempX, TempY - 1, TempZ),
+                                                             D.CellLib.getCellPtr("WIRE"), ptr->ori));
+                }
+                next:;
+                //WI[TempX][TempY][TempZ].C_ptr = &C;
+                ptr = ptr->P;
+            }
+        } else {
+            std::cout << "FAIL routing from " << start.x << ", " << start.y << ", " << start.z << " to " << it.x << ", "
+                      << it.y << ", " << it.z << std::endl;
+            retFlag = false;
+        }
+    }
+
+    //     for(auto itt = C.Result.begin(); itt!=C.Result.end(); ++itt)
+    //     {
+    // if(std::get<0>(itt->coord) == 20 && (std::get<1>(itt->coord) == 2) &&
+    // std::get<2>(itt->coord) == 1)
+    //         std::cout << "in while SUCCESS routing to "
+    //                      <<std::get<0>(itt->coord)<<", "<<std::get<1>(itt->coord)<<", "<<std::get<2>(itt->coord)<<std::endl;
+    //     }
+    auto IllegalPoints = C.checkRouteResult();
+    if(!IllegalPoints.empty()){
+        return ReRouteIllegal(C, IllegalPoints, Space, P_, D);
+    }
+    updateUsedSpace(C, Space);
+    return retFlag;
+}
