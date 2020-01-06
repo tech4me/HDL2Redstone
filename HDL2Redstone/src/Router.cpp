@@ -464,7 +464,7 @@ void Router::updateUsedSpace(Connection& C,
             UsedSpace[entry_temp.x][entry_temp.y - 1][entry_temp.z] = 1;
             WI[entry_temp.x][entry_temp.y - 1][entry_temp.z].C_ptr = &C;
         }
-        if ( (entry_temp.y < std::get<1>(Space) - 2) && (WI[entry_temp.x][entry_temp.y + 2][entry_temp.z].C_ptr=NULL)) {
+        if ( (entry_temp.y < std::get<1>(Space) - 2) && (WI[entry_temp.x][entry_temp.y + 2][entry_temp.z].C_ptr==NULL)) {
             UsedSpace[entry_temp.x][entry_temp.y + 2][entry_temp.z] = 1;
             WI[entry_temp.x][entry_temp.y + 2][entry_temp.z].C_ptr = &C;
         }
@@ -600,7 +600,7 @@ bool Router::ReRouteIllegal(Connection& C, std::set<std::tuple<uint16_t, uint16_
     std::cout << "Wire "<<rollback_wire_name<<" routing illegal: "<< std::endl;
     std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t>> local_congestion_points;
     for(auto it = congestionPoints.begin(); it!=congestionPoints.end(); ++it){
-        std::cout <<"    "<<std::get<0>(*it)<<", "<<std::get<1>(*it)<<", "<<std::get<2>(*it)<<std::endl;
+        std::cout <<"    "<<std::get<0>(*it)<<", "<<std::get<1>(*it)<<", "<<std::get<2>(*it)<<" Type: "<<std::get<3>(*it)<<std::endl;
         local_congestion_points.insert(std::make_tuple(std::get<0>(*it),std::get<1>(*it)+std::get<3>(*it)+1,std::get<2>(*it),0));
     }
     return HelperReRouteIllegal(C, local_congestion_points, Space, P_, D);
@@ -728,41 +728,6 @@ bool Router::ReRouteStartRouting(coord congestionPoint, std::tuple<uint16_t, uin
     return false;
 }
 
-/*std::set<std::tuple<uint16_t, uint16_t, uint16_t>> checkRouteResult () {
-    std::map<std::tuple<uint16_t, uint16_t, uint16_t>, uint16_t> ResultsMap;
-    std::set<std::tuple<uint16_t, uint16_t, uint16_t>> IllegalPoints;
-    for (const auto R : Result) {
-        const auto it = ResultsMap.find(R.coord);
-    if (it != ResultsMap.end()) {
-        switch (it->second) {
-            case 0:
-            IllegalPoints.insert({std::get<0>(R.coord), std::get<1>(R.coord)-1, std::get<2>(R.coord)});
-            break;
-        case 1,2,3:
-            IllegalPoints.insert({std::get<0>(R.coord), std::get<1>(R.coord), std::get<2>(R.coord)});
-            break;
-        case 4:
-            IllegalPoints.insert({std::get<0>(R.coord), std::get<1>(R.coord)+1, std::get<2>(R.coord)});
-            break;
-        default:
-            std::cout<<"wrong"<<std::endl;
-            break;
-
-        }
-    } else {
-        uint16_t x = std::get<0>(R.coord);
-        uint16_t y = std::get<1>(R.coord);
-        uint16_t z = std::get<2>(R.coord);
-        ResultsMap.insert({x,y+2,z}, 0);
-        ResultsMap.insert({x,y+1,z}, 1);
-            ResultsMap.insert({x,y,z}, 2);
-        ResultsMap.insert({x,y-1,z}, 3);
-        ResultsMap.insert({x,y-2,z}, 4);
-
-    }
-    return IllegalPoints;
-    }
-}*/
 bool Router::HelperReRouteforIllegalRegularRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_t, uint16_t>& Space,
                           Router::Point***& P_, std::set<std::tuple<uint16_t, uint16_t, uint16_t>>& RetIllegalPoints) {
     bool retFlag=true;
