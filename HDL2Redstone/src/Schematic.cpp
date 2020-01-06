@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream>
+#include <regex>
 #include <sstream>
 #include <string>
 
@@ -131,9 +132,94 @@ void Schematic::insertSubSchematic(const Placement& P_, const Schematic& Schem_,
     // 1. Merge sub schematic palette into schematic palette, update palette, create conversion map
     std::map<int32_t, int32_t> ConversionMap;
     for (int32_t i = 0; i < Schem_.InvertPalette.size(); ++i) {
+        // perform necessary changes caused by rotation to palette
+        std::string Str = Schem_.InvertPalette.at(i);
+        // std::cout<<"invert palette: "<<Schem_.InvertPalette.at(i) <<std::endl;
+
+        std::regex NorthReg("(north=)(\\w+),");
+        std::regex SouthReg("(south=)(\\w+),");
+        std::regex EastReg("(east=)(\\w+),");
+        std::regex WestReg("(west=)(\\w+)]");
+        std::regex FaceReg("(facing=)(\\w+),");
+        std::smatch Nmatch, Smatch, Ematch, Wmatch, Fmatch;
+
+        // redstone wire
+        if (std::regex_search(Str, Nmatch, NorthReg) && std::regex_search(Str, Smatch, SouthReg) &&
+            std::regex_search(Str, Ematch, EastReg) && std::regex_search(Str, Wmatch, WestReg)) {
+            switch (P_.Orient) {
+            case Orientation::OneCW:
+                Str = std::regex_replace(Str, EastReg, "$1" + Nmatch.str(2) + ",");
+                Str = std::regex_replace(Str, SouthReg, "$1" + Ematch.str(2) + ",");
+                Str = std::regex_replace(Str, WestReg, "$1" + Smatch.str(2) + "]");
+                Str = std::regex_replace(Str, NorthReg, "$1" + Wmatch.str(2) + ",");
+                break;
+            case Orientation::TwoCW:
+                Str = std::regex_replace(Str, EastReg, "$1" + Wmatch.str(2) + ",");
+                Str = std::regex_replace(Str, SouthReg, "$1" + Nmatch.str(2) + ",");
+                Str = std::regex_replace(Str, WestReg, "$1" + Ematch.str(2) + "]");
+                Str = std::regex_replace(Str, NorthReg, "$1" + Smatch.str(2) + ",");
+                break;
+            case Orientation::ThreeCW:
+                Str = std::regex_replace(Str, EastReg, "$1" + Smatch.str(2) + ",");
+                Str = std::regex_replace(Str, SouthReg, "$1" + Wmatch.str(2) + ",");
+                Str = std::regex_replace(Str, WestReg, "$1" + Nmatch.str(2) + "]");
+                Str = std::regex_replace(Str, NorthReg, "$1" + Ematch.str(2) + ",");
+                break;
+            default:
+                // std::cout<<"NO matching placement orientation: "<<(int)P_.Orient<<std::endl;
+                break;
+            }
+            // redstone_torch or repeater
+        } else if (std::regex_search(Str, Fmatch, FaceReg)) {
+            std::string Facing = Fmatch.str(2);
+            uint32_t FInt = 0, turn = 0;
+
+            if (Facing == "east")
+                FInt = 1;
+            else if (Facing == "south")
+                FInt = 2;
+            else if (Facing == "west")
+                FInt = 3;
+
+            switch (P_.Orient) {
+            case Orientation::OneCW:
+                turn = 1;
+                break;
+            case Orientation::TwoCW:
+                turn = 2;
+                break;
+            case Orientation::ThreeCW:
+                turn = 3;
+                break;
+            default:
+                break;
+            }
+
+            FInt = (FInt + turn) % 4;
+            switch (FInt) {
+            case 0:
+                Facing = "facing=north,";
+                break;
+            case 1:
+                Facing = "facing=east,";
+                break;
+            case 2:
+                Facing = "facing=south,";
+                break;
+            case 3:
+                Facing = "facing=west,";
+                break;
+            default:
+                break;
+            }
+            Str = std::regex_replace(Str, FaceReg, Facing);
+        }
+        if (Str != Schem_.InvertPalette.at(i))
+            std::cout << "  changed from " << Schem_.InvertPalette.at(i) << " to " << Str << std::endl;
+
         int32_t j = 0;
         for (; j < InvertPalette.size(); ++j) {
-            if (Schem_.InvertPalette.at(i) == InvertPalette.at(j)) {
+            if (/*Schem_.InvertPalette.at(i)*/ Str == InvertPalette.at(j)) {
                 // Add entry to conversion map
                 ConversionMap.emplace(i, j);
                 break;
@@ -142,7 +228,7 @@ void Schematic::insertSubSchematic(const Placement& P_, const Schematic& Schem_,
         if (j == InvertPalette.size()) {
             // Insert a new entry into palette
             int32_t Loc = InvertPalette.size();
-            InvertPalette.emplace(Loc, Schem_.InvertPalette.at(i));
+            InvertPalette.emplace(Loc, /*Schem_.InvertPalette.at(i)*/ Str);
             // Add entry to conversion map
             ConversionMap.emplace(i, Loc);
         }
@@ -203,6 +289,7 @@ void Schematic::insertSubSchematic(const Placement& P_, const Schematic& Schem_,
         Z += P_.Z;
         // Bound check
         if (X < 0 || X >= Width || Y < 0 || Y >= Height || Z < 0 || Z >= Length) {
+            // TODO: invertPalette.at(i) prob wrong
             throw Exception("Block:" + Schem_.InvertPalette.at(i) + " X:" + std::to_string(X) +
                             " Y:" + std::to_string(Y) + " Z:" + std::to_string(Z) + " is being placed out of bound.");
         }
@@ -212,6 +299,7 @@ void Schematic::insertSubSchematic(const Placement& P_, const Schematic& Schem_,
             std::string Curr_src = RouterSet_ ? "Router" : "Placer";
             std::string Set_by = std::get<1>(BlockOrigin.at(Index)) ? "Router" : "Placer";
             std::string Cell_type = std::get<0>(BlockOrigin.at(Index));
+            // TODO: block palette could be different after rotation, will need to make Str available here
             throw Exception("Block:" + Schem_.InvertPalette.at(Schem_.BlockData.at(i)) + " of cell " + Type_ +
                             " set by " + Curr_src + " cannot be placed at X:" + std::to_string(X) +
                             " Y:" + std::to_string(Y) + " Z:" + std::to_string(Z) +
