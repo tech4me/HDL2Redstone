@@ -17,6 +17,7 @@ class Router {
         uint16_t z;
     } coord;
     typedef struct {
+        int ComponentSpace;
         Connection* C_ptr;
     } WireInfo;
     class Point {
@@ -54,6 +55,7 @@ class Router {
     void Deconstructor(std::tuple<uint16_t, uint16_t, uint16_t>& Space);
     void Reconstructor(const Design& D);
     bool CheckandKeepResult(Connection& C, std::tuple<uint16_t, uint16_t, uint16_t>& Space);
+    bool HelperCheckUpdateGraph(Router::Point* Parent, Router::Point* Current);
     int*** UsedSpace;
     WireInfo*** WI;
     Connection* FailedWire_SingleRouting;

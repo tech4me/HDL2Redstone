@@ -77,6 +77,7 @@ Router::Router(const Design& D) {
             WI[i][j] = new WireInfo[std::get<2>(Space)];
             for (int k = 0; k < std::get<2>(Space); k++) {
                 WI[i][j][k].C_ptr = NULL;
+                WI[i][j][k].ComponentSpace = 0;
             }
         }
     }
@@ -106,6 +107,7 @@ Router::Router(const Design& D) {
             for (uint16_t k = std::get<1>(i.first); k < std::get<1>(i.second); k++) {
                 for (uint16_t z = std::get<2>(i.first); z < std::get<2>(i.second); z++) {
                     UsedSpace[j][k][z] = 1;
+                    WI[j][k][z].ComponentSpace = 1;
                     if (j > 0)
                         UsedSpace[j - 1][k][z] = (UsedSpace[j - 1][k][z] == 1) ? 1 : 2;
                     if (j < std::get<0>(Space) - 1)
@@ -144,6 +146,9 @@ void Router::route(Design& D) {
             }
         }
     }
+                std::cout<<"\nINIT FOUND wire status: "<<UsedSpace[21][0][10]<<std::endl;
+                 if(WI[33][12][9].C_ptr)
+                 std::cout<<"\nINIT wire name: "<<WI[21][0][10].C_ptr->getName()<<" "<<UsedSpace[33][12][9]<<std::endl;
     /*TODO
     check unablerouting is 0 or 1 or 2 or 3
     to reroute everything,
@@ -173,9 +178,9 @@ void Router::route(Design& D) {
                 if(!RegularRoute(D, *it, Space, P_)){
                     std::cout << "Routing: " << it->getName() <<" failed"<< std::endl;;
                 }
-                // std::cout<<"\nFOUND wire status: "<<UsedSpace[33][12][9]<<std::endl;
-                // if(WI[33][12][9].C_ptr)
-                // std::cout<<"\nFOUND wire name: "<<WI[33][12][9].C_ptr->getName()<<" "<<UsedSpace[33][12][9]<<std::endl;
+                 std::cout<<"\nFOUND wire status: "<<UsedSpace[21][0][10]<<std::endl;
+                 if(WI[33][12][9].C_ptr)
+                 std::cout<<"\nFOUND wire name: "<<WI[21][0][10].C_ptr->getName()<<" "<<UsedSpace[33][12][9]<<std::endl;
                 if(FailedWire_SingleRouting){break;}
             }
         }
@@ -242,6 +247,66 @@ void Router::route(Design& D) {
     }
     */
 }
+bool Router::HelperCheckUpdateGraph(Router::Point* Parent, Router::Point* Current){
+    bool RetFlag = true;
+    auto ori_ = Current->ori;
+    if (Parent->Loc.x > Current->Loc.x) {
+        ori_ = HDL2Redstone::Orientation::OneCW;
+    } else if (Parent->Loc.x < Current->Loc.x) {
+        ori_ = HDL2Redstone::Orientation::ThreeCW;
+    } else if (Parent->Loc.z > Current->Loc.z) {
+        ori_ = HDL2Redstone::Orientation::TwoCW;
+    } else if (Parent->Loc.z < Current->Loc.z) {
+        ori_ = HDL2Redstone::Orientation::ZeroCW;
+    }
+    if (Parent->length == MAX_NUM_OF_WIRE + 1) {
+        if(Parent->ori != ori_){
+            RetFlag = false;
+        }else if(Parent->Loc.y != Current->Loc.y){
+            RetFlag = false;
+        }else{
+            if(Current->cost == Parent->cost + 1){
+                if(Parent->Loc.y == Current->Loc.y){
+                    Current->length = 1;
+                }else{
+                    RetFlag = false;
+                }
+            }else{
+                Current->length = 1;
+            }
+        }
+    }else if(Parent->length == MAX_NUM_OF_WIRE){
+        if(Parent->ori != ori_){
+            RetFlag = false;
+        }else if(Parent->Loc.y != Current->Loc.y){
+            RetFlag = false;
+        }else{
+            if(Current->cost == Parent->cost + 1){
+                if(Parent->Loc.y == Current->Loc.y){
+                    Current->length = Parent->length + 1;
+                }else{
+                    RetFlag = false;
+                }
+            }else{
+                Current->length = Parent->length + 1;
+            }
+        }  
+    }else{
+        if(Current->cost == Parent->cost + 1){
+            if(Parent->Loc.y == Current->Loc.y){
+                Current->length = Parent->length + 1;
+            }else{
+                RetFlag = false;
+            }
+        }else{
+            Current->length = Parent->length + 1;
+        }
+    }
+    if(RetFlag){
+        Current->ori = ori_;
+    }
+    return RetFlag;
+}
 void Router::checkUpdateGraph(uint16_t x, uint16_t y, uint16_t z, Router::Point***& P_,
                               std::priority_queue<Router::Point*, std::vector<Router::Point*>, Router::PointCompare>& Q,
                               Router::Point*& TempP, std::tuple<uint16_t, uint16_t, uint16_t>& Space) {
@@ -250,6 +315,7 @@ void Router::checkUpdateGraph(uint16_t x, uint16_t y, uint16_t z, Router::Point*
         // check up to +- 2 unit are clean
         if ((P_[x][y][z].cost >= TempP->cost + 1)) {
             bool legal = 1;
+            //this while loop is checking self wire illegal situation
             Router::Point* temp_ptr = TempP->P;
             while (temp_ptr) {
                 if ((temp_ptr->Loc.y < std::get<1>(Space) - 2) &&
@@ -266,7 +332,7 @@ void Router::checkUpdateGraph(uint16_t x, uint16_t y, uint16_t z, Router::Point*
                 temp_ptr = temp_ptr->P;
             }
             if (legal) {
-                int set = 0;
+                /*int set = 0;
                 if (P_[x][y][z].cost == TempP->cost + 1) {
                     if (y == TempP->Loc.y) {
                         set = 1;
@@ -292,10 +358,14 @@ void Router::checkUpdateGraph(uint16_t x, uint16_t y, uint16_t z, Router::Point*
                         P_[x][y][z].length = 1;
                     }
                 }
-                P_[x][y][z].cost = TempP->cost + 1;
-                if (!P_[x][y][z].visited && !P_[x][y][z].inserted) {
-                    P_[x][y][z].inserted = 1;
-                    Q.push(&P_[x][y][z]);
+                P_[x][y][z].cost = TempP->cost + 1;*/
+                if(HelperCheckUpdateGraph(TempP, &P_[x][y][z])){
+                    P_[x][y][z].cost = TempP->cost + 1;
+                    P_[x][y][z].P = TempP;
+                    if (!P_[x][y][z].visited && !P_[x][y][z].inserted) {
+                        P_[x][y][z].inserted = 1;
+                        Q.push(&P_[x][y][z]);
+                    }
                 }
             }
         }
