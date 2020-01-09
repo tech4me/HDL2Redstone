@@ -36,7 +36,7 @@ void ModuleNetlist::ExtractNetlist::outputs(std::vector<std::string> outputs) {
             ComponentPtr->setPlacement(It->second.X, It->second.Y, It->second.Z, It->second.Orient);
             ComponentPtr->setPlaced(true);
         }
-        Connections.push_back(std::make_unique<Connection>(output, ComponentPtr.get(), "A"));
+        Connections.push_back(std::make_unique<Connection>(output, ComponentPtr.get(), "A", false /* Add as sink*/));
         Components.push_back(std::move(ComponentPtr));
     }
 }
@@ -59,8 +59,12 @@ void ModuleNetlist::ExtractNetlist::subckt(std::string model, std::vector<std::s
         };
         auto It = std::find_if(Connections.begin(), Connections.end(), P);
         if (It != Connections.end()) {
-            // TODO: This is assuming source of a connection will always be before sink
-            (*It)->addSink(ComponentPtr.get(), port);
+            // CHECK: This is assuming source of a connection will always be before sink
+            if ((*It)->getSourcePortConnection() == std::pair<Component*, std::string>()) { // Not set
+                (*It)->addSource(ComponentPtr.get(), port);
+            } else {
+                (*It)->addSink(ComponentPtr.get(), port);
+            }
         } else {
             Connections.push_back(std::make_unique<Connection>(net, ComponentPtr.get(), port));
         }

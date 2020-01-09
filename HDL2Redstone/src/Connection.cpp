@@ -2,18 +2,21 @@
 
 using namespace HDL2Redstone;
 
-Connection::Connection(const std::string& Name_, Component* ComponentPtr_, const std::string& PortName_) : Name(Name_) {
-    PortConnection.push_back(std::make_tuple(ComponentPtr_, PortName_, Connection::Parameters()));
+Connection::Connection(const std::string& Name_, Component* ComponentPtr_, const std::string& PortName_, bool IsSource)
+    : Name(Name_) {
+    if (IsSource) {
+        SourcePortConnection = std::make_pair(ComponentPtr_, PortName_);
+    } else {
+        addSink(ComponentPtr_, PortName_);
+    }
 }
 
-const std::string& Connection::getName() const { return Name; }
-
-const std::vector<std::tuple<Component*, std::string, Connection::Parameters>>& Connection::getPortConnection() const {
-    return PortConnection;
+void Connection::addSource(Component* ComponentPtr_, const std::string& PortName_) {
+    SourcePortConnection = std::make_pair(ComponentPtr_, PortName_);
 }
 
 void Connection::addSink(Component* ComponentPtr_, const std::string& PortName_) {
-    PortConnection.push_back(std::make_tuple(ComponentPtr_, PortName_, Connection::Parameters()));
+    SinkPortConnections.push_back(std::make_pair(ComponentPtr_, PortName_));
 }
 
 std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t>> Connection::checkRouteResult() {
@@ -57,8 +60,10 @@ std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t>> Connection::checkRo
 namespace HDL2Redstone {
 std::ostream& operator<<(std::ostream& out, const Connection& Connection_) {
     out << "Connection Name:" << Connection_.Name << std::endl;
-    for (const auto& T : Connection_.PortConnection) {
-        out << "    " << *(std::get<0>(T)) << "    Port Name:" << std::get<1>(T) << std::endl;
+    out << "Source:" << *(Connection_.SourcePortConnection.first)
+        << "    Port Name:" << Connection_.SourcePortConnection.second << std::endl;
+    for (const auto& T : Connection_.SinkPortConnections) {
+        out << "    Sink:" << *(T.first) << "    Port Name:" << T.second << std::endl;
     }
     return out;
 }

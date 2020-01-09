@@ -39,19 +39,23 @@ class Connection {
         } // TODO: check repeater is higher level than wire, cant be replaced
     };
     std::set<ConnectionResult, resultcomp> Result;
-    Connection(const std::string& Name_, Component* ComponentPtr_, const std::string& PortName_);
+    Connection(const std::string& Name_, Component* ComponentPtr_, const std::string& PortName_, bool IsSource = true);
     bool getRouted() const { return Routed; }
     void setRouted(bool Routed_) { Routed = Routed_; }
-    const std::string& getName() const;
-    const std::vector<std::tuple<Component*, std::string, Connection::Parameters>>& getPortConnection() const;
-    // add component port to sink
+    const std::string& getName() const { return Name; }
+    const std::pair<Component*, std::string>& getSourcePortConnection() { return SourcePortConnection; }
+    const std::vector<std::pair<Component*, std::string>>& getSinkPortConnections() { return SinkPortConnections; }
+    // Add component port to source
+    void addSource(Component* ComponentPtr_, const std::string& PortName_);
+    // Add component port to sink
     void addSink(Component* ComponentPtr_, const std::string& PortName_);
     std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t>> checkRouteResult();
 
   private:
     bool Routed;
     const std::string Name;
-    std::vector<std::tuple<Component*, std::string, Connection::Parameters>> PortConnection;
+    std::pair<Component*, std::string> SourcePortConnection;
+    std::vector<std::pair<Component*, std::string>> SinkPortConnections;
     friend std::ostream& operator<<(std::ostream& out, const Connection& Connection_);
 };
 
