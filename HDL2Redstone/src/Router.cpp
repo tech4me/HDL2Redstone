@@ -22,6 +22,8 @@ Router::coord Router::updateSinglePortUsedSpace(std::tuple<uint16_t, uint16_t, u
         if (UsedSpace[ret.x][ret.y][ret.z - 1] != 1) {
             UsedSpace[ret.x][ret.y][ret.z - 1] = 0;
             UsedSpace[ret.x][ret.y - 1][ret.z - 1] = 0;
+            // WI[ret.x][ret.y][ret.z - 1].ComponentSpace = 0;
+            // WI[ret.x][ret.y - 1][ret.z - 1].ComponentSpace = 0;
             ret.z--;
             return ret;
         }
@@ -31,6 +33,8 @@ Router::coord Router::updateSinglePortUsedSpace(std::tuple<uint16_t, uint16_t, u
         if (UsedSpace[ret.x + 1][ret.y][ret.z] != 1) {
             UsedSpace[ret.x + 1][ret.y][ret.z] = 0;
             UsedSpace[ret.x + 1][ret.y - 1][ret.z] = 0;
+            // WI[ret.x + 1][ret.y][ret.z].ComponentSpace = 0;
+            // WI[ret.x + 1][ret.y - 1][ret.z].ComponentSpace = 0;
             ret.x++;
             return ret;
         }
@@ -41,6 +45,8 @@ Router::coord Router::updateSinglePortUsedSpace(std::tuple<uint16_t, uint16_t, u
         if (UsedSpace[ret.x][ret.y][ret.z + 1] != 1) {
             UsedSpace[ret.x][ret.y][ret.z + 1] = 0;
             UsedSpace[ret.x][ret.y - 1][ret.z + 1] = 0;
+            // WI[ret.x][ret.y][ret.z + 1].ComponentSpace = 0;
+            // WI[ret.x][ret.y - 1][ret.z + 1].ComponentSpace = 0;
             ret.z++;
             return ret;
         }
@@ -50,6 +56,8 @@ Router::coord Router::updateSinglePortUsedSpace(std::tuple<uint16_t, uint16_t, u
         if (UsedSpace[ret.x - 1][ret.y][ret.z] != 1) {
             UsedSpace[ret.x - 1][ret.y][ret.z] = 0;
             UsedSpace[ret.x - 1][ret.y - 1][ret.z] = 0;
+            // WI[ret.x - 1][ret.y][ret.z].ComponentSpace = 0;
+            // WI[ret.x - 1][ret.y - 1][ret.z].ComponentSpace = 0;
             ret.x--;
             return ret;
         }
@@ -76,8 +84,8 @@ Router::Router(const Design& D) {
         for (int j = 0; j < std::get<1>(Space); j++) {
             WI[i][j] = new WireInfo[std::get<2>(Space)];
             for (int k = 0; k < std::get<2>(Space); k++) {
-                WI[i][j][k].C_ptr = NULL;
                 WI[i][j][k].ComponentSpace = 0;
+                WI[i][j][k].C_ptr.clear();
             }
         }
     }
@@ -108,21 +116,39 @@ Router::Router(const Design& D) {
                 for (uint16_t z = std::get<2>(i.first); z < std::get<2>(i.second); z++) {
                     UsedSpace[j][k][z] = 1;
                     WI[j][k][z].ComponentSpace = 1;
-                    if (j > 0)
+                    if (j > 0){
                         UsedSpace[j - 1][k][z] = (UsedSpace[j - 1][k][z] == 1) ? 1 : 2;
-                    if (j < std::get<0>(Space) - 1)
+                        WI[j - 1][k][z].ComponentSpace = (WI[j - 1][k][z].ComponentSpace==1)?1:2;
+                        
+                    }
+                    if (j < std::get<0>(Space) - 1){
                         UsedSpace[j + 1][k][z] = (UsedSpace[j + 1][k][z] == 1) ? 1 : 2;
+                        WI[j + 1][k][z].ComponentSpace = (WI[j + 1][k][z].ComponentSpace==1)?1:2;
+                        
+                    }
 
-                    if (k > 0)
+                    if (k > 0){
                         UsedSpace[j][k - 1][z] = (UsedSpace[j][k - 1][z] == 1) ? 1 : 2;
-                    if (k < std::get<1>(Space) - 1)
+                        WI[j][k - 1][z].ComponentSpace = (WI[j][k - 1][z].ComponentSpace==1)?1:2;
+                        
+                    }
+                    if (k < std::get<1>(Space) - 1){
                         UsedSpace[j][k + 1][z] =
                             (UsedSpace[j][k + 1][z] == 1) ? 1 : 2; // TODO veritcal pin maybe possible
+                        WI[j][k + 1][z].ComponentSpace = (WI[j][k + 1][z].ComponentSpace)?1:2;
+                        
+                    }
 
-                    if (z > 0)
+                    if (z > 0){
                         UsedSpace[j][k][z - 1] = (UsedSpace[j][k][z - 1] == 1) ? 1 : 2;
-                    if (z < std::get<2>(Space) - 1)
+                        WI[j][k][z - 1].ComponentSpace = (WI[j][k][z - 1].ComponentSpace==1)?1:2;
+                        
+                    }
+                    if (z < std::get<2>(Space) - 1){
                         UsedSpace[j][k][z + 1] = (UsedSpace[j][k][z + 1] == 1) ? 1 : 2;
+                        WI[j][k][z + 1].ComponentSpace = (WI[j][k][z + 1].ComponentSpace==1)?1:2;
+                        
+                    }
                 }
             }
         }
@@ -146,9 +172,9 @@ void Router::route(Design& D) {
             }
         }
     }
-                std::cout<<"\nINIT FOUND wire status: "<<UsedSpace[21][0][10]<<std::endl;
-                 if(WI[33][12][9].C_ptr)
-                 std::cout<<"\nINIT wire name: "<<WI[21][0][10].C_ptr->getName()<<" "<<UsedSpace[33][12][9]<<std::endl;
+                // std::cout<<"\nINIT FOUND wire status: "<<UsedSpace[21][0][10]<<std::endl;
+                //  if(WI[33][12][9].C_ptr)
+                //  std::cout<<"\nINIT wire name: "<<WI[21][0][10].C_ptr->getName()<<" "<<UsedSpace[33][12][9]<<std::endl;
     /*TODO
     check unablerouting is 0 or 1 or 2 or 3
     to reroute everything,
@@ -178,9 +204,13 @@ void Router::route(Design& D) {
                 if(!RegularRoute(D, *it, Space, P_)){
                     std::cout << "Routing: " << it->getName() <<" failed"<< std::endl;;
                 }
-                 std::cout<<"\nFOUND wire status: "<<UsedSpace[21][0][10]<<std::endl;
-                 if(WI[33][12][9].C_ptr)
-                 std::cout<<"\nFOUND wire name: "<<WI[21][0][10].C_ptr->getName()<<" "<<UsedSpace[33][12][9]<<std::endl;
+                //  std::cout<<"\nFOUND wire status: "<<UsedSpace[24][13][9]<<"   "<<WI[24][13][9].ComponentSpace<<std::endl;
+                //  if(!WI[24][13][9].C_ptr.empty()){
+                //      for (auto it: WI[24][13][9].C_ptr)
+                //     std::cout<<"\nFOUND wire name: "<<it->getName()<<std::endl;
+                //  }else{
+                //      std::cout<<"\nFOUND wire EMPTY"<<std::endl;
+                //  }
                 if(FailedWire_SingleRouting){break;}
             }
         }
@@ -217,7 +247,7 @@ void Router::route(Design& D) {
                     }
                 }
             }
-        }else if(FailedWire_SingleRouting->getUnableRouting()==2){
+        }else if(FailedWire_SingleRouting->getUnableRouting()==3){
             std::cout<<FailedWire_SingleRouting->getName()<<" is unable to route second time, routing failed"<<std::endl;
         }
         
@@ -259,7 +289,7 @@ bool Router::HelperCheckUpdateGraph(Router::Point* Parent, Router::Point* Curren
     } else if (Parent->Loc.z < Current->Loc.z) {
         ori_ = HDL2Redstone::Orientation::ZeroCW;
     }
-    if (Parent->length == MAX_NUM_OF_WIRE + 1) {
+    if (Parent->length == MAX_NUM_OF_WIRE + 1) {//should be never to reach here, cab be deleted
         if(Parent->ori != ori_){
             RetFlag = false;
         }else if(Parent->Loc.y != Current->Loc.y){
@@ -332,33 +362,6 @@ void Router::checkUpdateGraph(uint16_t x, uint16_t y, uint16_t z, Router::Point*
                 temp_ptr = temp_ptr->P;
             }
             if (legal) {
-                /*int set = 0;
-                if (P_[x][y][z].cost == TempP->cost + 1) {
-                    if (y == TempP->Loc.y) {
-                        set = 1;
-                        P_[x][y][z].P = TempP;
-                    }
-                } else {
-                    set = 1;
-                    P_[x][y][z].P = TempP;
-                }
-                if (set) {
-                    if (TempP->length <= MAX_NUM_OF_WIRE) {
-                        if (TempP->Loc.x > x) {
-                            P_[x][y][z].ori = HDL2Redstone::Orientation::OneCW;
-                        } else if (TempP->Loc.x < x) {
-                            P_[x][y][z].ori = HDL2Redstone::Orientation::ThreeCW;
-                        } else if (TempP->Loc.z > z) {
-                            P_[x][y][z].ori = HDL2Redstone::Orientation::TwoCW;
-                        } else if (TempP->Loc.z < z) {
-                            P_[x][y][z].ori = HDL2Redstone::Orientation::ZeroCW;
-                        }
-                        P_[x][y][z].length = TempP->length + 1;
-                    } else {
-                        P_[x][y][z].length = 1;
-                    }
-                }
-                P_[x][y][z].cost = TempP->cost + 1;*/
                 if(HelperCheckUpdateGraph(TempP, &P_[x][y][z])){
                     P_[x][y][z].cost = TempP->cost + 1;
                     P_[x][y][z].P = TempP;
@@ -404,7 +407,7 @@ bool Router::RegularRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_
     for (auto it = PortConnection_.begin() + 1; it != PortConnection_.end(); ++it) {
         auto temp = std::get<0>(*it)->getPinLocation(std::get<1>(*it));
         auto endFace = (std::get<0>(*it))->getPinFacing(std::get<1>(*it));
-        
+
         auto temp_result = Router::updateSinglePortUsedSpace(temp, endFace,congestionP);
         
         if (temp_result.x == std::get<0>(temp) && temp_result.y == std::get<1>(temp) &&
@@ -579,71 +582,55 @@ void Router::updateUsedSpace(Connection& C,
         entry_temp.y = std::get<1>(entry.coord);
         entry_temp.z = std::get<2>(entry.coord);
         UsedSpace[entry_temp.x][entry_temp.y + 1][entry_temp.z] = 1;
-        WI[entry_temp.x][entry_temp.y + 1][entry_temp.z].C_ptr = &C;
+        WI[entry_temp.x][entry_temp.y + 1][entry_temp.z].C_ptr.insert(&C);
         UsedSpace[entry_temp.x][entry_temp.y][entry_temp.z] = 1;
-        WI[entry_temp.x][entry_temp.y][entry_temp.z].C_ptr = &C;
-        if ((entry_temp.y > 0) && (WI[entry_temp.x][entry_temp.y - 1][entry_temp.z].C_ptr==NULL)) {
+        WI[entry_temp.x][entry_temp.y][entry_temp.z].C_ptr.insert(&C);
+        if ((entry_temp.y > 0)) {
             UsedSpace[entry_temp.x][entry_temp.y - 1][entry_temp.z] = 1;
-            WI[entry_temp.x][entry_temp.y - 1][entry_temp.z].C_ptr = &C;
+            WI[entry_temp.x][entry_temp.y - 1][entry_temp.z].C_ptr.insert(&C);
         }
-        if ( (entry_temp.y < std::get<1>(Space) - 2) && (WI[entry_temp.x][entry_temp.y + 2][entry_temp.z].C_ptr==NULL)) {
+        if ( (entry_temp.y < std::get<1>(Space) - 2)) {
             UsedSpace[entry_temp.x][entry_temp.y + 2][entry_temp.z] = 1;
-            WI[entry_temp.x][entry_temp.y + 2][entry_temp.z].C_ptr = &C;
+            WI[entry_temp.x][entry_temp.y + 2][entry_temp.z].C_ptr.insert(&C);
         }
         if (entry_temp.x > 0) {
-            if(WI[entry_temp.x - 1][entry_temp.y + 1][entry_temp.z].C_ptr==NULL){
                 UsedSpace[entry_temp.x - 1][entry_temp.y + 1][entry_temp.z] = 1;
-                WI[entry_temp.x - 1][entry_temp.y + 1][entry_temp.z].C_ptr = &C;
-            }
-            if(WI[entry_temp.x - 1][entry_temp.y][entry_temp.z].C_ptr==NULL){
+                WI[entry_temp.x - 1][entry_temp.y + 1][entry_temp.z].C_ptr.insert(&C);
                 UsedSpace[entry_temp.x - 1][entry_temp.y][entry_temp.z] = 1;
-                WI[entry_temp.x - 1][entry_temp.y][entry_temp.z].C_ptr = &C;
-            }
-            if ((entry_temp.y < std::get<1>(Space) - 2) && (WI[entry_temp.x - 1][entry_temp.y + 2][entry_temp.z].C_ptr==NULL)) {
+                WI[entry_temp.x - 1][entry_temp.y][entry_temp.z].C_ptr.insert(&C);
+            if ((entry_temp.y < std::get<1>(Space) - 2)) {
                 UsedSpace[entry_temp.x - 1][entry_temp.y + 2][entry_temp.z] = 1;
-                WI[entry_temp.x - 1][entry_temp.y + 2][entry_temp.z].C_ptr = &C;
+                WI[entry_temp.x - 1][entry_temp.y + 2][entry_temp.z].C_ptr.insert(&C);
             }
         }
         if (entry_temp.x < std::get<0>(Space) - 1) {
-            if(WI[entry_temp.x + 1][entry_temp.y + 1][entry_temp.z].C_ptr==NULL){
                 UsedSpace[entry_temp.x + 1][entry_temp.y + 1][entry_temp.z] = 1;
-                WI[entry_temp.x + 1][entry_temp.y + 1][entry_temp.z].C_ptr = &C;
-            }
-            if(WI[entry_temp.x + 1][entry_temp.y][entry_temp.z].C_ptr==NULL){
+                WI[entry_temp.x + 1][entry_temp.y + 1][entry_temp.z].C_ptr.insert(&C);
                 UsedSpace[entry_temp.x + 1][entry_temp.y][entry_temp.z] = 1;
-                WI[entry_temp.x + 1][entry_temp.y][entry_temp.z].C_ptr = &C;
-            }
-            if ((entry_temp.y < std::get<1>(Space) - 2) && (WI[entry_temp.x + 1][entry_temp.y + 2][entry_temp.z].C_ptr==NULL)) {
+                WI[entry_temp.x + 1][entry_temp.y][entry_temp.z].C_ptr.insert(&C);
+            if ((entry_temp.y < std::get<1>(Space) - 2)) {
                 UsedSpace[entry_temp.x + 1][entry_temp.y + 2][entry_temp.z] = 1;
-                WI[entry_temp.x + 1][entry_temp.y + 2][entry_temp.z].C_ptr = &C;
+                WI[entry_temp.x + 1][entry_temp.y + 2][entry_temp.z].C_ptr.insert(&C);
             }
         }
         if (entry_temp.z > 0) {
-            if(WI[entry_temp.x][entry_temp.y + 1][entry_temp.z - 1].C_ptr==NULL){
                 UsedSpace[entry_temp.x][entry_temp.y + 1][entry_temp.z - 1] = 1;
-                WI[entry_temp.x][entry_temp.y + 1][entry_temp.z - 1].C_ptr = &C;
-            }
-            if(WI[entry_temp.x][entry_temp.y][entry_temp.z - 1].C_ptr==NULL){
+                WI[entry_temp.x][entry_temp.y + 1][entry_temp.z - 1].C_ptr.insert(&C);
                 UsedSpace[entry_temp.x][entry_temp.y][entry_temp.z - 1] = 1;
-                WI[entry_temp.x][entry_temp.y][entry_temp.z - 1].C_ptr = &C;
-            }
-            if ((entry_temp.y < std::get<1>(Space) - 2)&&(WI[entry_temp.x][entry_temp.y + 2][entry_temp.z - 1].C_ptr==NULL)) {
+                WI[entry_temp.x][entry_temp.y][entry_temp.z - 1].C_ptr.insert(&C);
+            if ((entry_temp.y < std::get<1>(Space) - 2)) {
                 UsedSpace[entry_temp.x][entry_temp.y + 2][entry_temp.z - 1] = 1;
-                WI[entry_temp.x][entry_temp.y + 2][entry_temp.z - 1].C_ptr = &C;
+                WI[entry_temp.x][entry_temp.y + 2][entry_temp.z - 1].C_ptr.insert(&C);
             }
         }
         if (entry_temp.z < std::get<2>(Space) - 1) {
-            if(WI[entry_temp.x][entry_temp.y + 1][entry_temp.z + 1].C_ptr==NULL){
                 UsedSpace[entry_temp.x][entry_temp.y + 1][entry_temp.z + 1] = 1;
-                WI[entry_temp.x][entry_temp.y + 1][entry_temp.z + 1].C_ptr = &C;
-            }
-            if(WI[entry_temp.x][entry_temp.y][entry_temp.z + 1].C_ptr==NULL){
+                WI[entry_temp.x][entry_temp.y + 1][entry_temp.z + 1].C_ptr.insert(&C);
                 UsedSpace[entry_temp.x][entry_temp.y][entry_temp.z + 1] = 1;
-                WI[entry_temp.x][entry_temp.y][entry_temp.z + 1].C_ptr = &C;
-            }
-            if ((entry_temp.y < std::get<1>(Space) - 2)&&(WI[entry_temp.x][entry_temp.y + 2][entry_temp.z + 1].C_ptr==NULL)) {
+                WI[entry_temp.x][entry_temp.y][entry_temp.z + 1].C_ptr.insert(&C);
+            if ((entry_temp.y < std::get<1>(Space) - 2)) {
                 UsedSpace[entry_temp.x][entry_temp.y + 2][entry_temp.z + 1] = 1;
-                WI[entry_temp.x][entry_temp.y + 2][entry_temp.z + 1].C_ptr = &C;
+                WI[entry_temp.x][entry_temp.y + 2][entry_temp.z + 1].C_ptr.insert(&C);
             }
         }
     }
@@ -745,24 +732,37 @@ bool Router::ReRouteIllegal(Connection& C, std::set<std::tuple<uint16_t, uint16_
 
 bool Router::ReRouteStartRouting(coord congestionPoint, std::tuple<uint16_t, uint16_t, uint16_t>& Space,Router::Point***& P_, Design& D){
     auto C_ptr = WI[congestionPoint.x][congestionPoint.y][congestionPoint.z].C_ptr;
-    if(!C_ptr){
+    if(C_ptr.empty()){
         std::cout<<"ReRoute Failed: congest each other"<<std::endl;
         return false;
     }
-    std::string rollback_wire_name = WI[congestionPoint.x][congestionPoint.y][congestionPoint.z].C_ptr->getName();
+    std::set<std::string> rollback_wire_name;
+    //roll back congestion wires
+    for(auto it: C_ptr){
+        rollback_wire_name.insert(it->getName());
+        std::cout<<it->getName()<<" is rolling back for ReRouting"<<std::endl;
+        it->Result.clear();
+    }
     //roll back congestion wires
     for (int i = 0; i < std::get<0>(Space); i++) {
         for (int j = 0; j < std::get<1>(Space); j++) {
             for (int k = 0; k < std::get<2>(Space); k++) {
-                if(WI[i][j][k].C_ptr && WI[i][j][k].C_ptr->getName() == rollback_wire_name){
-                    UsedSpace[i][j][k] = 0;
-                    WI[i][j][k].C_ptr->Result.clear();
-                    WI[i][j][k].C_ptr = NULL;
+                if( (!WI[i][j][k].C_ptr.empty())){
+                    std::set<Connection*> temp = WI[i][j][k].C_ptr;
+                    for(auto z: WI[i][j][k].C_ptr){
+                        if(rollback_wire_name.find(z->getName()) != rollback_wire_name.end()){
+                            temp.erase(z);
+                            //WI[i][j][k].C_ptr->Result.clear();  
+                        }
+                    }
+                    WI[i][j][k].C_ptr = temp;
+                    if(WI[i][j][k].ComponentSpace != 1 && WI[i][j][k].C_ptr.empty()){
+                        UsedSpace[i][j][k] = 0;
+                    }
                 }
             }
         }
     }
-    
     //force congestion point is occupied
     UsedSpace[congestionPoint.x][congestionPoint.y][congestionPoint.z] = 3;
     if (congestionPoint.y < std::get<1>(Space) - 1){
@@ -795,22 +795,29 @@ bool Router::ReRouteStartRouting(coord congestionPoint, std::tuple<uint16_t, uin
             UsedSpace[congestionPoint.x][congestionPoint.y][congestionPoint.z + 1] = 3;
         }
     }
-    //route congested wire again
-    for (int i = 0; i < std::get<0>(Space); i++) {
-        for (int j = 0; j < std::get<1>(Space); j++) {
-            for (int k = 0; k < std::get<2>(Space); k++) {
-                P_[i][j][k].cost = std::get<0>(Space) * std::get<1>(Space) * std::get<2>(Space);
-                P_[i][j][k].length = -1;
-                P_[i][j][k].ori = HDL2Redstone::Orientation::ZeroCW;
-                P_[i][j][k].P = NULL;
-                P_[i][j][k].visited = 0;
-                P_[i][j][k].inserted = 0;
+    bool ReRouteFlag = true;
+    for(auto it: C_ptr){
+        //route congested wire again
+        for (int i = 0; i < std::get<0>(Space); i++) {
+            for (int j = 0; j < std::get<1>(Space); j++) {
+                for (int k = 0; k < std::get<2>(Space); k++) {
+                    P_[i][j][k].cost = std::get<0>(Space) * std::get<1>(Space) * std::get<2>(Space);
+                    P_[i][j][k].length = -1;
+                    P_[i][j][k].ori = HDL2Redstone::Orientation::ZeroCW;
+                    P_[i][j][k].P = NULL;
+                    P_[i][j][k].visited = 0;
+                    P_[i][j][k].inserted = 0;
+                }
             }
         }
+        std::cout << "ReRouting: " << it->getName() << std::endl;
+        if(!RegularRoute(D, *it, Space, P_)){
+            std::cout << "ReRouting Failed: " << it->getName()<< std::endl;
+            ReRouteFlag = false;
+        }else{
+            std::cout << "ReRouting Success: " << it->getName()<< std::endl;
+        }
     }
-    
-    std::cout << "ReRouting: " << rollback_wire_name << std::endl;
-    bool ReRouteFlag = RegularRoute(D, *C_ptr, Space, P_);
     if(UsedSpace[congestionPoint.x][congestionPoint.y][congestionPoint.z]==3){
         UsedSpace[congestionPoint.x][congestionPoint.y][congestionPoint.z] = 0;
     }
@@ -857,12 +864,7 @@ bool Router::ReRouteStartRouting(coord congestionPoint, std::tuple<uint16_t, uin
             }
         }
     }
-    if(ReRouteFlag){
-        std::cout << "ReRouting Success: " << rollback_wire_name<< std::endl;
-        return true;
-    }
-    std::cout << "ReRouting Failed: " << rollback_wire_name<< std::endl;
-    return false;
+    return ReRouteFlag;
 }
 
 bool Router::HelperReRouteforIllegalRegularRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_t, uint16_t>& Space,
@@ -1086,7 +1088,8 @@ void Router::Reconstructor(const Design& D){
         for (int j = 0; j < std::get<1>(Space); j++) {
             WI[i][j] = new WireInfo[std::get<2>(Space)];
             for (int k = 0; k < std::get<2>(Space); k++) {
-                WI[i][j][k].C_ptr = NULL;
+                WI[i][j][k].ComponentSpace = 0;
+                WI[i][j][k].C_ptr.clear();
             }
         }
     }
@@ -1105,21 +1108,40 @@ void Router::Reconstructor(const Design& D){
             for (uint16_t k = std::get<1>(i.first); k < std::get<1>(i.second); k++) {
                 for (uint16_t z = std::get<2>(i.first); z < std::get<2>(i.second); z++) {
                     UsedSpace[j][k][z] = 1;
-                    if (j > 0)
+                    WI[j][k][z].ComponentSpace = 1;
+                    if (j > 0){
                         UsedSpace[j - 1][k][z] = (UsedSpace[j - 1][k][z] == 1) ? 1 : 2;
-                    if (j < std::get<0>(Space) - 1)
+                        WI[j - 1][k][z].ComponentSpace = (WI[j - 1][k][z].ComponentSpace==1)?1:2;
+                        
+                    }
+                    if (j < std::get<0>(Space) - 1){
                         UsedSpace[j + 1][k][z] = (UsedSpace[j + 1][k][z] == 1) ? 1 : 2;
+                        WI[j + 1][k][z].ComponentSpace = (WI[j + 1][k][z].ComponentSpace==1)?1:2;
+                        
+                    }
 
-                    if (k > 0)
+                    if (k > 0){
                         UsedSpace[j][k - 1][z] = (UsedSpace[j][k - 1][z] == 1) ? 1 : 2;
-                    if (k < std::get<1>(Space) - 1)
+                        WI[j][k - 1][z].ComponentSpace = (WI[j][k - 1][z].ComponentSpace==1)?1:2;
+                        
+                    }
+                    if (k < std::get<1>(Space) - 1){
                         UsedSpace[j][k + 1][z] =
                             (UsedSpace[j][k + 1][z] == 1) ? 1 : 2; // TODO veritcal pin maybe possible
+                        WI[j][k + 1][z].ComponentSpace = (WI[j][k + 1][z].ComponentSpace)?1:2;
+                        
+                    }
 
-                    if (z > 0)
+                    if (z > 0){
                         UsedSpace[j][k][z - 1] = (UsedSpace[j][k][z - 1] == 1) ? 1 : 2;
-                    if (z < std::get<2>(Space) - 1)
+                        WI[j][k][z - 1].ComponentSpace = (WI[j][k][z - 1].ComponentSpace==1)?1:2;
+                        
+                    }
+                    if (z < std::get<2>(Space) - 1){
                         UsedSpace[j][k][z + 1] = (UsedSpace[j][k][z + 1] == 1) ? 1 : 2;
+                        WI[j][k][z + 1].ComponentSpace = (WI[j][k][z + 1].ComponentSpace==1)?1:2;
+                        
+                    }
                 }
             }
         }
@@ -1133,9 +1155,19 @@ void Router::Reconstructor(const Design& D){
 }
 bool Router::CheckandKeepResult(Connection& C, std::tuple<uint16_t, uint16_t, uint16_t>& Space){
     bool RetFlag = true;
+    // if(C.getName()=="$abc$73$new_n14_"){
+    //              std::cout<<"\nstart1FOUND wire status: "<<UsedSpace[24][13][9]<<"   "<<WI[24][13][9].ComponentSpace<<std::endl;
+    //              if(!WI[24][13][9].C_ptr.empty()){
+    //                  for (auto it: WI[24][13][9].C_ptr)
+    //                 std::cout<<"\nstart1FOUND wire name: "<<it->getName()<<std::endl;
+    //              }else{
+    //                  std::cout<<"\nstart1FOUND wire EMPTY"<<std::endl;
+    //              }
+    //         if (C.Result.empty()) {std::cout<<"\nstart1FOUND result EMPTY"<<std::endl;}     
+    // }
     if (!C.Result.empty()) {
         for (const auto& R : C.Result) {
-            if(UsedSpace[std::get<0>(R.coord)][std::get<1>(R.coord)][std::get<2>(R.coord)]==1){
+            if(UsedSpace[std::get<0>(R.coord)][std::get<1>(R.coord)][std::get<2>(R.coord)]==1 || UsedSpace[std::get<0>(R.coord)][std::get<1>(R.coord) + 1][std::get<2>(R.coord)]==1){
                 std::cout<<C.getName()<<" is reseted"<<std::endl;
                 RetFlag = false;
                 break;
@@ -1146,17 +1178,33 @@ bool Router::CheckandKeepResult(Connection& C, std::tuple<uint16_t, uint16_t, ui
     }
     if(!RetFlag){
         C.setRouted(0);
+        //roll back congestion wires
         for (int i = 0; i < std::get<0>(Space); i++) {
             for (int j = 0; j < std::get<1>(Space); j++) {
                 for (int k = 0; k < std::get<2>(Space); k++) {
-                    if(WI[i][j][k].C_ptr && WI[i][j][k].C_ptr->getName() == C.getName()){
-                        UsedSpace[i][j][k] = 0;
-                        WI[i][j][k].C_ptr = NULL;
+                    if( (!WI[i][j][k].C_ptr.empty())){
+                        std::set<Connection*> temp = WI[i][j][k].C_ptr;
+                        for(auto z: WI[i][j][k].C_ptr){
+                            if(z->getName() == C.getName()){
+                                temp.erase(z);
+                            }
+                        }
+                        WI[i][j][k].C_ptr = temp;
+                        if(WI[i][j][k].ComponentSpace != 1 && WI[i][j][k].C_ptr.empty()){
+                            UsedSpace[i][j][k] = 0;
+                        }
                     }
                 }
             }
         }
         C.Result.clear();
+                //  std::cout<<"\nSTARTFOUND wire status: "<<UsedSpace[12][1][1]<<"   "<<WI[12][1][1].ComponentSpace<<std::endl;
+                //  if(!WI[12][1][1].C_ptr.empty()){
+                //      for (auto it: WI[12][1][1].C_ptr)
+                //     std::cout<<"\nSTARTFOUND wire name: "<<it->getName()<<std::endl;
+                //  }else{
+                //      std::cout<<"\nSTARTFOUND wire EMPTY"<<std::endl;
+                //  }
     }else{
         //update usedspace and WI
         updateUsedSpace(C,Space);

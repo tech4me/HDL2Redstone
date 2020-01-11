@@ -18,7 +18,7 @@ class Router {
     } coord;
     typedef struct {
         int ComponentSpace;
-        Connection* C_ptr;
+        std::set<Connection*> C_ptr;
     } WireInfo;
     class Point {
       public:
