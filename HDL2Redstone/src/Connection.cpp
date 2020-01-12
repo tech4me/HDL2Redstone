@@ -31,6 +31,8 @@ std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t>> Connection::checkRo
                 break;
             case 1:
             case 2:
+                IllegalPoints.insert({std::get<0>(R.coord), std::get<1>(R.coord), std::get<2>(R.coord), 0});
+                break;
             case 3:
                 IllegalPoints.insert({std::get<0>(R.coord), std::get<1>(R.coord)+1, std::get<2>(R.coord), 0});
                 break;
