@@ -323,7 +323,27 @@ bool Router::HelperCheckUpdateGraph(Router::Point* Parent, Router::Point* Curren
         }  
     }else{
         if(Current->cost == Parent->cost + 1){
-            if(Parent->Loc.y == Current->Loc.y){
+            if( (Parent->Loc.y == Current->Loc.y) && (Current->P->Loc.y != Current->Loc.y)){
+                Current->length = Parent->length + 1;
+            }else if((Parent->Loc.y == Current->Loc.y) && (Current->P->Loc.y == Current->Loc.y)){
+                if( ori_ ==  HDL2Redstone::Orientation::ZeroCW){
+                    Current->length = Parent->length + 1;
+                }else if(ori_ ==  HDL2Redstone::Orientation::TwoCW){
+                    Current->length = Parent->length + 1;
+                }else if(ori_ ==  HDL2Redstone::Orientation::OneCW){
+                    if(Current->ori == HDL2Redstone::Orientation::ZeroCW || Current->ori == HDL2Redstone::Orientation::TwoCW){
+                        RetFlag = false;
+                    }else{
+                        Current->length = Parent->length + 1;
+                    }
+                }else{
+                    if(Current->ori == HDL2Redstone::Orientation::ZeroCW || Current->ori == HDL2Redstone::Orientation::TwoCW){
+                        RetFlag = false;
+                    }else{
+                        Current->length = Parent->length + 1;
+                    }
+                }
+            }else if((Parent->Loc.y != Current->Loc.y) && (Current->P->Loc.y != Current->Loc.y)){
                 Current->length = Parent->length + 1;
             }else{
                 RetFlag = false;
@@ -509,6 +529,12 @@ bool Router::RegularRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_
             TempY = it.y;
             TempZ = it.z;
             if (P_[it.x][it.y][it.z].length >= MAX_NUM_OF_WIRE + 1) {
+                    for(auto t: end){
+                        if(TempX == t.x && TempY == t.y && TempZ == t.z){
+                            std::cout<<"HITHITHIT "<<t.x<<" "<<t.y<<" "<<t.z<<std::endl;
+                            break;
+                        }
+                    }
                 C.setInsert(Connection::ConnectionResult(std::make_tuple(TempX, TempY - 1, TempZ),
                                                          D.CellLib.getCellPtr("BUF"), P_[it.x][it.y][it.z].ori));
             } else {
@@ -523,6 +549,12 @@ bool Router::RegularRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_
                 TempY = ptr->Loc.y;
                 TempZ = ptr->Loc.z;
                 if (ptr->length >= MAX_NUM_OF_WIRE + 1) {
+                    for(auto t: end){
+                        if(TempX == t.x && TempY == t.y && TempZ == t.z){
+                            std::cout<<"in while HITHITHIT "<<t.x<<" "<<t.y<<" "<<t.z<<std::endl;
+                            break;
+                        }
+                    }
                     C.setInsert(Connection::ConnectionResult(std::make_tuple(TempX, TempY - 1, TempZ),
                                                              D.CellLib.getCellPtr("BUF"), ptr->ori));
                 } else {
@@ -642,6 +674,7 @@ bool Router::HelperReRouteIllegal(Connection& C, std::set<std::tuple<uint16_t, u
     
     do{
         for(auto it = local_congestion_points.begin(); it!=local_congestion_points.end(); ++it){
+            std::cout<<"to set to 3: "<<std::get<0>(*it)<<" "<<std::get<1>(*it)<<" "<<std::get<2>(*it)<<" used "<<UsedSpace[std::get<0>(*it)][std::get<1>(*it)][std::get<2>(*it)]<<std::endl;
             if(UsedSpace[std::get<0>(*it)][std::get<1>(*it)][std::get<2>(*it)]!=1){
                 UsedSpace[std::get<0>(*it)][std::get<1>(*it)][std::get<2>(*it)] = 3;
             }
@@ -712,9 +745,10 @@ bool Router::ReRouteIllegal(Connection& C, std::set<std::tuple<uint16_t, uint16_
         std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t>>& congestionPoints_prev){   
     std::string rollback_wire_name = C.getName();
     std::cout << "Wire "<<rollback_wire_name<<" routing illegal: "<< std::endl;
-    // for (auto& test_t: C.Result){
-    //     std::cout<<"point list "<<std::get<0>(test_t.coord)<<" "<<std::get<1>(test_t.coord)<<" "<<std::get<2>(test_t.coord)<<std::endl;
-    // }
+    for (auto& test_t: C.Result){
+        if(std::get<0>(test_t.coord) == 15)
+        std::cout<<"point list "<<std::get<0>(test_t.coord)<<" "<<std::get<1>(test_t.coord)<<" "<<std::get<2>(test_t.coord)<<std::endl;
+    }
     std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t>> local_congestion_points;
     for(auto it = congestionPoints.begin(); it!=congestionPoints.end(); ++it){
         std::cout <<"    "<<std::get<0>(*it)<<", "<<std::get<1>(*it)<<", "<<std::get<2>(*it)<<" Type: "<<std::get<3>(*it)<<std::endl;

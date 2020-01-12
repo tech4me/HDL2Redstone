@@ -21,18 +21,18 @@ int main(int argc, char* argv[]) {
             DC.addForcedPlacement("c", {1, 0, 19, Orientation::ZeroCW});
             */
 
-            // DC.addForcedPlacement("a", {0, 0, 0, Orientation::ZeroCW});
-            // DC.addForcedPlacement("b", {3, 0, 0, Orientation::ZeroCW});
-            // DC.addForcedPlacement("c", {6, 0, 0, Orientation::ZeroCW});
-            // DC.addForcedPlacement("d", {9, 0, 0, Orientation::ZeroCW});
-            // DC.addForcedPlacement("x", {12, 0, 0, Orientation::ZeroCW});
-            // DC.addForcedPlacement("y", {15, 0, 0, Orientation::ZeroCW});
-            // DC.addForcedPlacement("dout", {10, 0, 49, Orientation::ZeroCW});
-            
             DC.addForcedPlacement("a", {0, 0, 0, Orientation::ZeroCW});
-            DC.addForcedPlacement("b", {20, 0, 0, Orientation::ZeroCW});
-            DC.addForcedPlacement("x", {40, 0, 0, Orientation::ZeroCW});
-            DC.addForcedPlacement("dout", {30, 0, 49, Orientation::ZeroCW});
+            DC.addForcedPlacement("b", {3, 0, 0, Orientation::ZeroCW});
+            DC.addForcedPlacement("c", {6, 0, 0, Orientation::ZeroCW});
+            DC.addForcedPlacement("d", {9, 0, 0, Orientation::ZeroCW});
+            DC.addForcedPlacement("x", {12, 0, 0, Orientation::ZeroCW});
+            DC.addForcedPlacement("y", {15, 0, 0, Orientation::ZeroCW});
+            DC.addForcedPlacement("dout", {10, 0, 49, Orientation::ZeroCW});
+            
+            // DC.addForcedPlacement("a", {0, 0, 0, Orientation::ZeroCW});
+            // DC.addForcedPlacement("b", {20, 0, 0, Orientation::ZeroCW});
+            // DC.addForcedPlacement("x", {40, 0, 0, Orientation::ZeroCW});
+            // DC.addForcedPlacement("dout", {30, 0, 49, Orientation::ZeroCW});
             
             Design D(50, 50, 50, "design.blif", CL, DC);
             std::cout << D;
