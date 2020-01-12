@@ -394,6 +394,35 @@ void Router::checkUpdateGraph(uint16_t x, uint16_t y, uint16_t z, Router::Point*
         }
     }
 }
+int Router::HelperRoutingLastRepeater(Router::Point* RecurP){
+    if(RecurP->P->length == MAX_NUM_OF_WIRE + 1){
+        RecurP->length = 1;
+        return 2;
+    }else{
+       RecurP->length =  HelperRoutingLastRepeater(RecurP->P);
+       return RecurP->length + 1;
+    }
+    return -1;
+}
+bool Router::RoutingLastRepeater(Router::Point* CongestionP){
+    Router::Point* tail = CongestionP;
+    bool RetFlag = false;
+    while(tail && tail->P && tail->P->P && (tail->length >= 3)){
+        if((tail->ori == tail->P->ori) && (tail->P->P->ori == tail->P->ori)){
+            tail->P->length = MAX_NUM_OF_WIRE + 1;
+            RetFlag = true;
+            break;
+        }
+    }
+    if(RetFlag){
+        CongestionP->length = -1;
+        HelperRoutingLastRepeater(CongestionP);
+        std::cout<<"Repeater Routing Success!"<<std::endl;
+    }else{
+        std::cout<<"Repeater Routing Failed!"<<std::endl;
+    }
+    return RetFlag;
+}
 bool Router::RegularRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_t, uint16_t>& Space,
                           Router::Point***& P_) {
     bool retFlag=true;
@@ -529,18 +558,12 @@ bool Router::RegularRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_
             TempY = it.y;
             TempZ = it.z;
             if (P_[it.x][it.y][it.z].length >= MAX_NUM_OF_WIRE + 1) {
-                    for(auto t: end){
-                        if(TempX == t.x && TempY == t.y && TempZ == t.z){
-                            std::cout<<"HITHITHIT "<<t.x<<" "<<t.y<<" "<<t.z<<std::endl;
-                            break;
-                        }
-                    }
-                C.setInsert(Connection::ConnectionResult(std::make_tuple(TempX, TempY - 1, TempZ),
-                                                         D.CellLib.getCellPtr("BUF"), P_[it.x][it.y][it.z].ori));
-            } else {
-                C.setInsert(Connection::ConnectionResult(std::make_tuple(TempX, TempY - 1, TempZ),
-                                                         D.CellLib.getCellPtr("WIRE"), P_[it.x][it.y][it.z].ori));
+                std::cout<<"Routing failed: Repeater is placed at the endpin "<<TempX<<" "<<TempY<<" "<<TempZ<<std::endl;
+                std::cout<<"Try Routing the repeater ..."<<std::endl;
+                RoutingLastRepeater(&P_[it.x][it.y][it.z]);
             }
+            C.setInsert(Connection::ConnectionResult(std::make_tuple(TempX, TempY - 1, TempZ),
+                                                         D.CellLib.getCellPtr("WIRE"), P_[it.x][it.y][it.z].ori));
             //WI[TempX][TempY][TempZ].C_ptr = &C;
             ptr = P_[it.x][it.y][it.z].P;
             while (ptr != NULL) {
@@ -549,12 +572,12 @@ bool Router::RegularRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_
                 TempY = ptr->Loc.y;
                 TempZ = ptr->Loc.z;
                 if (ptr->length >= MAX_NUM_OF_WIRE + 1) {
-                    for(auto t: end){
-                        if(TempX == t.x && TempY == t.y && TempZ == t.z){
-                            std::cout<<"in while HITHITHIT "<<t.x<<" "<<t.y<<" "<<t.z<<std::endl;
-                            break;
-                        }
-                    }
+                    // for(auto t: end){
+                    //     if(TempX == t.x && TempY == t.y && TempZ == t.z){
+                    //         std::cout<<"in while HITHITHIT "<<t.x<<" "<<t.y<<" "<<t.z<<std::endl;
+                    //         break;
+                    //     }
+                    // }
                     C.setInsert(Connection::ConnectionResult(std::make_tuple(TempX, TempY - 1, TempZ),
                                                              D.CellLib.getCellPtr("BUF"), ptr->ori));
                 } else {
@@ -1047,12 +1070,12 @@ bool Router::HelperReRouteforIllegalRegularRoute(Design& D, Connection& C, std::
             TempY = it.y;
             TempZ = it.z;
             if (P_[it.x][it.y][it.z].length >= MAX_NUM_OF_WIRE + 1) {
-                C.setInsert(Connection::ConnectionResult(std::make_tuple(TempX, TempY - 1, TempZ),
-                                                         D.CellLib.getCellPtr("BUF"), P_[it.x][it.y][it.z].ori));
-            } else {
-                C.setInsert(Connection::ConnectionResult(std::make_tuple(TempX, TempY - 1, TempZ),
-                                                         D.CellLib.getCellPtr("WIRE"), P_[it.x][it.y][it.z].ori));
+                std::cout<<"Routing failed: Repeater is placed at the endpin "<<TempX<<" "<<TempY<<" "<<TempZ<<std::endl;
+                std::cout<<"Try Routing the repeater ..."<<std::endl;
+                RoutingLastRepeater(&P_[it.x][it.y][it.z]);
             }
+            C.setInsert(Connection::ConnectionResult(std::make_tuple(TempX, TempY - 1, TempZ),
+                                                         D.CellLib.getCellPtr("WIRE"), P_[it.x][it.y][it.z].ori));
             //WI[TempX][TempY][TempZ].C_ptr = &C;
             ptr = P_[it.x][it.y][it.z].P;
             while (ptr != NULL) {

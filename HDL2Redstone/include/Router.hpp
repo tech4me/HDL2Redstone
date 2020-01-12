@@ -56,6 +56,8 @@ class Router {
     void Reconstructor(const Design& D);
     bool CheckandKeepResult(Connection& C, std::tuple<uint16_t, uint16_t, uint16_t>& Space);
     bool HelperCheckUpdateGraph(Router::Point* Parent, Router::Point* Current);
+    int HelperRoutingLastRepeater(Router::Point* RecurP);
+    bool RoutingLastRepeater(Router::Point* CongestionP);
     int*** UsedSpace;
     WireInfo*** WI;
     Connection* FailedWire_SingleRouting;
