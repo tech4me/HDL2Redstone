@@ -36,6 +36,9 @@ Schematic Design::exportDesign() const {
         if (Connection->getRouted()) {
             // TODO: Check this once we have something other than wire
             for (const auto& R : Connection->Result) {
+                // if(std::get<0>(R.coord)==33&&std::get<1>(R.coord)==12&& std::get<2>(R.coord)==9){
+                //     std::cout<<"FOUND wire name: "<<Connection->getName()<<std::endl;
+                // }
                 Schem.insertSubSchematic({std::get<0>(R.coord), std::get<1>(R.coord), std::get<2>(R.coord), R.Ori},
                                          R.CellPtr->getSchematic(), R.CellPtr->getType(),
                                          1); // last 2 arguments for debug

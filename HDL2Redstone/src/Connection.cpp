@@ -4,6 +4,7 @@ using namespace HDL2Redstone;
 
 Connection::Connection(const std::string& Name_, Component* ComponentPtr_, const std::string& PortName_, bool IsSource)
     : Name(Name_) {
+    Unable_Routing = 0;
     if (IsSource) {
         SourcePortConnection = std::make_pair(ComponentPtr_, PortName_);
     } else {
@@ -29,15 +30,17 @@ std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t>> Connection::checkRo
         if (it != ResultsMap.end()) {
             switch (it->second) {
             case 0:
-                IllegalPoints.insert({std::get<0>(R.coord), std::get<1>(R.coord) - 1, std::get<2>(R.coord), 0});
+                IllegalPoints.insert({std::get<0>(R.coord), std::get<1>(R.coord) - 1, std::get<2>(R.coord), 1});
                 break;
             case 1:
             case 2:
+                IllegalPoints.insert({std::get<0>(R.coord), std::get<1>(R.coord), std::get<2>(R.coord), 0});
+                break;
             case 3:
-                IllegalPoints.insert({std::get<0>(R.coord), std::get<1>(R.coord), std::get<2>(R.coord), 1});
+                IllegalPoints.insert({std::get<0>(R.coord), std::get<1>(R.coord)+1, std::get<2>(R.coord), 0});
                 break;
             case 4:
-                IllegalPoints.insert({std::get<0>(R.coord), std::get<1>(R.coord) + 1, std::get<2>(R.coord), 0});
+                IllegalPoints.insert({std::get<0>(R.coord), std::get<1>(R.coord) + 1, std::get<2>(R.coord), 1});
                 break;
             default:
                 std::cout << "wrong" << std::endl;

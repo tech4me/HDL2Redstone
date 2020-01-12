@@ -16,6 +16,10 @@ class Router {
         uint16_t y;
         uint16_t z;
     } coord;
+    typedef struct {
+        int ComponentSpace;
+        std::set<Connection*> C_ptr;
+    } WireInfo;
     class Point {
       public:
         coord Loc;
@@ -38,11 +42,24 @@ class Router {
     bool checkSingleRoute(const Design& D,
                           const std::vector<std::tuple<uint16_t, uint16_t, uint16_t>> connection_points);
     bool checkPointAvaliable(const Design& D, const std::tuple<int16_t, int16_t, int16_t> location);
-    std::vector<std::tuple<uint16_t, uint16_t, uint16_t>>
-    flatRouteDirectLine(std::tuple<uint16_t, uint16_t, uint16_t> start, std::tuple<uint16_t, uint16_t, uint16_t> end);
-    void updateUsedSpace(std::set<Connection::ConnectionResult, Connection::resultcomp>& Result,
+    void updateUsedSpace(Connection& C,
                          std::tuple<uint16_t, uint16_t, uint16_t>& Space);
-    coord updateSinglePortUsedSpace(std::tuple<uint16_t, uint16_t, uint16_t> Loc, Facing Fac);
-    bool*** UsedSpace;
+    coord updateSinglePortUsedSpace(std::tuple<uint16_t, uint16_t, uint16_t> Loc, Facing Fac, coord& congestion);
+    bool ReRouteStartRouting(coord congestionPoint, std::tuple<uint16_t, uint16_t, uint16_t>& Space,Router::Point***& P_, Design& D);
+    bool ReRouteEndRouting();//TODO
+    bool ReRouteIllegal(Connection& C, std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t>>& congestionPoints, std::tuple<uint16_t, uint16_t, uint16_t>& Space,Router::Point***& P_, Design& D,
+        std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t>>& congestionPoints_prev);
+    bool HelperReRouteIllegal(Connection& C, std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t>>& local_congestion_points, std::tuple<uint16_t, uint16_t, uint16_t>& Space,Router::Point***& P_, Design& D);
+    bool HelperReRouteforIllegalRegularRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_t, uint16_t>& Space,
+                          Router::Point***& P_, std::set<std::tuple<uint16_t, uint16_t, uint16_t>>& RetIllegalPoints, std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t>>& congestionPoints);
+    void Deconstructor(std::tuple<uint16_t, uint16_t, uint16_t>& Space);
+    void Reconstructor(const Design& D);
+    bool CheckandKeepResult(Connection& C, std::tuple<uint16_t, uint16_t, uint16_t>& Space);
+    bool HelperCheckUpdateGraph(Router::Point* Parent, Router::Point* Current);
+    int HelperRoutingLastRepeater(Router::Point* RecurP);
+    bool RoutingLastRepeater(Router::Point* CongestionP);
+    int*** UsedSpace;
+    WireInfo*** WI;
+    Connection* FailedWire_SingleRouting;
 };
 } // namespace HDL2Redstone
