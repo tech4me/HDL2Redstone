@@ -674,7 +674,7 @@ bool Router::HelperReRouteIllegal(Connection& C, std::set<std::tuple<uint16_t, u
     
     do{
         for(auto it = local_congestion_points.begin(); it!=local_congestion_points.end(); ++it){
-            std::cout<<"to set to 3: "<<std::get<0>(*it)<<" "<<std::get<1>(*it)<<" "<<std::get<2>(*it)<<" used "<<UsedSpace[std::get<0>(*it)][std::get<1>(*it)][std::get<2>(*it)]<<std::endl;
+            //std::cout<<"to set to 3: "<<std::get<0>(*it)<<" "<<std::get<1>(*it)<<" "<<std::get<2>(*it)<<" used "<<UsedSpace[std::get<0>(*it)][std::get<1>(*it)][std::get<2>(*it)]<<std::endl;
             if(UsedSpace[std::get<0>(*it)][std::get<1>(*it)][std::get<2>(*it)]!=1){
                 UsedSpace[std::get<0>(*it)][std::get<1>(*it)][std::get<2>(*it)] = 3;
             }
@@ -745,10 +745,10 @@ bool Router::ReRouteIllegal(Connection& C, std::set<std::tuple<uint16_t, uint16_
         std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t>>& congestionPoints_prev){   
     std::string rollback_wire_name = C.getName();
     std::cout << "Wire "<<rollback_wire_name<<" routing illegal: "<< std::endl;
-    for (auto& test_t: C.Result){
-        if(std::get<0>(test_t.coord) == 15)
-        std::cout<<"point list "<<std::get<0>(test_t.coord)<<" "<<std::get<1>(test_t.coord)<<" "<<std::get<2>(test_t.coord)<<std::endl;
-    }
+    // for (auto& test_t: C.Result){
+    //     if(std::get<0>(test_t.coord) == 15)
+    //     std::cout<<"point list "<<std::get<0>(test_t.coord)<<" "<<std::get<1>(test_t.coord)<<" "<<std::get<2>(test_t.coord)<<std::endl;
+    // }
     std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t>> local_congestion_points;
     for(auto it = congestionPoints.begin(); it!=congestionPoints.end(); ++it){
         std::cout <<"    "<<std::get<0>(*it)<<", "<<std::get<1>(*it)<<", "<<std::get<2>(*it)<<" Type: "<<std::get<3>(*it)<<std::endl;
