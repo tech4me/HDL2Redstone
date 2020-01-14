@@ -63,7 +63,7 @@ class Connection {
         }
         Result.insert(CR_);
     };
-    int  getUnableRouting() const { return Unable_Routing; }
+    int getUnableRouting() const { return Unable_Routing; }
     void setUnableRouting(int Unable_Routing_) { Unable_Routing = Unable_Routing_; }
     // add component port to sink
     void addSink(Component* ComponentPtr_, const std::string& PortName_);
