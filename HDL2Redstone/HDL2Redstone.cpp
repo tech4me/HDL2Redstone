@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
 	    DC.addForcedPlacement("sout[3]", {60, 0, 99, Orientation::ZeroCW});
 	    DC.addForcedPlacement("sout[4]", {80, 0, 99, Orientation::ZeroCW});*/
 
-            Design D(20, 20, 20, /*50, 50, 50,*/ /*105, 105, 105,*/ "design.blif", CL, DC);
+            Design D(/*20, 20, 20,*/ /*50, 50, 50,*/ 105, 105, 105, "design.blif", CL, DC);
             //std::cout << D;
             std::cout << "Now Running Place & Route..." << std::endl;
             if (!D.doPlaceAndRoute()) {
