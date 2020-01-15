@@ -3,6 +3,8 @@ hierarchy -check -auto-top
 
 proc; fsm; opt; memory; opt
 
+flatten;
+
 techmap; opt
 
 abc -liberty {input_liberty_file} -g AND,OR
