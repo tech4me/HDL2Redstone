@@ -434,6 +434,7 @@ bool Router::RoutingLastRepeater(Router::Point* CongestionP) {
             RetFlag = true;
             break;
         }
+        tail = tail->P;
     }
     if (RetFlag) {
         CongestionP->length = -1;
