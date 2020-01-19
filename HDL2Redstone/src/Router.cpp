@@ -267,8 +267,9 @@ void Router::route(Design& D) {
                 }
             }
         } else if (FailedWire_SingleRouting->getUnableRouting() == 3) {
-            std::cout << FailedWire_SingleRouting->getName() << " is unable to route second time, routing failed"
+            std::cout << FailedWire_SingleRouting->getName() << " is unable to route second time, Routing failed"
                       << std::endl;
+            break;
         }
     }
     std::cout << "Routing Done" << std::endl;
