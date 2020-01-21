@@ -309,7 +309,7 @@ bool Router::HelperCheckUpdateGraph(Router::Point* Parent, Router::Point* Curren
     } else if (Parent->Loc.z < Current->Loc.z) {
         ori_ = HDL2Redstone::Orientation::ZeroCW;
     }
-    if (Parent->length == MAX_NUM_OF_WIRE + 1) { // should be never to reach here, cab be deleted
+    if (Parent->length == MAX_NUM_OF_WIRE + 1) {
         if (Parent->ori != ori_) {
             RetFlag = false;
         } else if (Parent->Loc.y != Current->Loc.y) {
@@ -326,9 +326,7 @@ bool Router::HelperCheckUpdateGraph(Router::Point* Parent, Router::Point* Curren
             }
         }
     } else if (Parent->length == MAX_NUM_OF_WIRE) {
-        if (Parent->ori != ori_) {
-            RetFlag = false;
-        } else if (Parent->Loc.y != Current->Loc.y) {
+        if (Parent->Loc.y != Current->Loc.y) {
             RetFlag = false;
         } else {
             if (Current->cost == Parent->cost + 1) {
@@ -346,25 +344,28 @@ bool Router::HelperCheckUpdateGraph(Router::Point* Parent, Router::Point* Curren
             if ((Parent->Loc.y == Current->Loc.y) && (Current->P->Loc.y != Current->Loc.y)) {
                 Current->length = Parent->length + 1;
             } else if ((Parent->Loc.y == Current->Loc.y) && (Current->P->Loc.y == Current->Loc.y)) {
-                if (ori_ == HDL2Redstone::Orientation::ZeroCW) {
-                    Current->length = Parent->length + 1;
-                } else if (ori_ == HDL2Redstone::Orientation::TwoCW) {
-                    Current->length = Parent->length + 1;
-                } else if (ori_ == HDL2Redstone::Orientation::OneCW) {
-                    if (Current->ori == HDL2Redstone::Orientation::ZeroCW ||
-                        Current->ori == HDL2Redstone::Orientation::TwoCW) {
-                        RetFlag = false;
-                    } else {
+                //1 5 9 13; 3, 7, 11,15
+                //if(Current->Loc.y % 4 == 3){
+                    if (ori_ == HDL2Redstone::Orientation::ZeroCW || ori_ == HDL2Redstone::Orientation::TwoCW) {
                         Current->length = Parent->length + 1;
-                    }
-                } else {
-                    if (Current->ori == HDL2Redstone::Orientation::ZeroCW ||
-                        Current->ori == HDL2Redstone::Orientation::TwoCW) {
-                        RetFlag = false;
                     } else {
-                        Current->length = Parent->length + 1;
+                        if (Current->ori == HDL2Redstone::Orientation::ZeroCW || Current->ori == HDL2Redstone::Orientation::TwoCW) {
+                            RetFlag = false;
+                        } else {
+                            Current->length = Parent->length + 1;
+                        }
                     }
-                }
+                // }else{
+                //     if (ori_ == HDL2Redstone::Orientation::OneCW || ori_ == HDL2Redstone::Orientation::ThreeCW) {
+                //         Current->length = Parent->length + 1;
+                //     } else {
+                //         if (Current->ori == HDL2Redstone::Orientation::OneCW || Current->ori == HDL2Redstone::Orientation::ThreeCW) {
+                //             RetFlag = false;
+                //         } else {
+                //             Current->length = Parent->length + 1;
+                //         }
+                //     }                    
+                // }
             } else if ((Parent->Loc.y != Current->Loc.y) && (Current->P->Loc.y != Current->Loc.y)) {
                 Current->length = Parent->length + 1;
             } else {
@@ -490,6 +491,8 @@ bool Router::RegularRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_
             temp_result.z == std::get<2>(temp)) {
             std::cout << "FAIL routing to " << temp_result.x << ", " << temp_result.y << ", " << temp_result.z
                       << " because of other wires routing" << std::endl;
+            std::cout << "congestion point is " << congestionP.x << ", " << congestionP.y << ", " << congestionP.z
+                  << std::endl;
             if (!ReRouteStartRouting(congestionP, Space, P_, D)) {
                 retFlag = false;
                 temp_result = Router::updateSinglePortUsedSpace(temp, endFace, congestionP);
@@ -531,53 +534,53 @@ bool Router::RegularRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_
         if (endTemp.empty())
             break;
 
-        if (TempP->Loc.x && (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::OneCW) &&
+        if (TempP->Loc.x /*&& (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::OneCW)*/ &&
             (TempP->Loc.y) % 2) {
             Router::checkUpdateGraph(TempP->Loc.x - 1, TempP->Loc.y, TempP->Loc.z, P_, Q, TempP, Space);
         }
-        if (TempP->Loc.x < std::get<0>(Space) - 1 &&
-            (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::ThreeCW) &&
+        if (TempP->Loc.x < std::get<0>(Space) - 1 /*&&
+            (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::ThreeCW)*/ &&
             (TempP->Loc.y) % 2) {
             Router::checkUpdateGraph(TempP->Loc.x + 1, TempP->Loc.y, TempP->Loc.z, P_, Q, TempP, Space);
         }
-        if (TempP->Loc.z && (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::TwoCW) &&
+        if (TempP->Loc.z /*&& (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::TwoCW)*/ &&
             (TempP->Loc.y) % 2) {
             Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y, TempP->Loc.z - 1, P_, Q, TempP, Space);
         }
-        if (TempP->Loc.z < std::get<2>(Space) - 1 &&
-            (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::ZeroCW) &&
+        if (TempP->Loc.z < std::get<2>(Space) - 1 /*&&
+            (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::ZeroCW)*/ &&
             (TempP->Loc.y) % 2) {
             Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y, TempP->Loc.z + 1, P_, Q, TempP, Space);
         }
 
-        if (TempP->Loc.x && (TempP->Loc.y > 1) && (TempP->length <= MAX_NUM_OF_WIRE)) {
+        if (TempP->Loc.x && (TempP->Loc.y > 1) /*&& (TempP->length <= MAX_NUM_OF_WIRE)*/) {
             Router::checkUpdateGraph(TempP->Loc.x - 1, TempP->Loc.y - 1, TempP->Loc.z, P_, Q, TempP, Space);
         }
-        if (TempP->Loc.x && (TempP->Loc.y < std::get<1>(Space) - 1) &&
-            (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::OneCW)) {
+        if (TempP->Loc.x && (TempP->Loc.y < std::get<1>(Space) - 1)/* &&
+            (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::OneCW)*/) {
             Router::checkUpdateGraph(TempP->Loc.x - 1, TempP->Loc.y + 1, TempP->Loc.z, P_, Q, TempP, Space);
         }
 
-        if ((TempP->Loc.x < std::get<0>(Space) - 1) && (TempP->Loc.y > 1) && (TempP->length <= MAX_NUM_OF_WIRE)) {
+        if ((TempP->Loc.x < std::get<0>(Space) - 1) && (TempP->Loc.y > 1) /*&& (TempP->length <= MAX_NUM_OF_WIRE)*/) {
             Router::checkUpdateGraph(TempP->Loc.x + 1, TempP->Loc.y - 1, TempP->Loc.z, P_, Q, TempP, Space);
         }
-        if ((TempP->Loc.x < std::get<0>(Space) - 1) && (TempP->Loc.y < std::get<1>(Space) - 1) &&
-            (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::ThreeCW)) {
+        if ((TempP->Loc.x < std::get<0>(Space) - 1) && (TempP->Loc.y < std::get<1>(Space) - 1) /*&&
+            (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::ThreeCW)*/) {
             Router::checkUpdateGraph(TempP->Loc.x + 1, TempP->Loc.y + 1, TempP->Loc.z, P_, Q, TempP, Space);
         }
-        if (TempP->Loc.z && (TempP->Loc.y > 1) && (TempP->length <= MAX_NUM_OF_WIRE)) {
+        if (TempP->Loc.z && (TempP->Loc.y > 1)/* && (TempP->length <= MAX_NUM_OF_WIRE)*/) {
             Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y - 1, TempP->Loc.z - 1, P_, Q, TempP, Space);
         }
-        if (TempP->Loc.z && (TempP->Loc.y < std::get<1>(Space) - 1) &&
-            (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::TwoCW)) {
+        if (TempP->Loc.z && (TempP->Loc.y < std::get<1>(Space) - 1) /*&&
+            (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::TwoCW)*/) {
             Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y + 1, TempP->Loc.z - 1, P_, Q, TempP, Space);
         }
 
-        if ((TempP->Loc.z < std::get<2>(Space) - 1) && (TempP->Loc.y > 1) && (TempP->length <= MAX_NUM_OF_WIRE)) {
+        if ((TempP->Loc.z < std::get<2>(Space) - 1) && (TempP->Loc.y > 1)/* && (TempP->length <= MAX_NUM_OF_WIRE)*/) {
             Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y - 1, TempP->Loc.z + 1, P_, Q, TempP, Space);
         }
-        if ((TempP->Loc.z < std::get<2>(Space) - 1) && (TempP->Loc.y < std::get<1>(Space) - 1) &&
-            (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::ZeroCW)) {
+        if ((TempP->Loc.z < std::get<2>(Space) - 1) && (TempP->Loc.y < std::get<1>(Space) - 1)/* &&
+            (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::ZeroCW)*/) {
             Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y + 1, TempP->Loc.z + 1, P_, Q, TempP, Space);
         }
     }
@@ -815,17 +818,36 @@ bool Router::ReRouteIllegal(Connection& C,
     //     std::cout<<"point list "<<std::get<0>(test_t.coord)<<" "<<std::get<1>(test_t.coord)<<"
     //     "<<std::get<2>(test_t.coord)<<std::endl;
     // }
+    //TODO:can be optimaze its code
     std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t>> local_congestion_points;
-    for (auto it = congestionPoints.begin(); it != congestionPoints.end(); ++it) {
-        std::cout << "    " << std::get<0>(*it) << ", " << std::get<1>(*it) << ", " << std::get<2>(*it)
-                  << " Type: " << std::get<3>(*it) << std::endl;
-        local_congestion_points.insert(
-            std::make_tuple(std::get<0>(*it), std::get<1>(*it) + std::get<3>(*it) + 1, std::get<2>(*it), 0));
+    for(auto& i: congestionPoints){
+        std::cout << "    " << std::get<0>(i) << ", " << std::get<1>(i) << ", " << std::get<2>(i)
+                  << " Type: " << std::get<3>(i) << std::endl;
+        bool temp_flag = false;
+        for(auto& it: congestionPoints_prev){
+            if( (std::get<0>(it) == std::get<0>(i)) && (std::get<1>(it) == std::get<1>(i)) && (std::get<2>(it) == std::get<2>(i))){
+                if(std::get<3>(it)==1){
+                    std::cout << "        get it 3 times: rerouting for illegal failed"<< std::endl;
+                    return false; 
+                }
+            }
+            if( (std::get<0>(it) == std::get<0>(i)) && (std::get<1>(it) == std::get<1>(i)+std::get<3>(i)+1) && (std::get<2>(it) == std::get<2>(i))){
+                if(std::get<3>(it)==0){
+                    temp_flag = true;
+                    std::cout << "        get it twice: disable the lower point for illegal"<< std::endl;
+                    congestionPoints_prev.erase(it);
+                    congestionPoints_prev.insert(std::make_tuple(std::get<0>(it),std::get<1>(i), std::get<2>(i), 1));
+                    break;
+                }
+            }
+        }
+        if(!temp_flag){
+            local_congestion_points.insert(std::make_tuple(std::get<0>(i), std::get<1>(i) + std::get<3>(i) + 1, std::get<2>(i), 0));
+        }
     }
-    for (auto it = congestionPoints_prev.begin(); it != congestionPoints_prev.end(); ++it) {
-        std::cout << "    prev " << std::get<0>(*it) << ", " << std::get<1>(*it) << ", " << std::get<2>(*it)
-                  << " converted_type: " << std::get<3>(*it) << std::endl;
-        local_congestion_points.insert(*it);
+    for (auto it : congestionPoints_prev) {
+        std::cout << "    prev " << std::get<0>(it) << ", " << std::get<1>(it) << ", " << std::get<2>(it)<< " converted_type: " << std::get<3>(it) << std::endl;
+        local_congestion_points.insert(it);
     }
     // for(auto it = local_congestion_points.begin(); it!=local_congestion_points.end(); ++it){
     //     std::cout <<"    "<<std::get<0>(*it)<<", "<<std::get<1>(*it)<<", "<<std::get<2>(*it)<<" ---
@@ -1024,6 +1046,8 @@ bool Router::HelperReRouteforIllegalRegularRoute(
             temp_result.z == std::get<2>(temp)) {
             std::cout << "FAIL routing to " << temp_result.x << ", " << temp_result.y << ", " << temp_result.z
                       << " because of other wires routing" << std::endl;
+            std::cout << "congestion point is " << congestionP.x << ", " << congestionP.y << ", " << congestionP.z
+                  << std::endl;
             if (UsedSpace[temp_result.x][temp_result.y][temp_result.z] ==
                 3) { // Here to check the congestion point is set as non-reachable, it should fail
                 RetIllegalPoints.insert(temp);
@@ -1067,53 +1091,53 @@ bool Router::HelperReRouteforIllegalRegularRoute(
         if (endTemp.empty())
             break;
 
-        if (TempP->Loc.x && (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::OneCW) &&
+        if (TempP->Loc.x /*&& (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::OneCW)*/ &&
             (TempP->Loc.y) % 2) {
             Router::checkUpdateGraph(TempP->Loc.x - 1, TempP->Loc.y, TempP->Loc.z, P_, Q, TempP, Space);
         }
-        if (TempP->Loc.x < std::get<0>(Space) - 1 &&
-            (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::ThreeCW) &&
+        if (TempP->Loc.x < std::get<0>(Space) - 1 /*&&
+            (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::ThreeCW)*/ &&
             (TempP->Loc.y) % 2) {
             Router::checkUpdateGraph(TempP->Loc.x + 1, TempP->Loc.y, TempP->Loc.z, P_, Q, TempP, Space);
         }
-        if (TempP->Loc.z && (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::TwoCW) &&
+        if (TempP->Loc.z /*&& (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::TwoCW)*/ &&
             (TempP->Loc.y) % 2) {
             Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y, TempP->Loc.z - 1, P_, Q, TempP, Space);
         }
-        if (TempP->Loc.z < std::get<2>(Space) - 1 &&
-            (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::ZeroCW) &&
+        if (TempP->Loc.z < std::get<2>(Space) - 1 /*&&
+            (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::ZeroCW)*/ &&
             (TempP->Loc.y) % 2) {
             Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y, TempP->Loc.z + 1, P_, Q, TempP, Space);
         }
 
-        if (TempP->Loc.x && (TempP->Loc.y > 1) && (TempP->length <= MAX_NUM_OF_WIRE)) {
+        if (TempP->Loc.x && (TempP->Loc.y > 1) /*&& (TempP->length <= MAX_NUM_OF_WIRE)*/) {
             Router::checkUpdateGraph(TempP->Loc.x - 1, TempP->Loc.y - 1, TempP->Loc.z, P_, Q, TempP, Space);
         }
-        if (TempP->Loc.x && (TempP->Loc.y < std::get<1>(Space) - 1) &&
-            (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::OneCW)) {
+        if (TempP->Loc.x && (TempP->Loc.y < std::get<1>(Space) - 1)/* &&
+            (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::OneCW)*/) {
             Router::checkUpdateGraph(TempP->Loc.x - 1, TempP->Loc.y + 1, TempP->Loc.z, P_, Q, TempP, Space);
         }
 
-        if ((TempP->Loc.x < std::get<0>(Space) - 1) && (TempP->Loc.y > 1) && (TempP->length <= MAX_NUM_OF_WIRE)) {
+        if ((TempP->Loc.x < std::get<0>(Space) - 1) && (TempP->Loc.y > 1) /*&& (TempP->length <= MAX_NUM_OF_WIRE)*/) {
             Router::checkUpdateGraph(TempP->Loc.x + 1, TempP->Loc.y - 1, TempP->Loc.z, P_, Q, TempP, Space);
         }
-        if ((TempP->Loc.x < std::get<0>(Space) - 1) && (TempP->Loc.y < std::get<1>(Space) - 1) &&
-            (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::ThreeCW)) {
+        if ((TempP->Loc.x < std::get<0>(Space) - 1) && (TempP->Loc.y < std::get<1>(Space) - 1) /*&&
+            (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::ThreeCW)*/) {
             Router::checkUpdateGraph(TempP->Loc.x + 1, TempP->Loc.y + 1, TempP->Loc.z, P_, Q, TempP, Space);
         }
-        if (TempP->Loc.z && (TempP->Loc.y > 1) && (TempP->length <= MAX_NUM_OF_WIRE)) {
+        if (TempP->Loc.z && (TempP->Loc.y > 1)/* && (TempP->length <= MAX_NUM_OF_WIRE)*/) {
             Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y - 1, TempP->Loc.z - 1, P_, Q, TempP, Space);
         }
-        if (TempP->Loc.z && (TempP->Loc.y < std::get<1>(Space) - 1) &&
-            (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::TwoCW)) {
+        if (TempP->Loc.z && (TempP->Loc.y < std::get<1>(Space) - 1) /*&&
+            (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::TwoCW)*/) {
             Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y + 1, TempP->Loc.z - 1, P_, Q, TempP, Space);
         }
 
-        if ((TempP->Loc.z < std::get<2>(Space) - 1) && (TempP->Loc.y > 1) && (TempP->length <= MAX_NUM_OF_WIRE)) {
+        if ((TempP->Loc.z < std::get<2>(Space) - 1) && (TempP->Loc.y > 1)/* && (TempP->length <= MAX_NUM_OF_WIRE)*/) {
             Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y - 1, TempP->Loc.z + 1, P_, Q, TempP, Space);
         }
-        if ((TempP->Loc.z < std::get<2>(Space) - 1) && (TempP->Loc.y < std::get<1>(Space) - 1) &&
-            (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::ZeroCW)) {
+        if ((TempP->Loc.z < std::get<2>(Space) - 1) && (TempP->Loc.y < std::get<1>(Space) - 1)/* &&
+            (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::ZeroCW)*/) {
             Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y + 1, TempP->Loc.z + 1, P_, Q, TempP, Space);
         }
     }
