@@ -14,14 +14,15 @@ const std::tuple<uint16_t, uint16_t, uint16_t> Design::getSpace() const {
 const ModuleNetlist& Design::getModuleNetlist() const { return MN; }
 
 bool Design::doPlaceAndRoute() {
+    std::cout << "Now Placing..." << std::endl;
     Placer P(*this);
-    if (!P.place()) {
-        return false;
+    if (P.place()) {
+        return true;
     }
     Router R(*this);
     std::cout << "Now Routing..." << std::endl;
     R.route(*this);
-    return true;
+    return false;
 }
 
 Schematic Design::exportDesign() const {

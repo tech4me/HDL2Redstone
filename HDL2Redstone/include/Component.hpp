@@ -16,12 +16,21 @@ class Component {
     uint16_t getLength() const { return CellPtr->getLength(); }
     const std::string& getType() const { return CellPtr->getType(); }
 
+    std::vector<std::string> getPinNames() const { return CellPtr->getPinNames(); }
     Facing getPinFacing(std::string PinName_) const;
     std::tuple<uint16_t, uint16_t, uint16_t> getPinLocation(std::string PinName_) const;
     bool getPlaced() const { return Placed; }
     void setPlaced(bool Placed_) { Placed = Placed_; }
 
-    void setPlacement(uint16_t X_, uint16_t Y_, uint16_t Z_, Orientation Turn_);
+    void setPlacement(uint16_t X_, uint16_t Y_, uint16_t Z_, Orientation Orient_) {
+        P.X = X_;
+        P.Y = Y_;
+        P.Z = Z_;
+        P.Orient = Orient_;
+        Placed = true;
+    }
+
+    void clearPlacement() { Placed = false; }
 
     // Post placement method
     // TODO: Make sure they are only called when Placed is true

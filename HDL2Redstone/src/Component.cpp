@@ -52,13 +52,6 @@ std::tuple<uint16_t, uint16_t, uint16_t> Component::getPinLocation(std::string P
         return std::make_tuple(-std::get<2>(tempLoc) + P.X, std::get<1>(tempLoc) + P.Y, std::get<0>(tempLoc) + P.Z);
     }
 }
-void Component::setPlacement(uint16_t X_, uint16_t Y_, uint16_t Z_, Orientation Orient_) {
-    P.X = X_;
-    P.Y = Y_;
-    P.Z = Z_;
-    P.Orient = Orient_;
-    Placed = true;
-}
 
 std::pair<std::tuple<uint16_t, uint16_t, uint16_t>, std::tuple<uint16_t, uint16_t, uint16_t>>
 Component::getRange() const {

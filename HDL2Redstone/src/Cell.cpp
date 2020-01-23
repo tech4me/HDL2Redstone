@@ -7,6 +7,14 @@ Cell::Cell(const std::string& Type_, const std::string& CellLibDir_, const std::
            const std::string& SchematicName_)
     : Type(Type_), Schem(CellLibDir_ + SchematicName_ + ".schem"), Pins(Pins_) {}
 
+std::vector<std::string> Cell::getPinNames() const {
+    std::vector<std::string> Ret;
+    for (const auto& Pin : Pins) {
+        Ret.push_back(Pin.first);
+    }
+    return Ret;
+}
+
 namespace HDL2Redstone {
 std::ostream& operator<<(std::ostream& out, const Cell& Cell_) {
     out << "In cell " << Cell_.Type << ": " << std::endl;

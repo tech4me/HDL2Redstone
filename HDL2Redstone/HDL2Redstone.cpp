@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
                      "design.blif", CL, DC);
             //std::cout << D;
             std::cout << "Now Running Place & Route..." << std::endl;
-            if (!D.doPlaceAndRoute()) {
+            if (D.doPlaceAndRoute()) {
                 std::cout << "Place/Route failed!!!" << std::endl;
                 return 1;
             }
