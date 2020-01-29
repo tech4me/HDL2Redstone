@@ -9,7 +9,24 @@
 #define MAX_NUM_OF_WIRE 12
 
 using namespace HDL2Redstone;
-void Router::InitPortUsedSpace(std::tuple<uint16_t, uint16_t, uint16_t> Loc, Facing Fac) {
+void Router::InitPortUsedSpaceHelper(Router::coord& Loc,std::tuple<uint16_t, uint16_t, uint16_t>& Space){
+    if (Loc.x > 0) {
+        UsedSpace[Loc.x - 1][Loc.y][Loc.z] = (UsedSpace[Loc.x - 1][Loc.y][Loc.z] == 1) ? 1 : 2;
+    }
+    if (Loc.x < std::get<0>(Space) - 1) {
+        UsedSpace[Loc.x + 1][Loc.y][Loc.z] = (UsedSpace[Loc.x + 1][Loc.y][Loc.z] == 1) ? 1 : 2;
+    }
+    if (Loc.y > 0) {
+        UsedSpace[Loc.x][Loc.y - 1][Loc.z] = (UsedSpace[Loc.x][Loc.y - 1][Loc.z] == 1) ? 1 : 2;
+    }
+    if (Loc.z > 0) {
+        UsedSpace[Loc.x][Loc.y][Loc.z - 1] = (UsedSpace[Loc.x][Loc.y][Loc.z - 1] == 1) ? 1 : 2;
+    }
+    if (Loc.z < std::get<2>(Space) - 1) {
+        UsedSpace[Loc.x][Loc.y][Loc.z + 1] = (UsedSpace[Loc.x][Loc.y][Loc.z + 1] == 1) ? 1 : 2;
+    }    
+}
+void Router::InitPortUsedSpace(std::tuple<uint16_t, uint16_t, uint16_t> Loc, Facing Fac,std::tuple<uint16_t, uint16_t, uint16_t>& Space) {
     Router::coord ret;
     ret.x = std::get<0>(Loc);
     ret.y = std::get<1>(Loc);
@@ -17,20 +34,25 @@ void Router::InitPortUsedSpace(std::tuple<uint16_t, uint16_t, uint16_t> Loc, Fac
     if (Fac == Facing::North) {
         WI[ret.x][ret.y][ret.z - 1].ComponentSpace = 2;
         WI[ret.x][ret.y - 1][ret.z - 1].ComponentSpace = 2;
+        ret.z--;
     }
-    if (Fac == Facing::East) {
+    else if (Fac == Facing::East) {
         WI[ret.x + 1][ret.y][ret.z].ComponentSpace = 2;
         WI[ret.x + 1][ret.y - 1][ret.z].ComponentSpace = 2;
+        ret.x++;
     }
     // TODO: Add vertical pin
-    if (Fac == Facing::South) {
+    else if (Fac == Facing::South) {
         WI[ret.x][ret.y][ret.z + 1].ComponentSpace = 2;
         WI[ret.x][ret.y - 1][ret.z + 1].ComponentSpace = 2;
+        ret.z++;
     }
-    if (Fac == Facing::West) {
+    else{
         WI[ret.x - 1][ret.y][ret.z].ComponentSpace = 2;
         WI[ret.x - 1][ret.y - 1][ret.z].ComponentSpace = 2;
+        ret.x--;
     }
+    //InitPortUsedSpaceHelper(ret,Space);
 }
 Router::coord Router::updateSinglePortUsedSpace(std::tuple<uint16_t, uint16_t, uint16_t> Loc, Facing Fac,
                                                 coord& congestion) {
@@ -162,10 +184,10 @@ Router::Router(const Design& D) {
     for (auto const& j : Connections_) {
         auto SourcePortConnection_ = j->getSourcePortConnection();
         InitPortUsedSpace(((SourcePortConnection_).first)->getPinLocation((SourcePortConnection_).second),
-                          ((SourcePortConnection_).first)->getPinFacing((SourcePortConnection_).second));
+                          ((SourcePortConnection_).first)->getPinFacing((SourcePortConnection_).second),Space);
         auto SinkPortConnection_ = j->getSinkPortConnections();
         for (auto const& k : SinkPortConnection_) {
-            InitPortUsedSpace((k.first)->getPinLocation(k.second), (k.first)->getPinFacing(k.second));
+            InitPortUsedSpace((k.first)->getPinLocation(k.second), (k.first)->getPinFacing(k.second),Space);
         }
     }
     FailedWire_SingleRouting = NULL;
@@ -1283,10 +1305,10 @@ void Router::Reconstructor(const Design& D) {
     for (auto const& j : Connections_) {
         auto SourcePortConnection_ = j->getSourcePortConnection();
         InitPortUsedSpace(((SourcePortConnection_).first)->getPinLocation((SourcePortConnection_).second),
-                          ((SourcePortConnection_).first)->getPinFacing((SourcePortConnection_).second));
+                          ((SourcePortConnection_).first)->getPinFacing((SourcePortConnection_).second),Space);
         auto SinkPortConnection_ = j->getSinkPortConnections();
         for (auto const& k : SinkPortConnection_) {
-            InitPortUsedSpace((k.first)->getPinLocation(k.second), (k.first)->getPinFacing(k.second));
+            InitPortUsedSpace((k.first)->getPinLocation(k.second), (k.first)->getPinFacing(k.second),Space);
         }
     }
     for (auto const& j : Connections_) {

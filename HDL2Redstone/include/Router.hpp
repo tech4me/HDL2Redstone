@@ -64,7 +64,8 @@ class Router {
     bool HelperCheckUpdateGraph(Router::Point* Parent, Router::Point* Current);
     int HelperRoutingLastRepeater(Router::Point* RecurP);
     bool RoutingLastRepeater(Router::Point* CongestionP);
-    void InitPortUsedSpace(std::tuple<uint16_t, uint16_t, uint16_t> Loc, Facing Fac);
+    void InitPortUsedSpace(std::tuple<uint16_t, uint16_t, uint16_t> Loc, Facing Fac,std::tuple<uint16_t, uint16_t, uint16_t>& Space);
+    void InitPortUsedSpaceHelper(Router::coord& Loc,std::tuple<uint16_t, uint16_t, uint16_t>& Space);
     int*** UsedSpace;
     WireInfo*** WI;
     Connection* FailedWire_SingleRouting;
