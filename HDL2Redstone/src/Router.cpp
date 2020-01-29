@@ -52,7 +52,7 @@ void Router::InitPortUsedSpace(std::tuple<uint16_t, uint16_t, uint16_t> Loc, Fac
         WI[ret.x - 1][ret.y - 1][ret.z].ComponentSpace = 2;
         ret.x--;
     }
-    //InitPortUsedSpaceHelper(ret,Space);
+    InitPortUsedSpaceHelper(ret,Space);
 }
 Router::coord Router::updateSinglePortUsedSpace(std::tuple<uint16_t, uint16_t, uint16_t> Loc, Facing Fac,
                                                 coord& congestion) {
