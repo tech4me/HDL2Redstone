@@ -54,8 +54,25 @@ void Router::InitPortUsedSpace(std::tuple<uint16_t, uint16_t, uint16_t> Loc, Fac
     }
     InitPortUsedSpaceHelper(ret,Space);
 }
+void Router::updateSinglePortUsedSpaceHelper(Router::coord& Loc,std::tuple<uint16_t, uint16_t, uint16_t>& Space){
+    if (Loc.x > 0) {
+        UsedSpace[Loc.x - 1][Loc.y][Loc.z] = (UsedSpace[Loc.x - 1][Loc.y][Loc.z] != 1) ? 0 : 1;
+    }
+    if (Loc.x < std::get<0>(Space) - 1) {
+        UsedSpace[Loc.x + 1][Loc.y][Loc.z] = (UsedSpace[Loc.x + 1][Loc.y][Loc.z] != 1) ? 0 : 1;
+    }
+    if (Loc.y > 0) {
+        UsedSpace[Loc.x][Loc.y - 1][Loc.z] = (UsedSpace[Loc.x][Loc.y - 1][Loc.z] != 1) ? 0 : 1;
+    }
+    if (Loc.z > 0) {
+        UsedSpace[Loc.x][Loc.y][Loc.z - 1] = (UsedSpace[Loc.x][Loc.y][Loc.z - 1] != 1) ? 0 : 1;
+    }
+    if (Loc.z < std::get<2>(Space) - 1) {
+        UsedSpace[Loc.x][Loc.y][Loc.z + 1] = (UsedSpace[Loc.x][Loc.y][Loc.z + 1] != 1) ? 0 : 1;
+    }     
+}
 Router::coord Router::updateSinglePortUsedSpace(std::tuple<uint16_t, uint16_t, uint16_t> Loc, Facing Fac,
-                                                coord& congestion) {
+                                                coord& congestion, std::tuple<uint16_t, uint16_t, uint16_t>& Space) {
     Router::coord ret;
     ret.x = std::get<0>(Loc);
     ret.y = std::get<1>(Loc);
@@ -63,6 +80,7 @@ Router::coord Router::updateSinglePortUsedSpace(std::tuple<uint16_t, uint16_t, u
     congestion.x = std::get<0>(Loc);
     congestion.y = std::get<1>(Loc);
     congestion.z = std::get<2>(Loc);
+    bool temp=false;
     if (Fac == Facing::North) {
         congestion.z--;
         if (UsedSpace[ret.x][ret.y][ret.z - 1] != 1) {
@@ -71,10 +89,10 @@ Router::coord Router::updateSinglePortUsedSpace(std::tuple<uint16_t, uint16_t, u
             // WI[ret.x][ret.y][ret.z - 1].ComponentSpace = 2;
             // WI[ret.x][ret.y - 1][ret.z - 1].ComponentSpace = 2;
             ret.z--;
-            return ret;
+            temp = true;
         }
     }
-    if (Fac == Facing::East) {
+    else if (Fac == Facing::East) {
         congestion.x++;
         if (UsedSpace[ret.x + 1][ret.y][ret.z] != 1) {
             UsedSpace[ret.x + 1][ret.y][ret.z] = 0;
@@ -82,11 +100,10 @@ Router::coord Router::updateSinglePortUsedSpace(std::tuple<uint16_t, uint16_t, u
             // WI[ret.x + 1][ret.y][ret.z].ComponentSpace = 2;
             // WI[ret.x + 1][ret.y - 1][ret.z].ComponentSpace = 2;
             ret.x++;
-            return ret;
+            temp = true;
         }
     }
-    // TODO: Add vertical pin
-    if (Fac == Facing::South) {
+    else if (Fac == Facing::South) {
         congestion.z++;
         if (UsedSpace[ret.x][ret.y][ret.z + 1] != 1) {
             UsedSpace[ret.x][ret.y][ret.z + 1] = 0;
@@ -94,10 +111,10 @@ Router::coord Router::updateSinglePortUsedSpace(std::tuple<uint16_t, uint16_t, u
             // WI[ret.x][ret.y][ret.z + 1].ComponentSpace = 2;
             // WI[ret.x][ret.y - 1][ret.z + 1].ComponentSpace = 2;
             ret.z++;
-            return ret;
+            temp = true;
         }
     }
-    if (Fac == Facing::West) {
+    else (Fac == Facing::West) {
         congestion.x--;
         if (UsedSpace[ret.x - 1][ret.y][ret.z] != 1) {
             UsedSpace[ret.x - 1][ret.y][ret.z] = 0;
@@ -105,8 +122,11 @@ Router::coord Router::updateSinglePortUsedSpace(std::tuple<uint16_t, uint16_t, u
             // WI[ret.x - 1][ret.y][ret.z].ComponentSpace = 2;
             // WI[ret.x - 1][ret.y - 1][ret.z].ComponentSpace = 2;
             ret.x--;
-            return ret;
+            temp = true;
         }
+    }
+    if(temp){
+        updateSinglePortUsedSpaceHelper(ret,Space);    
     }
     return ret;
 }
