@@ -43,7 +43,7 @@ class Router {
                           const std::vector<std::tuple<uint16_t, uint16_t, uint16_t>> connection_points);
     bool checkPointAvaliable(const Design& D, const std::tuple<int16_t, int16_t, int16_t> location);
     void updateUsedSpace(Connection& C, std::tuple<uint16_t, uint16_t, uint16_t>& Space);
-    coord updateSinglePortUsedSpace(std::tuple<uint16_t, uint16_t, uint16_t> Loc, Facing Fac, coord& congestion);
+    coord updateSinglePortUsedSpace(std::tuple<uint16_t, uint16_t, uint16_t> Loc, Facing Fac, coord& congestion,std::tuple<uint16_t, uint16_t, uint16_t>& Space);
     bool ReRouteStartRouting(coord congestionPoint, std::tuple<uint16_t, uint16_t, uint16_t>& Space,
                              Router::Point***& P_, Design& D);
     bool ReRouteEndRouting(); // TODO
@@ -66,6 +66,7 @@ class Router {
     bool RoutingLastRepeater(Router::Point* CongestionP);
     void InitPortUsedSpace(std::tuple<uint16_t, uint16_t, uint16_t> Loc, Facing Fac,std::tuple<uint16_t, uint16_t, uint16_t>& Space);
     void InitPortUsedSpaceHelper(Router::coord& Loc,std::tuple<uint16_t, uint16_t, uint16_t>& Space);
+    void updateSinglePortUsedSpaceHelper(Router::coord& Loc,std::tuple<uint16_t, uint16_t, uint16_t>& Space);
     int*** UsedSpace;
     WireInfo*** WI;
     Connection* FailedWire_SingleRouting;
