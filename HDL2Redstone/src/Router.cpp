@@ -11,19 +11,23 @@
 using namespace HDL2Redstone;
 void Router::InitPortUsedSpaceHelper(Router::coord& Loc,std::tuple<uint16_t, uint16_t, uint16_t>& Space){
     if (Loc.x > 0) {
-        UsedSpace[Loc.x - 1][Loc.y][Loc.z] = (UsedSpace[Loc.x - 1][Loc.y][Loc.z] == 1) ? 1 : 2;
+        UsedSpace[Loc.x - 1][Loc.y][Loc.z] = (UsedSpace[Loc.x - 1][Loc.y][Loc.z] == 0) ? 2 : 1;
+        UsedSpace[Loc.x - 1][Loc.y-1][Loc.z] = (UsedSpace[Loc.x - 1][Loc.y-1][Loc.z] == 0) ? 2 : 1;
     }
     if (Loc.x < std::get<0>(Space) - 1) {
-        UsedSpace[Loc.x + 1][Loc.y][Loc.z] = (UsedSpace[Loc.x + 1][Loc.y][Loc.z] == 1) ? 1 : 2;
+        UsedSpace[Loc.x + 1][Loc.y][Loc.z] = (UsedSpace[Loc.x + 1][Loc.y][Loc.z] == 0) ? 2 : 1;
+        UsedSpace[Loc.x + 1][Loc.y-1][Loc.z] = (UsedSpace[Loc.x + 1][Loc.y-1][Loc.z] == 0) ? 2 : 1;
     }
     if (Loc.y > 0) {
-        UsedSpace[Loc.x][Loc.y - 1][Loc.z] = (UsedSpace[Loc.x][Loc.y - 1][Loc.z] == 1) ? 1 : 2;
+        UsedSpace[Loc.x][Loc.y - 1][Loc.z] = (UsedSpace[Loc.x][Loc.y - 1][Loc.z] == 0) ? 2 : 1;
     }
     if (Loc.z > 0) {
-        UsedSpace[Loc.x][Loc.y][Loc.z - 1] = (UsedSpace[Loc.x][Loc.y][Loc.z - 1] == 1) ? 1 : 2;
+        UsedSpace[Loc.x][Loc.y][Loc.z - 1] = (UsedSpace[Loc.x][Loc.y][Loc.z - 1] == 0) ? 2 : 1;
+        UsedSpace[Loc.x][Loc.y-1][Loc.z - 1] = (UsedSpace[Loc.x][Loc.y-1][Loc.z - 1] == 0) ? 2 : 1;
     }
     if (Loc.z < std::get<2>(Space) - 1) {
-        UsedSpace[Loc.x][Loc.y][Loc.z + 1] = (UsedSpace[Loc.x][Loc.y][Loc.z + 1] == 1) ? 1 : 2;
+        UsedSpace[Loc.x][Loc.y][Loc.z + 1] = (UsedSpace[Loc.x][Loc.y][Loc.z + 1] == 0) ? 2 : 1;
+        UsedSpace[Loc.x][Loc.y-1][Loc.z + 1] = (UsedSpace[Loc.x][Loc.y-1][Loc.z + 1] == 0) ? 2 : 1;
     }    
 }
 void Router::InitPortUsedSpace(std::tuple<uint16_t, uint16_t, uint16_t> Loc, Facing Fac,std::tuple<uint16_t, uint16_t, uint16_t>& Space) {
@@ -57,18 +61,22 @@ void Router::InitPortUsedSpace(std::tuple<uint16_t, uint16_t, uint16_t> Loc, Fac
 void Router::updateSinglePortUsedSpaceHelper(Router::coord& Loc,std::tuple<uint16_t, uint16_t, uint16_t>& Space){
     if (Loc.x > 0) {
         UsedSpace[Loc.x - 1][Loc.y][Loc.z] = (UsedSpace[Loc.x - 1][Loc.y][Loc.z] != 1) ? 0 : 1;
+        UsedSpace[Loc.x - 1][Loc.y-1][Loc.z] = (UsedSpace[Loc.x - 1][Loc.y-1][Loc.z] != 1) ? 0 : 1;
     }
     if (Loc.x < std::get<0>(Space) - 1) {
         UsedSpace[Loc.x + 1][Loc.y][Loc.z] = (UsedSpace[Loc.x + 1][Loc.y][Loc.z] != 1) ? 0 : 1;
+        UsedSpace[Loc.x + 1][Loc.y-1][Loc.z] = (UsedSpace[Loc.x + 1][Loc.y-1][Loc.z] != 1) ? 0 : 1;
     }
     if (Loc.y > 0) {
         UsedSpace[Loc.x][Loc.y - 1][Loc.z] = (UsedSpace[Loc.x][Loc.y - 1][Loc.z] != 1) ? 0 : 1;
     }
     if (Loc.z > 0) {
         UsedSpace[Loc.x][Loc.y][Loc.z - 1] = (UsedSpace[Loc.x][Loc.y][Loc.z - 1] != 1) ? 0 : 1;
+        UsedSpace[Loc.x][Loc.y-1][Loc.z - 1] = (UsedSpace[Loc.x][Loc.y-1][Loc.z - 1] != 1) ? 0 : 1;
     }
     if (Loc.z < std::get<2>(Space) - 1) {
         UsedSpace[Loc.x][Loc.y][Loc.z + 1] = (UsedSpace[Loc.x][Loc.y][Loc.z + 1] != 1) ? 0 : 1;
+        UsedSpace[Loc.x][Loc.y-1][Loc.z + 1] = (UsedSpace[Loc.x][Loc.y-1][Loc.z + 1] != 1) ? 0 : 1;
     }     
 }
 Router::coord Router::updateSinglePortUsedSpace(std::tuple<uint16_t, uint16_t, uint16_t> Loc, Facing Fac,
@@ -278,6 +286,7 @@ void Router::route(Design& D) {
             std::cout << "FUll Routing Success!!!" << std::endl;
             break;
         } else if (FailedWire_SingleRouting->getUnableRouting() == 1) {
+            //break;
             Deconstructor(Space);
             Reconstructor(D);
             FailedWire_SingleRouting->setUnableRouting(2);
