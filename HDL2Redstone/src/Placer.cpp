@@ -15,12 +15,15 @@ Placer::Placer(Design& D_) : D(D_) {
 Placer::~Placer() { delete[] UsedSpace; }
 
 bool Placer::place() {
+    if (checkLegality()) {
+        std::cout << "Illegal user forced placement!" << std::endl;
+    }
     if (initialPlace()) {
         std::cout << "Initial placement failed, please consider allocate more space for design!" << std::endl;
         return true;
     }
     if (checkLegality()) {
-        throw Exception("Inlegal initial placement!");
+        throw Exception("Illegal initial placement!");
     }
     return false;
 }
@@ -81,7 +84,7 @@ bool Placer::initialPlace() {
             while (true) {
                 if (Y >= D.Height) {
                     std::cout << "DEBUG: Placement error: not enough space!" << std::endl;
-                    return false;
+                    return true;
                 }
                 Component->setPlacement(X, Y, Z, Orientation::ZeroCW);
                 if (!testInitialPlacement(*Component, INITIAL_CLEARANCE)) {
@@ -206,7 +209,7 @@ bool Placer::checkLegality() const {
             for (int Y = std::get<1>(P1); Y != std::get<1>(P2); ++Y) {
                 for (int Z = std::get<2>(P1); Z != std::get<2>(P2); ++Z) {
                     if (OccupiedSpace[X][Y][Z]) {
-                        return false;
+                        return true;
                     } else {
                         OccupiedSpace[X][Y][Z] = true;
                     }
@@ -214,5 +217,5 @@ bool Placer::checkLegality() const {
             }
         }
     }
-    return true;
+    return false;
 }
