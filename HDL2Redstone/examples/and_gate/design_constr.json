@@ -1,0 +1,33 @@
+{
+  "dimension": [
+    50,
+    50,
+    50
+  ],
+  "forced_placement": {
+    "a": {
+      "location": [
+        0,
+        0,
+        0
+      ],
+      "orientation": 0
+    },
+    "b": {
+      "location": [
+        4,
+        0,
+        0
+      ],
+      "orientation": 0
+    },
+    "c": {
+      "location": [
+        1,
+        0,
+        49
+      ],
+      "orientation": 0
+    }
+  }
+}

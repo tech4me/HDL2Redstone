@@ -1,0 +1,65 @@
+{
+  "dimension": [
+    50,
+    50,
+    50
+  ],
+  "forced_placement": {
+    "a": {
+      "location": [
+        0,
+        0,
+        0
+      ],
+      "orientation": 0
+    },
+    "b": {
+      "location": [
+        3,
+        0,
+        0
+      ],
+      "orientation": 0
+    },
+    "c": {
+      "location": [
+        6,
+        0,
+        0
+      ],
+      "orientation": 0
+    },
+    "d": {
+      "location": [
+        9,
+        0,
+        0
+      ],
+      "orientation": 0
+    },
+    "x": {
+      "location": [
+        12,
+        0,
+        0
+      ],
+      "orientation": 0
+    },
+    "y": {
+      "location": [
+        15,
+        0,
+        0
+      ],
+      "orientation": 0
+    },
+    "dout": {
+      "location": [
+        10,
+        0,
+        49
+      ],
+      "orientation": 0
+    }
+  }
+}

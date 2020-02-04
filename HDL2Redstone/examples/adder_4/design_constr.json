@@ -1,0 +1,121 @@
+{
+  "dimension": [
+    100,
+    100,
+    100
+  ],
+  "forced_placement": {
+    "a[0]": {
+      "location": [
+        0,
+        0,
+        0
+      ],
+      "orientation": 0
+    },
+    "a[1]": {
+      "location": [
+        10,
+        0,
+        0
+      ],
+      "orientation": 0
+    },
+    "a[2]": {
+      "location": [
+        20,
+        0,
+        0
+      ],
+      "orientation": 0
+    },
+    "a[3]": {
+      "location": [
+        30,
+        0,
+        0
+      ],
+      "orientation": 0
+    },
+    "b[0]": {
+      "location": [
+        70,
+        0,
+        0
+      ],
+      "orientation": 0
+    },
+    "b[1]": {
+      "location": [
+        80,
+        0,
+        0
+      ],
+      "orientation": 0
+    },
+    "b[2]": {
+      "location": [
+        90,
+        0,
+        0
+      ],
+      "orientation": 0
+    },
+    "b[3]": {
+      "location": [
+        99,
+        0,
+        0
+      ],
+      "orientation": 0
+    },
+    "cin": {
+      "location": [
+        50,
+        0,
+        0
+      ],
+      "orientation": 0
+    },
+    "sout[0]": {
+      "location": [
+        0,
+        0,
+        99
+      ],
+      "orientation": 0
+    },
+    "sout[1]": {
+      "location": [
+        20,
+        0,
+        99
+      ],
+      "orientation": 0
+    },
+    "sout[2]": {
+      "location": [
+        40,
+        0,
+        99
+      ],
+      "orientation": 0
+    },
+    "sout[3]": {
+      "location": [
+        60,
+        0,
+        99
+      ],
+      "orientation": 0
+    },
+    "sout[4]": {
+      "location": [
+        80,
+        0,
+        99
+      ],
+      "orientation": 0
+    }
+  }
+}

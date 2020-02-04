@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <sstream>
 
 #include <Exception.hpp>
 #include <Placer.hpp>
@@ -15,8 +16,9 @@ Placer::Placer(Design& D_) : D(D_) {
 Placer::~Placer() { delete[] UsedSpace; }
 
 bool Placer::place() {
-    if (checkLegality()) {
+    if (checkLegality(true)) {
         std::cout << "Illegal user forced placement!" << std::endl;
+        return true;
     }
     if (initialPlace()) {
         std::cout << "Initial placement failed, please consider allocate more space for design!" << std::endl;
@@ -148,7 +150,7 @@ bool Placer::updateUsedSpace(const Component& C_, bool Status_) {
     if (std::get<0>(P1) >= D.Width || std::get<1>(P1) >= D.Height || std::get<2>(P1) >= D.Length) {
         return true;
     }
-    if (std::get<0>(P2) >= D.Width || std::get<1>(P2) >= D.Height || std::get<2>(P2) >= D.Length) {
+    if (std::get<0>(P2) > D.Width || std::get<1>(P2) > D.Height || std::get<2>(P2) > D.Length) {
         return true;
     }
     for (int X = std::get<0>(P1); X != std::get<0>(P2); ++X) {
@@ -190,25 +192,39 @@ bool Placer::testInitialPlacement(const Component& C_, uint16_t Clearance_) cons
     return false;
 }
 
-bool Placer::checkLegality() const {
+bool Placer::checkLegality(bool SkipUnplaced_) const {
     std::vector<std::vector<std::vector<bool>>> OccupiedSpace(
         D.Width, std::vector<std::vector<bool>>(D.Height, std::vector<bool>(D.Length)));
     const auto& Components = D.MN.getComponents();
 
     for (const auto& Component : Components) {
+        // Skip the not yet placed or throw
+        if (!Component->getPlaced()) {
+            if (SkipUnplaced_) {
+                continue;
+            } else {
+                std::stringstream S;
+                S << "Unplaced component:" << std::endl;
+                S << *Component;
+                throw Exception(S.str());
+            }
+        }
         const auto& ComponentRange = Component->getRange();
         const auto& P1 = ComponentRange.first;
         const auto& P2 = ComponentRange.second;
         if (std::get<0>(P1) >= D.Width || std::get<1>(P1) >= D.Height || std::get<2>(P1) >= D.Length) {
-            return false;
+            std::cout << "123";
+            return true;
         }
-        if (std::get<0>(P2) >= D.Width || std::get<1>(P2) >= D.Height || std::get<2>(P2) >= D.Length) {
-            return false;
+        if (std::get<0>(P2) > D.Width || std::get<1>(P2) > D.Height || std::get<2>(P2) > D.Length) {
+            std::cout << std::get<0>(P2) << " " << std::get<1>(P2) << " " << std::get<2>(P2) << std::endl;;
+            return true;
         }
         for (int X = std::get<0>(P1); X != std::get<0>(P2); ++X) {
             for (int Y = std::get<1>(P1); Y != std::get<1>(P2); ++Y) {
                 for (int Z = std::get<2>(P1); Z != std::get<2>(P2); ++Z) {
                     if (OccupiedSpace[X][Y][Z]) {
+                        std::cout << X << " " << Y << " " << Z << std::endl;
                         return true;
                     } else {
                         OccupiedSpace[X][Y][Z] = true;
