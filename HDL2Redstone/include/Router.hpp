@@ -3,7 +3,9 @@
 
 #include <Design.hpp>
 #include <Placement.hpp>
-
+#define MAX_NUM_OF_WIRE 12
+#define MUL_COST_INC 1
+#define BASE_COST_INC 1
 namespace HDL2Redstone {
 class Router {
   public:
@@ -24,6 +26,8 @@ class Router {
       public:
         coord Loc;
         int cost;
+        int base_cost;
+        int mul_cost;
         int length;
         Point* P;
         bool visited;
@@ -61,6 +65,7 @@ class Router {
     void Deconstructor(std::tuple<uint16_t, uint16_t, uint16_t>& Space);
     void Reconstructor(const Design& D);
     bool CheckandKeepResult(Connection& C, std::tuple<uint16_t, uint16_t, uint16_t>& Space);
+    bool CheckKeepOrUpdate(Connection& C, std::tuple<uint16_t, uint16_t, uint16_t>& Space,Router::Point***& P_);
     bool HelperCheckUpdateGraph(Router::Point* Parent, Router::Point* Current);
     int HelperRoutingLastRepeater(Router::Point* RecurP);
     bool RoutingLastRepeater(Router::Point* CongestionP);
