@@ -32,8 +32,8 @@ class Cell {
     const std::string& getType() const { return Type; }
     const Schematic& getSchematic() const { return Schem; }
     std::vector<std::string> getPinNames() const;
-    const Direction& getPinDir(std::string PinName_) const { return Pins.at(PinName_).Dir; }
-    const Facing& getPinFacing(std::string PinName_) const { return Pins.at(PinName_).Face; }
+    Direction getPinDir(std::string PinName_) const { return Pins.at(PinName_).Dir; }
+    Facing getPinFacing(std::string PinName_) const { return Pins.at(PinName_).Face; }
     const std::tuple<uint16_t, uint16_t, uint16_t>& getPinLocation(std::string PinName_) const {
         return Pins.at(PinName_).Location;
     }

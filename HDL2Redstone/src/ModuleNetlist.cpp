@@ -48,10 +48,23 @@ void ModuleNetlist::ExtractNetlist::subckt(std::string model, std::vector<std::s
     auto It1 = ports.begin();
     auto It2 = nets.begin();
     for (; It1 != ports.end() && It2 != nets.end(); ++It1, ++It2) {
-        auto port = *It1;
-        auto net = *It2;
-        auto P = [net](const std::unique_ptr<Connection>& ConnectionPtr) -> bool {
-            if (ConnectionPtr->getName() == net) {
+        auto Port = *It1;
+        auto Net = *It2;
+        auto PortDir = ComponentPtr->getPinDir(Port);
+        bool isSource = true;
+        switch (PortDir) {
+            case Direction::Input:
+                isSource = false;
+                break;
+            case Direction::Output:
+                isSource = true;
+                break;
+            case Direction::Inout:
+            default:
+                throw Exception("Cell library has unsupported pin direction!");
+        }
+        auto P = [Net](const std::unique_ptr<Connection>& ConnectionPtr) -> bool {
+            if (ConnectionPtr->getName() == Net) {
                 return true;
             } else {
                 return false;
@@ -59,14 +72,13 @@ void ModuleNetlist::ExtractNetlist::subckt(std::string model, std::vector<std::s
         };
         auto It = std::find_if(Connections.begin(), Connections.end(), P);
         if (It != Connections.end()) {
-            // CHECK: This is assuming source of a connection will always be before sink
-            if ((*It)->getSourcePortConnection() == std::pair<Component*, std::string>()) { // Not set
-                (*It)->addSource(ComponentPtr.get(), port);
+            if (isSource) {
+                (*It)->addSource(ComponentPtr.get(), Port);
             } else {
-                (*It)->addSink(ComponentPtr.get(), port);
+                (*It)->addSink(ComponentPtr.get(), Port);
             }
         } else {
-            Connections.push_back(std::make_unique<Connection>(net, ComponentPtr.get(), port));
+            Connections.push_back(std::make_unique<Connection>(Net, ComponentPtr.get(), Port, isSource));
         }
     }
     Components.push_back(std::move(ComponentPtr));

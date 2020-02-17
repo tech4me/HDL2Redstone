@@ -17,8 +17,9 @@ class Component {
     const std::string& getType() const { return CellPtr->getType(); }
 
     std::vector<std::string> getPinNames() const { return CellPtr->getPinNames(); }
-    Facing getPinFacing(std::string PinName_) const;
-    std::tuple<uint16_t, uint16_t, uint16_t> getPinLocation(std::string PinName_) const;
+    Direction getPinDir(const std::string& PinName_) const { return CellPtr->getPinDir(PinName_); }
+    Facing getPinFacing(const std::string& PinName_) const;
+    std::tuple<uint16_t, uint16_t, uint16_t> getPinLocation(const std::string& PinName_) const;
     bool getPlaced() const { return Placed; }
     void setPlaced(bool Placed_) { Placed = Placed_; }
 

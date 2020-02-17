@@ -3,7 +3,7 @@
 using namespace HDL2Redstone;
 Component::Component(const Cell* CellPtr_) : CellPtr(CellPtr_), Placed(false) {}
 
-Facing Component::getPinFacing(std::string PinName_) const {
+Facing Component::getPinFacing(const std::string& PinName_) const {
     auto tempDir = CellPtr->getPinFacing(PinName_);
     if (tempDir == Facing::Up || tempDir == Facing::Down)
         return tempDir;
@@ -39,7 +39,7 @@ Facing Component::getPinFacing(std::string PinName_) const {
     }
     return tempDir;
 }
-std::tuple<uint16_t, uint16_t, uint16_t> Component::getPinLocation(std::string PinName_) const {
+std::tuple<uint16_t, uint16_t, uint16_t> Component::getPinLocation(const std::string& PinName_) const {
     auto tempLoc = CellPtr->getPinLocation(PinName_);
     // Facing tempFac = Component::getPinFacing(PinName_);
     if (P.Orient == Orientation::ZeroCW) {
