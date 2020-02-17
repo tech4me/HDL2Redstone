@@ -3,9 +3,9 @@
 #include <Router.hpp>
 using namespace HDL2Redstone;
 
-Design::Design(uint16_t Width_, uint16_t Height_, uint16_t Length_, const std::string& File_,
+Design::Design(const std::string& File_,
                const CellLibrary& CellLib_, const DesignConstraint& DC_)
-    : Width(Width_), Height(Height_), Length(Length_), CellLib(CellLib_), DC(DC_), MN(File_, CellLib_, DC) {}
+    : Width(std::get<0>(DC_.getDimension())), Height(std::get<1>(DC_.getDimension())), Length(std::get<2>(DC_.getDimension())), CellLib(CellLib_), DC(DC_), MN(File_, CellLib_, DC) {}
 
 const std::tuple<uint16_t, uint16_t, uint16_t> Design::getSpace() const {
     return std::make_tuple(Width, Height, Length);

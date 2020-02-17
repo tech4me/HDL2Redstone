@@ -12,9 +12,8 @@ class Design {
   public:
     // Deleted default constructor
     Design() = delete;
-    // Create a design with max width, max height, and max length
-    // Verilog file, cell library, and design constraint
-    Design(uint16_t Width, uint16_t Height, uint16_t Length, const std::string& File_, const CellLibrary& CellLib_,
+    // Create a design with BLIF file, cell library, and design constraint
+    Design(const std::string& File_, const CellLibrary& CellLib_,
            const DesignConstraint& DC_);
     const std::tuple<uint16_t, uint16_t, uint16_t> getSpace() const;
     const ModuleNetlist& getModuleNetlist() const;
