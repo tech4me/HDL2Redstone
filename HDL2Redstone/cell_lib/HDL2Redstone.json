@@ -1,179 +1,179 @@
 [
-    {
-        "is_component": true,
-        "liberty": false,
-        "name": "INPUT",
-        "pins": {
-            "Y": {
-                "direction": "output",
-                "location": [
-                    0,
-                    1,
-                    0
-                ],
-                "facing": "south"
-            }
-        },
-        "schematic": "input"
+  {
+    "is_component": true,
+    "liberty": false,
+    "name": "INPUT",
+    "pins": {
+      "Y": {
+        "direction": "output",
+        "location": [
+          0,
+          1,
+          0
+        ],
+        "facing": "east"
+      }
     },
-    {
-        "is_component": true,
-        "liberty": false,
-        "name": "OUTPUT",
-        "pins": {
-            "A": {
-                "direction": "input",
-                "location": [
-                    0,
-                    1,
-                    0
-                ],
-                "facing": "north"
-            }
-        },
-        "schematic": "output"
+    "schematic": "input"
+  },
+  {
+    "is_component": true,
+    "liberty": false,
+    "name": "OUTPUT",
+    "pins": {
+      "A": {
+        "direction": "input",
+        "location": [
+          0,
+          1,
+          0
+        ],
+        "facing": "west"
+      }
     },
-    {
-        "is_component": true,
-        "liberty": true,
-        "name": "AND",
-        "pins": {
-            "A": {
-                "direction": "input",
-                "location": [
-                    0,
-                    1,
-                    0
-                ],
-                "facing": "north"
-            },
-            "B": {
-                "direction": "input",
-                "location": [
-                    2,
-                    1,
-                    0
-                ],
-                "facing": "north"
-            },
-            "Y": {
-                "direction": "output",
-                "location": [
-                    1,
-                    1,
-                    3
-                ],
-                "facing": "south",
-                "function": "A*B"
-            }
-        },
-        "schematic": "basic_and_gate"
+    "schematic": "output"
+  },
+  {
+    "is_component": true,
+    "liberty": true,
+    "name": "AND2",
+    "pins": {
+      "A": {
+        "direction": "input",
+        "location": [
+          0,
+          1,
+          0
+        ],
+        "facing": "north"
+      },
+      "B": {
+        "direction": "input",
+        "location": [
+          4,
+          1,
+          0
+        ],
+        "facing": "south"
+      },
+      "Y": {
+        "direction": "output",
+        "location": [
+          2,
+          1,
+          1
+        ],
+        "facing": "east",
+        "function": "A*B"
+      }
     },
-    {
-        "is_component": true,
-        "liberty": true,
-        "name": "BUF",
-        "pins": {
-            "A": {
-                "direction": "input",
-                "location": [
-                    0,
-                    1,
-                    0
-                ],
-                "facing": "north"
-            },
-            "Y": {
-                "direction": "output",
-                "location": [
-                    0,
-                    1,
-                    0
-                ],
-                "facing": "south",
-                "function": "A"
-            }
-        },
-        "schematic": "redstone_repeater_buf"
+    "schematic": "and2"
+  },
+  {
+    "is_component": true,
+    "liberty": true,
+    "name": "BUF",
+    "pins": {
+      "A": {
+        "direction": "input",
+        "location": [
+          0,
+          1,
+          0
+        ],
+        "facing": "west"
+      },
+      "Y": {
+        "direction": "output",
+        "location": [
+          0,
+          1,
+          0
+        ],
+        "facing": "east",
+        "function": "A"
+      }
     },
-    {
-        "is_component": true,
-        "liberty": true,
-        "name": "NOT",
-        "pins": {
-            "A": {
-                "direction": "input",
-                "location": [
-                    0,
-                    1,
-                    0
-                ],
-                "facing": "north"
-            },
-            "Y": {
-                "direction": "output",
-                "location": [
-                    0,
-                    1,
-                    3
-                ],
-                "facing": "south",
-                "function": "A'"
-            }
-        },
-        "schematic": "horizontal_torch_inv"
+    "schematic": "buf"
+  },
+  {
+    "is_component": true,
+    "liberty": true,
+    "name": "NOT",
+    "pins": {
+      "A": {
+        "direction": "input",
+        "location": [
+          0,
+          1,
+          0
+        ],
+        "facing": "north"
+      },
+      "Y": {
+        "direction": "output",
+        "location": [
+          0,
+          1,
+          2
+        ],
+        "facing": "south",
+        "function": "A'"
+      }
     },
-    {
-        "is_component": true,
-        "liberty": true,
-        "name": "OR",
-        "pins": {
-            "A": {
-                "direction": "input",
-                "location": [
-                    0,
-                    1,
-                    0
-                ],
-                "facing": "north"
-            },
-            "B": {
-                "direction": "input",
-                "location": [
-                    2,
-                    1,
-                    0
-                ],
-                "facing": "north"
-            },
-            "Y": {
-                "direction": "output",
-                "location": [
-                    1,
-                    1,
-                    2
-                ],
-                "facing": "south",
-                "function": "A+B"
-            }
-        },
-        "schematic": "repeater_isolated_or_gate"
+    "schematic": "inv"
+  },
+  {
+    "is_component": true,
+    "liberty": true,
+    "name": "OR2",
+    "pins": {
+      "A": {
+        "direction": "input",
+        "location": [
+          0,
+          1,
+          0
+        ],
+        "facing": "west"
+      },
+      "B": {
+        "direction": "input",
+        "location": [
+          2,
+          1,
+          0
+        ],
+        "facing": "east"
+      },
+      "Y": {
+        "direction": "output",
+        "location": [
+          1,
+          1,
+          0
+        ],
+        "facing": "south",
+        "function": "A+B"
+      }
     },
-    {
-        "is_component": false,
-        "liberty": false,
-        "name": "WIRE",
-        "pins": {
-            "Y": {
-                "direction": "output",
-                "location": [
-                    0,
-                    1,
-                    0
-                ],
-                "facing": "south"
-            }
-        },
-        "schematic": "redstone_dust"
-    }
+    "schematic": "or2"
+  },
+  {
+    "is_component": false,
+    "liberty": false,
+    "name": "WIRE",
+    "pins": {
+      "Y": {
+        "direction": "output",
+        "location": [
+          0,
+          1,
+          0
+        ],
+        "facing": "west"
+      }
+    },
+    "schematic": "wire"
+  }
 ]

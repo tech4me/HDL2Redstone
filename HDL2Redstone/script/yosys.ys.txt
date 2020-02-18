@@ -7,7 +7,7 @@ flatten;
 
 techmap; opt
 
-abc -liberty {input_liberty_file} -g AND,OR
+abc -liberty {input_liberty_file}
 
 # Remove unused cells and wires
 clean

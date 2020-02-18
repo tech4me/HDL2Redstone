@@ -70,41 +70,36 @@ bool Placer::initialPlace() {
         }
     }
 
-    // FIXME; Add more cells here
-    std::set<std::string> AvailableCell{"INPUT", "OUTPUT", "NOT", "AND", "OR"};
-
     for (auto& Component : Components) {
         // Skip already placed component
         if (Component->getPlaced()) {
             continue;
         }
 
-        if (AvailableCell.count(Component->getType())) {
-            uint16_t X = 0;
-            uint16_t Y = 0;
-            uint16_t Z = 0;
-            while (true) {
-                if (Y >= D.Height) {
-                    std::cout << "DEBUG: Placement error: not enough space!" << std::endl;
-                    return true;
-                }
-                Component->setPlacement(X, Y, Z, Orientation::ZeroCW);
-                if (!testInitialPlacement(*Component, INITIAL_CLEARANCE)) {
-                    setUsedSpace(*Component);
-                    break;
-                }
-                Component->clearPlacement();
-                // Loop X and Z first
-                ++X;
-                if (X == D.Width) {
-                    X = 0;
-                    ++Z;
-                }
-                if (Z == D.Length) {
-                    X = 0;
-                    Z = 0;
-                    ++Y;
-                }
+        uint16_t X = 0;
+        uint16_t Y = 0;
+        uint16_t Z = 0;
+        while (true) {
+            if (Y >= D.Height) {
+                std::cout << "DEBUG: Placement error: not enough space!" << std::endl;
+                return true;
+            }
+            Component->setPlacement(X, Y, Z, Orientation::ZeroCW);
+            if (!testInitialPlacement(*Component, INITIAL_CLEARANCE)) {
+                setUsedSpace(*Component);
+                break;
+            }
+            Component->clearPlacement();
+            // Loop X and Z first
+            ++X;
+            if (X == D.Width) {
+                X = 0;
+                ++Z;
+            }
+            if (Z == D.Length) {
+                X = 0;
+                Z = 0;
+                ++Y;
             }
         }
     }
@@ -213,7 +208,6 @@ bool Placer::checkLegality(bool SkipUnplaced_) const {
         const auto& P1 = ComponentRange.first;
         const auto& P2 = ComponentRange.second;
         if (std::get<0>(P1) >= D.Width || std::get<1>(P1) >= D.Height || std::get<2>(P1) >= D.Length) {
-            std::cout << "123";
             return true;
         }
         if (std::get<0>(P2) > D.Width || std::get<1>(P2) > D.Height || std::get<2>(P2) > D.Length) {

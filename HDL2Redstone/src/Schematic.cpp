@@ -17,10 +17,10 @@ using namespace nbt;
 using namespace HDL2Redstone;
 
 // This comes from https://github.com/SpongePowered/Schematic-Specification
-// We are only supporting version 2
+// We only support version 2
 static constexpr int SUPPORTED_SCHEM_VERSION = 2;
-// We only support game version 1.14.4 for now
-static constexpr int SUPPORTED_SCHEM_DATA_VERSION = 1976;
+// We only support game version 1.15.2
+static constexpr int SUPPORTED_SCHEM_DATA_VERSION = 2230;
 static constexpr auto SCHEM_VERSION = "Version";
 static constexpr auto SCHEM_DATA_VERSION = "DataVersion";
 static constexpr auto SCHEM_METADATA = "Metadata";
