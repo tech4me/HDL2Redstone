@@ -50,18 +50,18 @@
       "B": {
         "direction": "input",
         "location": [
-          4,
+          0,
           1,
-          0
+          4
         ],
         "facing": "south"
       },
       "Y": {
         "direction": "output",
         "location": [
-          2,
           1,
-          1
+          1,
+          2
         ],
         "facing": "east",
         "function": "A*B"
@@ -108,16 +108,16 @@
           1,
           0
         ],
-        "facing": "north"
+        "facing": "west"
       },
       "Y": {
         "direction": "output",
         "location": [
-          0,
+          2,
           1,
-          2
+          0
         ],
-        "facing": "south",
+        "facing": "east",
         "function": "A'"
       }
     },
@@ -135,25 +135,25 @@
           1,
           0
         ],
-        "facing": "west"
+        "facing": "north"
       },
       "B": {
         "direction": "input",
         "location": [
-          2,
+          0,
           1,
-          0
+          2
         ],
-        "facing": "east"
+        "facing": "south"
       },
       "Y": {
         "direction": "output",
         "location": [
+          0,
           1,
-          1,
-          0
+          1
         ],
-        "facing": "south",
+        "facing": "east",
         "function": "A+B"
       }
     },

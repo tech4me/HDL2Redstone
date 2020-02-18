@@ -174,11 +174,11 @@ void Schematic::insertSubSchematic(const Placement& P_, const Schematic& Schem_,
             std::string Facing = Fmatch.str(2);
             uint32_t FInt = 0, turn = 0;
 
-            if (Facing == "east")
+            if (Facing == "north")
                 FInt = 1;
-            else if (Facing == "south")
+            else if (Facing == "east")
                 FInt = 2;
-            else if (Facing == "west")
+            else if (Facing == "south")
                 FInt = 3;
 
             switch (P_.Orient) {
@@ -198,16 +198,16 @@ void Schematic::insertSubSchematic(const Placement& P_, const Schematic& Schem_,
             FInt = (FInt + turn) % 4;
             switch (FInt) {
             case 0:
-                Facing = "facing=north,";
+                Facing = "facing=west,";
                 break;
             case 1:
-                Facing = "facing=east,";
+                Facing = "facing=north,";
                 break;
             case 2:
-                Facing = "facing=south,";
+                Facing = "facing=east,";
                 break;
             case 3:
-                Facing = "facing=west,";
+                Facing = "facing=south,";
                 break;
             default:
                 break;

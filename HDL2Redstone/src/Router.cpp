@@ -376,15 +376,25 @@ void Router::route(Design& D) {
 bool Router::HelperCheckUpdateGraph(Router::Point* Parent, Router::Point* Current) {
     bool RetFlag = true;
     auto ori_ = Current->ori;
+    // if (Parent->Loc.x > Current->Loc.x) {
+    //     ori_ = HDL2Redstone::Orientation::OneCW;
+    // } else if (Parent->Loc.x < Current->Loc.x) {
+    //     ori_ = HDL2Redstone::Orientation::ThreeCW;
+    // } else if (Parent->Loc.z > Current->Loc.z) {
+    //     ori_ = HDL2Redstone::Orientation::TwoCW;
+    // } else if (Parent->Loc.z < Current->Loc.z) {
+    //     ori_ = HDL2Redstone::Orientation::ZeroCW;
+    // }
     if (Parent->Loc.x > Current->Loc.x) {
-        ori_ = HDL2Redstone::Orientation::OneCW;
-    } else if (Parent->Loc.x < Current->Loc.x) {
-        ori_ = HDL2Redstone::Orientation::ThreeCW;
-    } else if (Parent->Loc.z > Current->Loc.z) {
         ori_ = HDL2Redstone::Orientation::TwoCW;
-    } else if (Parent->Loc.z < Current->Loc.z) {
+    } else if (Parent->Loc.x < Current->Loc.x) {
         ori_ = HDL2Redstone::Orientation::ZeroCW;
+    } else if (Parent->Loc.z > Current->Loc.z) {
+        ori_ = HDL2Redstone::Orientation::ThreeCW;
+    } else if (Parent->Loc.z < Current->Loc.z) {
+        ori_ = HDL2Redstone::Orientation::OneCW;
     }
+
     if (Parent->length == MAX_NUM_OF_WIRE + 1) {
         if (Parent->ori != ori_) {
             RetFlag = false;
@@ -693,6 +703,7 @@ bool Router::RegularRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_
                     // }
                     C.setInsert(Connection::ConnectionResult(std::make_tuple(TempX, TempY - 1, TempZ),
                                                              D.CellLib.getCellPtr("BUF"), ptr->ori));
+                    //std::cout<<"repeater: "<<static_cast<int>(ptr->ori)<<std::endl;
                 } else {
                     C.setInsert(Connection::ConnectionResult(std::make_tuple(TempX, TempY - 1, TempZ),
                                                              D.CellLib.getCellPtr("WIRE"), ptr->ori));
@@ -960,7 +971,7 @@ bool Router::ReRouteStartRouting(coord congestionPoint, std::tuple<uint16_t, uin
                                  Router::Point***& P_, Design& D) {
     auto C_ptr = WI[congestionPoint.x][congestionPoint.y][congestionPoint.z].C_ptr;
     if (C_ptr.empty()) {
-        std::cout << "ReRoute Failed: congest each other" << std::endl;
+        std::cout << "ReRoute Failed: Never Reach Here!" << std::endl;
         return false;
     }
     std::set<std::string> rollback_wire_name;
