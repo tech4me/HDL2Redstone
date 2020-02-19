@@ -103,19 +103,25 @@ Schematic::Schematic(const std::string& File_) {
         if (C.has_key(SCHEM_BLOCK_ENTITIES, tag_type::List)) {
             // TODO: check if the following works when actually have block entity data
             const auto& BlockEntities = C.at(SCHEM_BLOCK_ENTITIES).as<tag_list>();
-            for (int i = 0; i < BlockEntities.size(); i++) {
-                auto Entity = BlockEntities[i].as<tag_compound>();
+            for (const auto& NBTEntity : BlockEntities) {
+                const auto& Entity = NBTEntity.as<tag_compound>();
                 BlockEntityPositions.push_back(Entity.at("Pos").as<tag_int_array>().get());
                 BlockEntityIds.push_back(Entity.at("Id").as<tag_string>().get());
-                std::map<std::string, std::string> EntityText;
-                for (auto It = Entity.begin(); It != Entity.end(); It++) {
-                    if ((It->first != "Pos") && (It->first != "Id"))
-                        EntityText.emplace(It->first, It->second);
+                std::map<std::string, std::string> EntityExtra;
+                for (auto It = Entity.begin(); It != Entity.end(); ++It) {
+                    if ((It->first == "Pos") || (It->first == "Id")) {
+                        continue;
+                    }
+                    if (It->first == "OutputSignal") {
+                        EntityExtra.emplace(It->first, std::to_string(It->second.as<tag_int>()));
+                    } else {
+                        throw Exception("Unkown block entity field: " + It->first);
+                    }
                 }
-                BlockEntityTexts.push_back(EntityText);
+                BlockEntityExtras.push_back(EntityExtra);
             }
         }
-        // Ignore entities and biome related data
+        // Ignore biome related data
     } catch (Exception& E) {
         throw E;
     } catch (...) {
@@ -134,7 +140,6 @@ void Schematic::insertSubSchematic(const Placement& P_, const Schematic& Schem_,
     for (int32_t i = 0; i < Schem_.InvertPalette.size(); ++i) {
         // perform necessary changes caused by rotation to palette
         std::string Str = Schem_.InvertPalette.at(i);
-        // std::cout<<"invert palette: "<<Schem_.InvertPalette.at(i) <<std::endl;
 
         std::regex NorthReg("(north=)(\\w+),");
         std::regex SouthReg("(south=)(\\w+),");
@@ -291,11 +296,11 @@ void Schematic::insertSubSchematic(const Placement& P_, const Schematic& Schem_,
     }
     // TODO: not checked against real block entity info!
     for (int32_t i = 0; i < Schem_.BlockEntityPositions.size(); ++i) {
-        std::vector<int32_t> Pos = BlockEntityPositions[i];
+        std::vector<int32_t> Pos = Schem_.BlockEntityPositions[i];
         std::vector<int32_t> Updated_pos({Pos[0] + P_.X, Pos[1] + P_.Y, Pos[2] + P_.Z});
         BlockEntityPositions.push_back(Updated_pos);
         BlockEntityIds.push_back(Schem_.BlockEntityIds[i]);
-        BlockEntityTexts.push_back(Schem_.BlockEntityTexts[i]);
+        BlockEntityExtras.push_back(Schem_.BlockEntityExtras[i]);
     }
 }
 
@@ -345,8 +350,14 @@ void Schematic::exportSchematic(const std::string& File_) const {
             tag_compound BlockEntity;
             BlockEntity.emplace<tag_int_array>("Pos", tag_int_array(std::vector<int32_t>(BlockEntityPositions[i])));
             BlockEntity.emplace<tag_string>("Id", tag_string(BlockEntityIds[i]));
-            for (auto It = BlockEntityTexts[i].begin(); It != BlockEntityTexts[i].end(); It++)
-                BlockEntity.emplace<tag_string>(tag_string(It->first), tag_string(It->second));
+            for (auto It = BlockEntityExtras[i].begin(); It != BlockEntityExtras[i].end(); ++It) {
+                if ((It->first == "Pos") || (It->first == "Id")) {
+                        continue;
+                }
+                if (It->first == "OutputSignal") {
+                    BlockEntity.emplace<tag_int>(tag_string(It->first), tag_int(std::stoi(It->second)));
+                }
+            }
             BlockEntities.push_back(tag_compound(BlockEntity));
         }
         C.emplace<tag_list>(SCHEM_BLOCK_ENTITIES, BlockEntities);

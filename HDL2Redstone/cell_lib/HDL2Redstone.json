@@ -126,6 +126,78 @@
   {
     "is_component": true,
     "liberty": true,
+    "name": "NAND2",
+    "pins": {
+      "A": {
+        "direction": "input",
+        "location": [
+          0,
+          1,
+          0
+        ],
+        "facing": "north"
+      },
+      "B": {
+        "direction": "input",
+        "location": [
+          0,
+          1,
+          4
+        ],
+        "facing": "south"
+      },
+      "Y": {
+        "direction": "output",
+        "location": [
+          0,
+          1,
+          2
+        ],
+        "facing": "east",
+        "function": "(A*B)'"
+      }
+    },
+    "schematic": "nand2"
+  },
+  {
+    "is_component": true,
+    "liberty": true,
+    "name": "NOR2",
+    "pins": {
+      "A": {
+        "direction": "input",
+        "location": [
+          0,
+          1,
+          0
+        ],
+        "facing": "north"
+      },
+      "B": {
+        "direction": "input",
+        "location": [
+          0,
+          1,
+          0
+        ],
+        "facing": "south"
+      },
+      "Y": {
+        "direction": "output",
+        "location": [
+          0,
+          1,
+          1
+        ],
+        "facing": "east",
+        "function": "(A+B)'"
+      }
+    },
+    "schematic": "nor2"
+  },
+  {
+    "is_component": true,
+    "liberty": true,
     "name": "OR2",
     "pins": {
       "A": {
@@ -160,6 +232,78 @@
     "schematic": "or2"
   },
   {
+    "is_component": true,
+    "liberty": true,
+    "name": "XNOR2",
+    "pins": {
+      "A": {
+        "direction": "input",
+        "location": [
+          0,
+          1,
+          0
+        ],
+        "facing": "west"
+      },
+      "B": {
+        "direction": "input",
+       "location": [
+          0,
+          1,
+          3
+        ],
+        "facing": "west"
+      },
+      "Y": {
+        "direction": "output",
+        "location": [
+          5,
+          1,
+          1
+        ],
+        "facing": "east",
+        "function": "(A^B)'"
+      }
+    },
+    "schematic": "xnor2"
+  },
+  {
+    "is_component": true,
+    "liberty": true,
+    "name": "XOR2",
+    "pins": {
+      "A": {
+        "direction": "input",
+        "location": [
+          0,
+          1,
+          0
+        ],
+        "facing": "west"
+      },
+      "B": {
+        "direction": "input",
+        "location": [
+          0,
+          1,
+          3
+        ],
+        "facing": "west"
+      },
+      "Y": {
+        "direction": "output",
+        "location": [
+          3,
+          1,
+          1
+        ],
+        "facing": "east",
+        "function": "A^B"
+      }
+    },
+    "schematic": "xor2"
+  },
+  {
     "is_component": false,
     "liberty": false,
     "name": "WIRE",
@@ -176,4 +320,4 @@
     },
     "schematic": "wire"
   }
-]
+] 

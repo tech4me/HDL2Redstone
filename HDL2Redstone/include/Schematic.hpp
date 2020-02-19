@@ -36,7 +36,7 @@ class Schematic {
     std::vector<int32_t> Offset;
     std::vector<std::vector<int32_t>> BlockEntityPositions;
     std::vector<std::string> BlockEntityIds;
-    std::vector<std::map<std::string, std::string>> BlockEntityTexts;
+    std::vector<std::map<std::string, std::string>> BlockEntityExtras;
     int32_t PaletteMax;
     std::map<int32_t, std::string> InvertPalette;
     std::vector<int32_t> BlockData;
