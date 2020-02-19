@@ -19,8 +19,8 @@ bool Design::doPlaceAndRoute() {
     if (P.place()) {
         return true;
     }
-    Router R(*this);
     std::cout << "Now Routing..." << std::endl;
+    Router R(*this);
     R.route(*this);
     return false;
 }
