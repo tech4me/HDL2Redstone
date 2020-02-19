@@ -238,7 +238,7 @@ void Router::route(Design& D) {
     // std::cout<<"\nINIT FOUND wire status: "<<UsedSpace[21][0][10]<<std::endl;
     //  if(WI[33][12][9].C_ptr)
     //  std::cout<<"\nINIT wire name: "<<WI[21][0][10].C_ptr->getName()<<" "<<UsedSpace[33][12][9]<<std::endl;
-    /*TODO
+    /*
     check unablerouting is 0 or 1 or 2 or 3
     to reroute everything,
     1. reconstruct router
