@@ -15,53 +15,69 @@
     },
     "a[1]": {
       "location": [
-        10,
         0,
-        0
+        0,
+        10
       ],
       "orientation": 0
     },
     "a[2]": {
       "location": [
-        20,
         0,
-        0
+        0,
+        20
       ],
       "orientation": 0
     },
     "a[3]": {
       "location": [
-        30,
         0,
-        0
+        0,
+        30
       ],
       "orientation": 0
     },
     "b[0]": {
       "location": [
-        70,
         0,
-        0
+        0,
+        70
       ],
       "orientation": 0
     },
     "b[1]": {
       "location": [
-        80,
         0,
-        0
+        0,
+        80
       ],
       "orientation": 0
     },
     "b[2]": {
       "location": [
-        90,
         0,
-        0
+        0,
+        90
       ],
       "orientation": 0
     },
     "b[3]": {
+      "location": [
+        0,
+        0,
+        99
+      ],
+      "orientation": 0
+    },
+    "cin": {
+      "location": [
+        0,
+        0,
+        50
+      ],
+      "orientation": 0
+    },
+    "sout[0]": {
       "location": [
         99,
         0,
@@ -69,51 +85,35 @@
       ],
       "orientation": 0
     },
-    "cin": {
-      "location": [
-        50,
-        0,
-        0
-      ],
-      "orientation": 0
-    },
-    "sout[0]": {
-      "location": [
-        0,
-        0,
-        99
-      ],
-      "orientation": 0
-    },
     "sout[1]": {
       "location": [
-        20,
+        99,
         0,
-        99
+        20
       ],
       "orientation": 0
     },
     "sout[2]": {
       "location": [
-        40,
+        99,
         0,
-        99
+        40
       ],
       "orientation": 0
     },
     "sout[3]": {
       "location": [
-        60,
+        99,
         0,
-        99
+        60
       ],
       "orientation": 0
     },
     "sout[4]": {
       "location": [
-        80,
+        99,
         0,
-        99
+        80
       ],
       "orientation": 0
     }
