@@ -161,59 +161,7 @@ Router::Router(const Design& D) {
         }
     }
 
-    auto& Components_ = D.getModuleNetlist().getComponents();
-    auto& Connections_ = D.getModuleNetlist().getConnections();
-    std::vector<std::pair<std::tuple<uint16_t, uint16_t, uint16_t>, std::tuple<uint16_t, uint16_t, uint16_t>>>
-        UsedComponentSpace;
-    std::vector<std::vector<std::tuple<int16_t, int16_t, int16_t>>> UsedConnectionSpace;
-    for (auto const& i : Components_) {
-        UsedComponentSpace.push_back(i->getRange());
-    }
-    for (auto const& i : UsedComponentSpace) {
-        for (uint16_t j = std::get<0>(i.first); j < std::get<0>(i.second); j++) {
-            for (uint16_t k = std::get<1>(i.first); k < std::get<1>(i.second); k++) {
-                for (uint16_t z = std::get<2>(i.first); z < std::get<2>(i.second); z++) {
-                    UsedSpace[j][k][z] = 1;
-                    WI[j][k][z].ComponentSpace = 1;
-                    if (j > 0) {
-                        UsedSpace[j - 1][k][z] = 1; //(UsedSpace[j - 1][k][z] == 1) ? 1 : 2;
-                        WI[j - 1][k][z].ComponentSpace = 1;
-                    }
-                    if (j < std::get<0>(Space) - 1) {
-                        UsedSpace[j + 1][k][z] = 1; //(UsedSpace[j + 1][k][z] == 1) ? 1 : 2;
-                        WI[j + 1][k][z].ComponentSpace = 1;
-                    }
-
-                    if (k > 0) {
-                        UsedSpace[j][k - 1][z] = 1; //(UsedSpace[j][k - 1][z] == 1) ? 1 : 2;
-                        WI[j][k - 1][z].ComponentSpace = 1;
-                    }
-                    if (k < std::get<1>(Space) - 1) {
-                        UsedSpace[j][k + 1][z] = 1; //(UsedSpace[j][k + 1][z] == 1) ? 1 : 2; // TODO veritcal pin maybe possible
-                        WI[j][k + 1][z].ComponentSpace = 1;
-                    }
-
-                    if (z > 0) {
-                        UsedSpace[j][k][z - 1] = 1; //(UsedSpace[j][k][z - 1] == 1) ? 1 : 2;
-                        WI[j][k][z - 1].ComponentSpace = 1;
-                    }
-                    if (z < std::get<2>(Space) - 1) {
-                        UsedSpace[j][k][z + 1] = 1; //(UsedSpace[j][k][z + 1] == 1) ? 1 : 2;
-                        WI[j][k][z + 1].ComponentSpace = 1;
-                    }
-                }
-            }
-        }
-    }
-    for (auto const& j : Connections_) {
-        auto SourcePortConnection_ = j->getSourcePortConnection();
-        InitPortUsedSpace(((SourcePortConnection_).first)->getPinLocation((SourcePortConnection_).second),
-                          ((SourcePortConnection_).first)->getPinFacing((SourcePortConnection_).second),Space);
-        auto SinkPortConnection_ = j->getSinkPortConnections();
-        for (auto const& k : SinkPortConnection_) {
-            InitPortUsedSpace((k.first)->getPinLocation(k.second), (k.first)->getPinFacing(k.second),Space);
-        }
-    }
+    Reconstructor(D,Space);
     FailedWire_SingleRouting = NULL;
 }
 void Router::route(Design& D) {
@@ -289,7 +237,6 @@ void Router::route(Design& D) {
                 std::cout << "Routing: " << it->getName() << std::endl;
                 if (!RegularRoute(D, *it, Space, P_)) {
                     std::cout << "Routing: " << it->getName() << " failed" << std::endl;
-                    ;
                 }
                 //  std::cout<<"\nFOUND wire status: "<<UsedSpace[9][0][24]<<"
                 //  "<<WI[9][0][24].ComponentSpace<<std::endl; if(!WI[9][0][24].C_ptr.empty()){
@@ -306,12 +253,11 @@ void Router::route(Design& D) {
         if (FailedWire_SingleRouting == NULL) {
             std::cout << "FUll Routing Success!!!" << std::endl;
             break;
-        } else if (FailedWire_SingleRouting->getUnableRouting()/* == 1*/) {
+        } else if (FailedWire_SingleRouting->getUnableRouting()) {
             //for debugging
             //break;
             Deconstructor(Space);
-            Reconstructor(D);
-            FailedWire_SingleRouting->setUnableRouting(2);
+            Reconstructor(D,Space);
             FailedWire_SingleRouting->Result.clear();
             std::cout << "Try Routing: " << FailedWire_SingleRouting->getName() << " first" << std::endl;
             // reset P_ for routing
@@ -331,7 +277,9 @@ void Router::route(Design& D) {
             FailedWire_SingleRouting = NULL;
             if (!RegularRoute(D, *FailedWire_SingleRouting_temp, Space, P_)) {
                 std::cout << "Routing: " << FailedWire_SingleRouting_temp->getName() << " failed" << std::endl;
-                ;
+                std::cout << "The wire " <<FailedWire_SingleRouting_temp->getName()<<" failed for routing first" << std::endl;
+                //TODO the breaked should be removed in final design
+                break;
             } else {
                 for (auto& it : Connections_) {
                     if (FailedWire_SingleRouting_temp->getName() != it->getName()) {
@@ -339,10 +287,6 @@ void Router::route(Design& D) {
                     }
                 }
             }
-        } else if (FailedWire_SingleRouting->getUnableRouting() == 3) {
-            std::cout << FailedWire_SingleRouting->getName() << " is unable to route second time, Routing failed"
-                      << std::endl;
-            break;
         }
         if(i == Connections_.size()-1){
             std::cout << "Routing Times are not enough" << std::endl;
@@ -1328,16 +1272,6 @@ bool Router::HelperReRouteforIllegalRegularRoute(
 void Router::Deconstructor(std::tuple<uint16_t, uint16_t, uint16_t>& Space) {
     for (int i = 0; i < std::get<0>(Space); i++) {
         for (int j = 0; j < std::get<1>(Space); j++) {
-            delete[] WI[i][j];
-        }
-        delete[] WI[i];
-    }
-    delete[] WI;
-}
-void Router::Reconstructor(const Design& D) {
-    std::tuple<uint16_t, uint16_t, uint16_t> Space = D.getSpace();
-    for (int i = 0; i < std::get<0>(Space); i++) {
-        for (int j = 0; j < std::get<1>(Space); j++) {
             for (int k = 0; k < std::get<2>(Space); k++) {
                 UsedSpace[i][j][k] = 0;
             }
@@ -1345,18 +1279,16 @@ void Router::Reconstructor(const Design& D) {
     }
 
     // add wire info for each block all over the space
-    WI = new WireInfo**[std::get<0>(Space)];
     for (int i = 0; i < std::get<0>(Space); i++) {
-        WI[i] = new WireInfo*[std::get<1>(Space)];
         for (int j = 0; j < std::get<1>(Space); j++) {
-            WI[i][j] = new WireInfo[std::get<2>(Space)];
             for (int k = 0; k < std::get<2>(Space); k++) {
                 WI[i][j][k].ComponentSpace = 0;
                 WI[i][j][k].C_ptr.clear();
             }
         }
     }
-
+}
+void Router::Reconstructor(const Design& D, std::tuple<uint16_t, uint16_t, uint16_t>& Space) {
     auto& Components_ = D.getModuleNetlist().getComponents();
     auto& Connections_ = D.getModuleNetlist().getConnections();
     std::vector<std::pair<std::tuple<uint16_t, uint16_t, uint16_t>, std::tuple<uint16_t, uint16_t, uint16_t>>>
@@ -1418,65 +1350,6 @@ void Router::Reconstructor(const Design& D) {
     //     }
     // }
 }
-bool Router::CheckandKeepResult(Connection& C, std::tuple<uint16_t, uint16_t, uint16_t>& Space) {
-    bool RetFlag = true;
-    // if(C.getName()=="$abc$73$new_n14_"){
-    //              std::cout<<"\nstart1FOUND wire status: "<<UsedSpace[24][13][9]<<"
-    //              "<<WI[24][13][9].ComponentSpace<<std::endl; if(!WI[24][13][9].C_ptr.empty()){
-    //                  for (auto it: WI[24][13][9].C_ptr)
-    //                 std::cout<<"\nstart1FOUND wire name: "<<it->getName()<<std::endl;
-    //              }else{
-    //                  std::cout<<"\nstart1FOUND wire EMPTY"<<std::endl;
-    //              }
-    //         if (C.Result.empty()) {std::cout<<"\nstart1FOUND result EMPTY"<<std::endl;}
-    // }
-    if (!C.Result.empty()) {
-        for (const auto& R : C.Result) {
-            if (UsedSpace[std::get<0>(R.coord)][std::get<1>(R.coord)][std::get<2>(R.coord)] == 1 ||
-                UsedSpace[std::get<0>(R.coord)][std::get<1>(R.coord) + 1][std::get<2>(R.coord)] == 1) {
-                std::cout << C.getName() << " is reseted" << std::endl;
-                RetFlag = false;
-                break;
-            }
-        }
-    } else {
-        return false;
-    }
-    if (!RetFlag) {
-        C.setRouted(0);
-        // roll back congestion wires
-        for (int i = 0; i < std::get<0>(Space); i++) {
-            for (int j = 0; j < std::get<1>(Space); j++) {
-                for (int k = 0; k < std::get<2>(Space); k++) {
-                    if ((!WI[i][j][k].C_ptr.empty())) {
-                        std::set<Connection*> temp = WI[i][j][k].C_ptr;
-                        for (auto z : WI[i][j][k].C_ptr) {
-                            if (z->getName() == C.getName()) {
-                                temp.erase(z);
-                            }
-                        }
-                        WI[i][j][k].C_ptr = temp;
-                        if (WI[i][j][k].ComponentSpace != 1 && WI[i][j][k].C_ptr.empty()) {
-                            UsedSpace[i][j][k] = 0;
-                        }
-                    }
-                }
-            }
-        }
-        C.Result.clear();
-        //  std::cout<<"\nSTARTFOUND wire status: "<<UsedSpace[12][1][1]<<"   "<<WI[12][1][1].ComponentSpace<<std::endl;
-        //  if(!WI[12][1][1].C_ptr.empty()){
-        //      for (auto it: WI[12][1][1].C_ptr)
-        //     std::cout<<"\nSTARTFOUND wire name: "<<it->getName()<<std::endl;
-        //  }else{
-        //      std::cout<<"\nSTARTFOUND wire EMPTY"<<std::endl;
-        //  }
-    } else {
-        // update usedspace and WI
-        updateUsedSpace(C, Space);
-    }
-    return RetFlag;
-}
 
 bool Router::CheckKeepOrUpdate(Connection& C, std::tuple<uint16_t, uint16_t, uint16_t>& Space,Router::Point***& P_){
     bool RetFlag = true;
@@ -1501,6 +1374,7 @@ bool Router::CheckKeepOrUpdate(Connection& C, std::tuple<uint16_t, uint16_t, uin
             for (int j = 0; j < std::get<1>(Space); j++) {
                 for (int k = 0; k < std::get<2>(Space); k++) {
                     if ((!WI[i][j][k].C_ptr.empty())) {
+                        std::cout << "\n\nTESTING\n\n"<<std::endl;
                         std::set<Connection*> temp = WI[i][j][k].C_ptr;
                         for (auto z : WI[i][j][k].C_ptr) {
                             if (z->getName() == C.getName()) {

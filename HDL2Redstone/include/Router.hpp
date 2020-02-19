@@ -63,8 +63,7 @@ class Router {
                                         std::set<std::tuple<uint16_t, uint16_t, uint16_t>>& RetIllegalPoints,
                                         std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t, uint16_t>>& congestionPoints);
     void Deconstructor(std::tuple<uint16_t, uint16_t, uint16_t>& Space);
-    void Reconstructor(const Design& D);
-    bool CheckandKeepResult(Connection& C, std::tuple<uint16_t, uint16_t, uint16_t>& Space);
+    void Reconstructor(const Design& D, std::tuple<uint16_t, uint16_t, uint16_t>& Space);
     bool CheckKeepOrUpdate(Connection& C, std::tuple<uint16_t, uint16_t, uint16_t>& Space,Router::Point***& P_);
     bool HelperCheckUpdateGraph(Router::Point* Parent, Router::Point* Current);
     int HelperRoutingLastRepeater(Router::Point* RecurP);
