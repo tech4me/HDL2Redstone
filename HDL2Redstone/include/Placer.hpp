@@ -16,6 +16,7 @@ class Placer {
 
   private:
     bool initialPlace();
+    bool annealPlace();
     bool checkLegality(bool SkipUnplaced_ = 0) const;
 
     struct Coordination {
