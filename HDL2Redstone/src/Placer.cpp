@@ -27,10 +27,18 @@ bool Placer::place() {
     if (checkLegality()) {
         throw Exception("Illegal initial placement!");
     }
+    if (annealPlace()) {
+        std::cout << "Simulated annealing placement failed!" << std::endl;
+        return true;
+    }
+    if (checkLegality()) {
+        throw Exception("Illegal simulated annealing placement!");
+    }
     return false;
 }
 
 bool Placer::initialPlace() {
+    std::cout << "Running initial placer..." << std::endl;
     // Create placement data structures
     const auto& Components = D.MN.getComponents();
     for (const auto& Component : Components) {
@@ -135,6 +143,11 @@ bool Placer::initialPlace() {
         CPD;
     }
     */
+    return false;
+}
+
+bool Placer::annealPlace() {
+    std::cout << "Running simulated annealing placer..." << std::endl;
     return false;
 }
 
