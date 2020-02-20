@@ -1,0 +1,138 @@
+
+{
+  "dimension": [
+    150,
+    150,
+    150
+  ],
+  "forced_placement": {
+    "a[0]": {
+      "location": [
+        0,
+        0,
+        0
+      ],
+      "orientation": 0
+    },
+    "a[1]": {
+      "location": [
+        0,
+        0,
+        10
+      ],
+      "orientation": 0
+    },
+    "a[2]": {
+      "location": [
+        0,
+        0,
+        20
+      ],
+      "orientation": 0
+    },
+    "a[3]": {
+      "location": [
+        0,
+        0,
+        30
+      ],
+      "orientation": 0
+    },
+    "b[0]": {
+      "location": [
+        0,
+        0,
+        70
+      ],
+      "orientation": 0
+    },
+    "b[1]": {
+      "location": [
+        0,
+        0,
+        80
+      ],
+      "orientation": 0
+    },
+    "b[2]": {
+      "location": [
+        0,
+        0,
+        90
+      ],
+      "orientation": 0
+    },
+    "b[3]": {
+      "location": [
+        0,
+        0,
+        99
+      ],
+      "orientation": 0
+    },
+    "result[0]": {
+      "location": [
+        149,
+        0,
+        0
+      ],
+      "orientation": 0
+    },
+    "result[1]": {
+      "location": [
+        149,
+        0,
+        20
+      ],
+      "orientation": 0
+    },
+    "result[2]": {
+      "location": [
+        149,
+        0,
+        40
+      ],
+      "orientation": 0
+    },
+    "result[3]": {
+      "location": [
+        149,
+        0,
+        60
+      ],
+      "orientation": 0
+    },
+    "result[4]": {
+      "location": [
+        149,
+        0,
+        80
+      ],
+      "orientation": 0
+    },
+    "result[5]": {
+      "location": [
+        149,
+        0,
+        100
+      ],
+      "orientation": 0
+    },
+    "result[6]": {
+      "location": [
+        149,
+        0,
+        120
+      ],
+      "orientation": 0
+    },
+    "result[7]": {
+      "location": [
+        149,
+        0,
+        140
+      ],
+      "orientation": 0
+    }
+  }
+}

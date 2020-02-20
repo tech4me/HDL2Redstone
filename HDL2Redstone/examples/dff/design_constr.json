@@ -1,0 +1,34 @@
+{
+  "dimension": [
+     20,
+     20,
+     20		     
+  ],
+  "forced_placement": {
+     "D": {
+     	"location": [
+	  0,
+          0,
+          0	  
+	],
+	"orientation": 0
+     },
+     "clk": {
+	"location": [
+	  0,
+          0,
+          15	  
+	],
+   	"orientation": 0	
+     },
+     "Q": {
+	"location": [
+	  19,
+           0,
+	  10
+	],
+   	"orientation": 0	
+     
+     }
+  }
+}
