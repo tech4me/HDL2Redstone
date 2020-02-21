@@ -11,7 +11,7 @@
           0,
           0	  
 	],
-	"orientation": 0
+	"input": true
      },
      "clk": {
 	"location": [
@@ -19,7 +19,7 @@
           0,
           15	  
 	],
-   	"orientation": 0	
+   	"input": true	
      },
      "Q": {
 	"location": [
@@ -27,7 +27,7 @@
            0,
 	  10
 	],
-   	"orientation": 0	
+   	"input": false	
      
      }
   }

@@ -204,21 +204,28 @@ bool Placer::checkLegality(bool SkipUnplaced_) const {
                 throw Exception(S.str());
             }
         }
+        /// debug	std::cout<<*Component;
         const auto& ComponentRange = Component->getRange();
         const auto& P1 = ComponentRange.first;
         const auto& P2 = ComponentRange.second;
+        /// debug        std::cout << "start:" << std::get<0>(P1) << " " << std::get<1>(P1) << " " << std::get<2>(P1) <<
+        /// std::endl;; debug        std::cout << "end:" << std::get<0>(P2) << " " << std::get<1>(P2) << " " <<
+        /// std::get<2>(P2) << std::endl;;
         if (std::get<0>(P1) >= D.Width || std::get<1>(P1) >= D.Height || std::get<2>(P1) >= D.Length) {
+            std::cout << "start:" << std::get<0>(P1) << " " << std::get<1>(P1) << " " << std::get<2>(P1) << std::endl;
+            ;
             return true;
         }
         if (std::get<0>(P2) > D.Width || std::get<1>(P2) > D.Height || std::get<2>(P2) > D.Length) {
-            std::cout << std::get<0>(P2) << " " << std::get<1>(P2) << " " << std::get<2>(P2) << std::endl;;
+            std::cout << "end:" << std::get<0>(P2) << " " << std::get<1>(P2) << " " << std::get<2>(P2) << std::endl;
+            ;
             return true;
         }
         for (int X = std::get<0>(P1); X != std::get<0>(P2); ++X) {
             for (int Y = std::get<1>(P1); Y != std::get<1>(P2); ++Y) {
                 for (int Z = std::get<2>(P1); Z != std::get<2>(P2); ++Z) {
                     if (OccupiedSpace[X][Y][Z]) {
-                        std::cout << X << " " << Y << " " << Z << std::endl;
+                        std::cout << "occupied:" << X << " " << Y << " " << Z << std::endl;
                         return true;
                     } else {
                         OccupiedSpace[X][Y][Z] = true;

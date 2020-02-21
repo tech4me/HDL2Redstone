@@ -11,7 +11,7 @@
         0,
         0
       ],
-      "orientation": 0
+      "input": true
     },
     "b": {
       "location": [
@@ -19,7 +19,7 @@
         0,
         20
       ],
-      "orientation": 0
+      "input": true
     },
     "x": {
       "location": [
@@ -27,7 +27,7 @@
         0,
         40
       ],
-      "orientation": 0
+      "input": true
     },
     "dout": {
       "location": [
@@ -35,7 +35,7 @@
         0,
         30
       ],
-      "orientation": 0
+      "input": false
     }
   }
 }

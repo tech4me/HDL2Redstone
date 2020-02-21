@@ -11,7 +11,7 @@
         0,
         0
       ],
-      "orientation": 0
+      "input": true
     },
     "b": {
       "location": [
@@ -19,7 +19,7 @@
         0,
         3
       ],
-      "orientation": 0
+      "input": true
     },
     "c": {
       "location": [
@@ -27,7 +27,7 @@
         0,
         6
       ],
-      "orientation": 0
+      "input": true
     },
     "d": {
       "location": [
@@ -35,7 +35,7 @@
         0,
         9
       ],
-      "orientation": 0
+      "input": true
     },
     "x": {
       "location": [
@@ -43,7 +43,7 @@
         0,
         12
       ],
-      "orientation": 0
+      "input": true
     },
     "y": {
       "location": [
@@ -51,7 +51,7 @@
         0,
         15
       ],
-      "orientation": 0
+      "input": true
     },
     "dout": {
       "location": [
@@ -59,7 +59,7 @@
         0,
         10
       ],
-      "orientation": 0
+      "input": false
     }
   }
 }

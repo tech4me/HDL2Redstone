@@ -22,6 +22,8 @@ class Component {
     std::tuple<uint16_t, uint16_t, uint16_t> getPinLocation(const std::string& PinName_) const;
     bool getPlaced() const { return Placed; }
     void setPlaced(bool Placed_) { Placed = Placed_; }
+    const std::string& getName() const { return Name; }
+    void setName(const std::string& Name_) { Name = Name_; }
 
     void setPlacement(uint16_t X_, uint16_t Y_, uint16_t Z_, Orientation Orient_) {
         P.X = X_;
@@ -44,6 +46,7 @@ class Component {
   private:
     const Cell* CellPtr;
     bool Placed;
+    std::string Name; // for i/o set by user
     // Post placement data structure
     Placement P;
     friend std::ostream& operator<<(std::ostream& out, const Component& Component_);

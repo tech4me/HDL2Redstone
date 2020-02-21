@@ -11,7 +11,7 @@
         0,
         0
       ],
-      "orientation": 0
+      "input": true
     },
     "a[1]": {
       "location": [
@@ -19,7 +19,7 @@
         0,
         10
       ],
-      "orientation": 0
+      "input": true
     },
     "a[2]": {
       "location": [
@@ -27,7 +27,7 @@
         0,
         20
       ],
-      "orientation": 0
+      "input": true
     },
     "a[3]": {
       "location": [
@@ -35,7 +35,7 @@
         0,
         30
       ],
-      "orientation": 0
+      "input": true
     },
     "b[0]": {
       "location": [
@@ -43,7 +43,7 @@
         0,
         70
       ],
-      "orientation": 0
+      "input": true
     },
     "b[1]": {
       "location": [
@@ -51,7 +51,7 @@
         0,
         80
       ],
-      "orientation": 0
+      "input": true
     },
     "b[2]": {
       "location": [
@@ -59,7 +59,7 @@
         0,
         90
       ],
-      "orientation": 0
+      "input": true
     },
     "b[3]": {
       "location": [
@@ -67,7 +67,7 @@
         0,
         99
       ],
-      "orientation": 0
+      "input": true
     },
     "cin": {
       "location": [
@@ -75,7 +75,7 @@
         0,
         50
       ],
-      "orientation": 0
+      "input": true
     },
     "sout[0]": {
       "location": [
@@ -83,7 +83,7 @@
         0,
         0
       ],
-      "orientation": 0
+      "input": false
     },
     "sout[1]": {
       "location": [
@@ -91,7 +91,7 @@
         0,
         20
       ],
-      "orientation": 0
+      "input": false
     },
     "sout[2]": {
       "location": [
@@ -99,7 +99,7 @@
         0,
         40
       ],
-      "orientation": 0
+      "input": false
     },
     "sout[3]": {
       "location": [
@@ -107,7 +107,7 @@
         0,
         60
       ],
-      "orientation": 0
+      "input": false
     },
     "sout[4]": {
       "location": [
@@ -115,7 +115,7 @@
         0,
         80
       ],
-      "orientation": 0
+      "input": false
     }
   }
 }

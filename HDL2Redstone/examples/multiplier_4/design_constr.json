@@ -1,9 +1,9 @@
 
 {
   "dimension": [
-    150,
-    150,
-    150
+    100,
+    50,
+    100
   ],
   "forced_placement": {
     "a[0]": {
@@ -12,7 +12,7 @@
         0,
         0
       ],
-      "orientation": 0
+      "input": true
     },
     "a[1]": {
       "location": [
@@ -20,7 +20,7 @@
         0,
         10
       ],
-      "orientation": 0
+      "input": true
     },
     "a[2]": {
       "location": [
@@ -28,7 +28,7 @@
         0,
         20
       ],
-      "orientation": 0
+      "input": true
     },
     "a[3]": {
       "location": [
@@ -36,7 +36,7 @@
         0,
         30
       ],
-      "orientation": 0
+      "input": true
     },
     "b[0]": {
       "location": [
@@ -44,7 +44,7 @@
         0,
         70
       ],
-      "orientation": 0
+      "input": true
     },
     "b[1]": {
       "location": [
@@ -52,7 +52,7 @@
         0,
         80
       ],
-      "orientation": 0
+      "input": true
     },
     "b[2]": {
       "location": [
@@ -60,7 +60,7 @@
         0,
         90
       ],
-      "orientation": 0
+      "input": true
     },
     "b[3]": {
       "location": [
@@ -68,71 +68,71 @@
         0,
         99
       ],
-      "orientation": 0
+      "input": true
     },
     "result[0]": {
       "location": [
-        149,
+        99,
         0,
         0
       ],
-      "orientation": 0
+      "input": false
     },
     "result[1]": {
       "location": [
-        149,
+        99,
         0,
-        20
+        13
       ],
-      "orientation": 0
+      "input": false
     },
     "result[2]": {
       "location": [
-        149,
+        99,
         0,
-        40
+        26
       ],
-      "orientation": 0
+      "input": false
     },
     "result[3]": {
       "location": [
-        149,
+        99,
         0,
-        60
+        39
       ],
-      "orientation": 0
+      "input": false
     },
     "result[4]": {
       "location": [
-        149,
+        99,
         0,
-        80
+        52
       ],
-      "orientation": 0
+      "input": false
     },
     "result[5]": {
       "location": [
-        149,
+        99,
         0,
-        100
+        65
       ],
-      "orientation": 0
+      "input": false
     },
     "result[6]": {
       "location": [
-        149,
+        99,
         0,
-        120
+        78
       ],
-      "orientation": 0
+      "input": false
     },
     "result[7]": {
       "location": [
-        149,
+        99,
         0,
-        140
+        91
       ],
-      "orientation": 0
+      "input": false
     }
   }
 }

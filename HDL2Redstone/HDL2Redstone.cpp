@@ -54,29 +54,29 @@ int main(int argc, char* argv[]) {
             // DC.addForcedPlacement("sout[2]", {40, 0, 99, Orientation::ZeroCW});
             // DC.addForcedPlacement("sout[3]", {60, 0, 99, Orientation::ZeroCW});
             // DC.addForcedPlacement("sout[4]", {80, 0, 99, Orientation::ZeroCW});
-	    
-	    // 4 bit multiplier
-	    /*DC.addForcedPlacement("a[0]", {0, 0, 0, Orientation::ZeroCW});
-	    DC.addForcedPlacement("a[1]", {10, 0, 0, Orientation::ZeroCW});
-	    DC.addForcedPlacement("a[2]", {20, 0, 0, Orientation::ZeroCW});
-	    DC.addForcedPlacement("a[3]", {30, 0, 0, Orientation::ZeroCW});
-	    DC.addForcedPlacement("b[0]", {70, 0, 0, Orientation::ZeroCW});
-	    DC.addForcedPlacement("b[1]", {80, 0, 0, Orientation::ZeroCW});
-	    DC.addForcedPlacement("b[2]", {90, 0, 0, Orientation::ZeroCW});
-	    DC.addForcedPlacement("b[3]", {99, 0, 0, Orientation::ZeroCW});
-	    DC.addForcedPlacement("result[0]", {0, 0, 149, Orientation::ZeroCW});
-	    DC.addForcedPlacement("result[1]", {20, 0, 149, Orientation::ZeroCW});
-	    DC.addForcedPlacement("result[2]", {40, 0, 149, Orientation::ZeroCW});
-	    DC.addForcedPlacement("result[3]", {60, 0, 149, Orientation::ZeroCW});
-	    DC.addForcedPlacement("result[4]", {80, 0, 149, Orientation::ZeroCW});
-	    DC.addForcedPlacement("result[5]", {100, 0, 149, Orientation::ZeroCW});
-	    DC.addForcedPlacement("result[6]", {120, 0, 149, Orientation::ZeroCW});
-	    DC.addForcedPlacement("result[7]", {140, 0, 149, Orientation::ZeroCW});*/
+
+            // 4 bit multiplier
+            /*DC.addForcedPlacement("a[0]", {0, 0, 0, Orientation::ZeroCW});
+            DC.addForcedPlacement("a[1]", {10, 0, 0, Orientation::ZeroCW});
+            DC.addForcedPlacement("a[2]", {20, 0, 0, Orientation::ZeroCW});
+            DC.addForcedPlacement("a[3]", {30, 0, 0, Orientation::ZeroCW});
+            DC.addForcedPlacement("b[0]", {70, 0, 0, Orientation::ZeroCW});
+            DC.addForcedPlacement("b[1]", {80, 0, 0, Orientation::ZeroCW});
+            DC.addForcedPlacement("b[2]", {90, 0, 0, Orientation::ZeroCW});
+            DC.addForcedPlacement("b[3]", {99, 0, 0, Orientation::ZeroCW});
+            DC.addForcedPlacement("result[0]", {0, 0, 149, Orientation::ZeroCW});
+            DC.addForcedPlacement("result[1]", {20, 0, 149, Orientation::ZeroCW});
+            DC.addForcedPlacement("result[2]", {40, 0, 149, Orientation::ZeroCW});
+            DC.addForcedPlacement("result[3]", {60, 0, 149, Orientation::ZeroCW});
+            DC.addForcedPlacement("result[4]", {80, 0, 149, Orientation::ZeroCW});
+            DC.addForcedPlacement("result[5]", {100, 0, 149, Orientation::ZeroCW});
+            DC.addForcedPlacement("result[6]", {120, 0, 149, Orientation::ZeroCW});
+            DC.addForcedPlacement("result[7]", {140, 0, 149, Orientation::ZeroCW});*/
 
             Design D("design.blif", CL, DC);
             // std::cout << D;
-	                
-	    std::cout << "Now Running Place & Route..." << std::endl;
+
+            std::cout << "Now Running Place & Route..." << std::endl;
             if (D.doPlaceAndRoute()) {
                 std::cout << "Place/Route failed!!!" << std::endl;
                 return 1;

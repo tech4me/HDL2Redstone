@@ -47,31 +47,32 @@ class Router {
                           const std::vector<std::tuple<uint16_t, uint16_t, uint16_t>> connection_points);
     bool checkPointAvaliable(const Design& D, const std::tuple<int16_t, int16_t, int16_t> location);
     void updateUsedSpace(Connection& C, std::tuple<uint16_t, uint16_t, uint16_t>& Space);
-    coord updateSinglePortUsedSpace(std::tuple<uint16_t, uint16_t, uint16_t> Loc, Facing Fac, coord& congestion,std::tuple<uint16_t, uint16_t, uint16_t>& Space);
+    coord updateSinglePortUsedSpace(std::tuple<uint16_t, uint16_t, uint16_t> Loc, Facing Fac, coord& congestion,
+                                    std::tuple<uint16_t, uint16_t, uint16_t>& Space);
     bool ReRouteStartRouting(coord congestionPoint, std::tuple<uint16_t, uint16_t, uint16_t>& Space,
                              Router::Point***& P_, Design& D);
     bool ReRouteEndRouting(); // TODO
     bool ReRouteIllegal(Connection& C, std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t>>& congestionPoints,
                         std::tuple<uint16_t, uint16_t, uint16_t>& Space, Router::Point***& P_, Design& D,
                         std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t, uint16_t>>& congestionPoints_prev);
-    bool HelperReRouteIllegal(Connection& C,
-                              std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t, uint16_t>>& local_congestion_points,
-                              std::tuple<uint16_t, uint16_t, uint16_t>& Space, Router::Point***& P_, Design& D);
-    bool
-    HelperReRouteforIllegalRegularRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_t, uint16_t>& Space,
-                                        Router::Point***& P_,
-                                        std::set<std::tuple<uint16_t, uint16_t, uint16_t>>& RetIllegalPoints,
-                                        std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t, uint16_t>>& congestionPoints);
+    bool HelperReRouteIllegal(
+        Connection& C, std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t, uint16_t>>& local_congestion_points,
+        std::tuple<uint16_t, uint16_t, uint16_t>& Space, Router::Point***& P_, Design& D);
+    bool HelperReRouteforIllegalRegularRoute(
+        Design& D, Connection& C, std::tuple<uint16_t, uint16_t, uint16_t>& Space, Router::Point***& P_,
+        std::set<std::tuple<uint16_t, uint16_t, uint16_t>>& RetIllegalPoints,
+        std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t, uint16_t>>& congestionPoints);
     void Deconstructor(std::tuple<uint16_t, uint16_t, uint16_t>& Space);
     void Reconstructor(const Design& D);
     bool CheckandKeepResult(Connection& C, std::tuple<uint16_t, uint16_t, uint16_t>& Space);
-    bool CheckKeepOrUpdate(Connection& C, std::tuple<uint16_t, uint16_t, uint16_t>& Space,Router::Point***& P_);
+    bool CheckKeepOrUpdate(Connection& C, std::tuple<uint16_t, uint16_t, uint16_t>& Space, Router::Point***& P_);
     bool HelperCheckUpdateGraph(Router::Point* Parent, Router::Point* Current);
     int HelperRoutingLastRepeater(Router::Point* RecurP);
     bool RoutingLastRepeater(Router::Point* CongestionP);
-    void InitPortUsedSpace(std::tuple<uint16_t, uint16_t, uint16_t> Loc, Facing Fac,std::tuple<uint16_t, uint16_t, uint16_t>& Space);
-    void InitPortUsedSpaceHelper(Router::coord& Loc,std::tuple<uint16_t, uint16_t, uint16_t>& Space);
-    void updateSinglePortUsedSpaceHelper(Router::coord& Loc,std::tuple<uint16_t, uint16_t, uint16_t>& Space);
+    void InitPortUsedSpace(std::tuple<uint16_t, uint16_t, uint16_t> Loc, Facing Fac,
+                           std::tuple<uint16_t, uint16_t, uint16_t>& Space);
+    void InitPortUsedSpaceHelper(Router::coord& Loc, std::tuple<uint16_t, uint16_t, uint16_t>& Space);
+    void updateSinglePortUsedSpaceHelper(Router::coord& Loc, std::tuple<uint16_t, uint16_t, uint16_t>& Space);
     int*** UsedSpace;
     WireInfo*** WI;
     Connection* FailedWire_SingleRouting;

@@ -67,7 +67,7 @@ Component::getRange() const {
         x2 = P.X + Width;
         y2 = P.Y + Height;
         z2 = P.Z + Length;
-    } else if (P.Orient == Orientation::OneCW) {
+    } else if (P.Orient == Orientation::OneCW) { // TODO: NOT SURE IF ONECW AND 3CW ARE CORRECT
         x1 = P.X - Length;
         y1 = P.Y;
         z1 = P.Z;
