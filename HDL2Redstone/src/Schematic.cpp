@@ -101,7 +101,6 @@ Schematic::Schematic(const std::string& File_) {
             BlockData.push_back(Value);
         }
         if (C.has_key(SCHEM_BLOCK_ENTITIES, tag_type::List)) {
-            // TODO: check if the following works when actually have block entity data
             const auto& BlockEntities = C.at(SCHEM_BLOCK_ENTITIES).as<tag_list>();
             for (const auto& NBTEntity : BlockEntities) {
                 const auto& Entity = NBTEntity.as<tag_compound>();
@@ -294,7 +293,6 @@ void Schematic::insertSubSchematic(const Placement& P_, const Schematic& Schem_,
         // for debug
         BlockOrigin.at(Index) = std::make_tuple(Type_, RouterSet_);
     }
-    // TODO: not checked against real block entity info!
     for (int32_t i = 0; i < Schem_.BlockEntityPositions.size(); ++i) {
         std::vector<int32_t> Pos = Schem_.BlockEntityPositions[i];
         std::vector<int32_t> Updated_pos({Pos[0] + P_.X, Pos[1] + P_.Y, Pos[2] + P_.Z});
@@ -344,7 +342,6 @@ void Schematic::exportSchematic(const std::string& File_) const {
             i++;
         }
         C.emplace<tag_byte_array>(SCHEM_BLOCK_DATA, tag_byte_array(std::move(Blocks)));
-        // TODO: Not Tested....
         tag_list BlockEntities;
         for (int32_t i = 0; i < BlockEntityPositions.size(); i++) {
             tag_compound BlockEntity;
@@ -352,7 +349,7 @@ void Schematic::exportSchematic(const std::string& File_) const {
             BlockEntity.emplace<tag_string>("Id", tag_string(BlockEntityIds[i]));
             for (auto It = BlockEntityExtras[i].begin(); It != BlockEntityExtras[i].end(); ++It) {
                 if ((It->first == "Pos") || (It->first == "Id")) {
-                        continue;
+                    continue;
                 }
                 if (It->first == "OutputSignal") {
                     BlockEntity.emplace<tag_int>(tag_string(It->first), tag_int(std::stoi(It->second)));
@@ -361,7 +358,6 @@ void Schematic::exportSchematic(const std::string& File_) const {
             BlockEntities.push_back(tag_compound(BlockEntity));
         }
         C.emplace<tag_list>(SCHEM_BLOCK_ENTITIES, BlockEntities);
-        // END Not Tested....
         io::write_tag("Schematic", C, ZS);
     } catch (...) {
         throw Exception("Failed writing schematic file " + File_);

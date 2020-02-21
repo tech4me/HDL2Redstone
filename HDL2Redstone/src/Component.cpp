@@ -1,7 +1,7 @@
 #include <Component.hpp>
 
 using namespace HDL2Redstone;
-Component::Component(const Cell* CellPtr_) : CellPtr(CellPtr_), Placed(false) {}
+Component::Component(const Cell* CellPtr_) : CellPtr(CellPtr_), ForcePlaced(false), Placed(false) {}
 
 Facing Component::getPinFacing(const std::string& PinName_) const {
     auto tempDir = CellPtr->getPinFacing(PinName_);
@@ -91,6 +91,46 @@ Component::getRange() const {
     }
     return std::pair(std::make_tuple(x1, y1, z1), std::make_tuple(x2, y2, z2));
 }
+
+std::pair<Coordinate, Coordinate> Component::getRangeWithPlacement(const Placement& Placement_) const {
+    const auto& P = Placement_;
+    uint16_t x1, y1, z1, x2, y2, z2;
+    Schematic S = CellPtr->getSchematic();
+    uint16_t Width = S.getWidth();
+    uint16_t Height = S.getHeight();
+    uint16_t Length = S.getLength();
+    if (P.Orient == Orientation::ZeroCW) {
+        x1 = P.X;
+        y1 = P.Y;
+        z1 = P.Z;
+        x2 = P.X + Width;
+        y2 = P.Y + Height;
+        z2 = P.Z + Length;
+    } else if (P.Orient == Orientation::OneCW) {
+        x1 = P.X - Length;
+        y1 = P.Y;
+        z1 = P.Z;
+        x2 = P.X;
+        y2 = P.Y + Height;
+        z2 = P.Z + Width;
+    } else if (P.Orient == Orientation::TwoCW) {
+        x1 = P.X - Width;
+        y1 = P.Y;
+        z1 = P.Z - Length;
+        x2 = P.X;
+        y2 = P.Y + Height;
+        z2 = P.Z;
+    } else {
+        x1 = P.X;
+        y1 = P.Y;
+        z1 = P.Z - Width;
+        x2 = P.X + Length;
+        y2 = P.Y + Height;
+        z2 = P.Z;
+    }
+    return std::pair(Coordinate{.X = x1, .Y = y1, .Z = z1}, Coordinate{.X = x2, .Y = y2, .Z = z2});
+}
+
 namespace HDL2Redstone {
 std::ostream& operator<<(std::ostream& out, const Component& Component_) {
 

@@ -22,6 +22,10 @@ class Component {
     std::tuple<uint16_t, uint16_t, uint16_t> getPinLocation(const std::string& PinName_) const;
     bool getPlaced() const { return Placed; }
     void setPlaced(bool Placed_) { Placed = Placed_; }
+    void setForcePlaced() {
+        Placed = true;
+        ForcePlaced = true;
+    }
 
     void setPlacement(uint16_t X_, uint16_t Y_, uint16_t Z_, Orientation Orient_) {
         P.X = X_;
@@ -37,13 +41,16 @@ class Component {
     // TODO: Make sure they are only called when Placed is true
     const Placement& getPlacement() const { return P; }
 
+    // TODO: Change this function to use the function below
     std::pair<std::tuple<uint16_t, uint16_t, uint16_t>, std::tuple<uint16_t, uint16_t, uint16_t>> getRange() const;
+    std::pair<Coordinate, Coordinate> getRangeWithPlacement(const Placement& Placement_) const;
     // Return schematic specified by CellStructName
     const Schematic& getSchematic() const { return CellPtr->getSchematic(); }
 
   private:
     const Cell* CellPtr;
     bool Placed;
+    bool ForcePlaced;
     // Post placement data structure
     Placement P;
     friend std::ostream& operator<<(std::ostream& out, const Component& Component_);

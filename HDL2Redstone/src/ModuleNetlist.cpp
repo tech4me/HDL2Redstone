@@ -20,7 +20,7 @@ void ModuleNetlist::ExtractNetlist::inputs(std::vector<std::string> inputs) {
         auto It = DC.getForcedPlacement().find(input);
         if (It != DC.getForcedPlacement().end()) {
             ComponentPtr->setPlacement(It->second.X, It->second.Y, It->second.Z, It->second.Orient);
-            ComponentPtr->setPlaced(true);
+            ComponentPtr->setForcePlaced();
         }
         Connections.push_back(std::make_unique<Connection>(input, ComponentPtr.get(), "Y"));
         Components.push_back(std::move(ComponentPtr));
@@ -34,7 +34,7 @@ void ModuleNetlist::ExtractNetlist::outputs(std::vector<std::string> outputs) {
         auto It = DC.getForcedPlacement().find(output);
         if (It != DC.getForcedPlacement().end()) {
             ComponentPtr->setPlacement(It->second.X, It->second.Y, It->second.Z, It->second.Orient);
-            ComponentPtr->setPlaced(true);
+            ComponentPtr->setForcePlaced();
         }
         Connections.push_back(std::make_unique<Connection>(output, ComponentPtr.get(), "A", false /* Add as sink*/));
         Components.push_back(std::move(ComponentPtr));
@@ -53,15 +53,15 @@ void ModuleNetlist::ExtractNetlist::subckt(std::string model, std::vector<std::s
         auto PortDir = ComponentPtr->getPinDir(Port);
         bool isSource = true;
         switch (PortDir) {
-            case Direction::Input:
-                isSource = false;
-                break;
-            case Direction::Output:
-                isSource = true;
-                break;
-            case Direction::Inout:
-            default:
-                throw Exception("Cell library has unsupported pin direction!");
+        case Direction::Input:
+            isSource = false;
+            break;
+        case Direction::Output:
+            isSource = true;
+            break;
+        case Direction::Inout:
+        default:
+            throw Exception("Cell library has unsupported pin direction!");
         }
         auto P = [Net](const std::unique_ptr<Connection>& ConnectionPtr) -> bool {
             if (ConnectionPtr->getName() == Net) {
