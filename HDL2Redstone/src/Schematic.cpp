@@ -101,7 +101,6 @@ Schematic::Schematic(const std::string& File_) {
             BlockData.push_back(Value);
         }
         if (C.has_key(SCHEM_BLOCK_ENTITIES, tag_type::List)) {
-            // TODO: check if the following works when actually have block entity data
             const auto& BlockEntities = C.at(SCHEM_BLOCK_ENTITIES).as<tag_list>();
             for (const auto& NBTEntity : BlockEntities) {
                 const auto& Entity = NBTEntity.as<tag_compound>();
@@ -178,7 +177,7 @@ void Schematic::insertSubSchematic(const Placement& P_, const Schematic& Schem_,
                 // std::cout<<"NO matching placement orientation: "<<(int)P_.Orient<<std::endl;
                 break;
             }
-            // redstone_torch or repeater
+            // redstone_torch or repeater, or sign
         } else if (std::regex_search(Str, Fmatch, FaceReg)) {
             std::string Facing = Fmatch.str(2);
             uint32_t FInt = 0, turn = 0;
@@ -254,26 +253,26 @@ void Schematic::insertSubSchematic(const Placement& P_, const Schematic& Schem_,
         switch (P_.Orient) {
         case Orientation::OneCW:
             Temp = X;
-            X = -Z;
+            X = Z - 1;
             Z = Temp;
             break;
         case Orientation::TwoCW:
-            X = -X;
-            Z = -Z;
+            X = -X - 1;
+            Z = -Z - 1;
             break;
         case Orientation::ThreeCW:
             Temp = X;
             X = Z;
-            Z = -Temp;
+            Z = -Temp - 1;
             break;
         default:
             break;
         }
-        //	std::cout<<"after rot:"<<X<<" "<<Y<<" "<<Z<<std::endl;
+        // std::cout<<"after rot:"<<X<<" "<<Y<<" "<<Z<<std::endl;
         X += P_.X;
         Y += P_.Y;
         Z += P_.Z;
-        //	std::cout<<"p added:"<<X<<" "<<Y<<" "<<Z<<std::endl;
+        // std::cout<<"p added:"<<X<<" "<<Y<<" "<<Z<<std::endl;
         // Bound check
         if (X < 0 || X >= Width || Y < 0 || Y >= Height || Z < 0 || Z >= Length) {
             // TODO: invertPalette.at(i) prob wrong
@@ -366,7 +365,6 @@ void Schematic::exportSchematic(const std::string& File_) const {
             i++;
         }
         C.emplace<tag_byte_array>(SCHEM_BLOCK_DATA, tag_byte_array(std::move(Blocks)));
-        // TODO: Not Tested....
         tag_list BlockEntities;
         for (int32_t i = 0; i < BlockEntityPositions.size(); i++) {
             tag_compound BlockEntity;
@@ -387,7 +385,6 @@ void Schematic::exportSchematic(const std::string& File_) const {
             BlockEntities.push_back(tag_compound(BlockEntity));
         }
         C.emplace<tag_list>(SCHEM_BLOCK_ENTITIES, BlockEntities);
-        // END Not Tested....
         io::write_tag("Schematic", C, ZS);
     } catch (...) {
         throw Exception("Failed writing schematic file " + File_);
