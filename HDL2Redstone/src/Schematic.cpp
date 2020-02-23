@@ -303,18 +303,38 @@ void Schematic::insertSubSchematic(const Placement& P_, const Schematic& Schem_,
     // TODO: not checked against real block entity info!
     for (int32_t i = 0; i < Schem_.BlockEntityPositions.size(); ++i) {
         std::vector<int32_t> Pos = Schem_.BlockEntityPositions[i];
+	int32_t Temp;
+	// rotate entities, code below could be put into a func...
+	switch (P_.Orient) {
+        case Orientation::OneCW:
+            Temp = Pos[0];
+            Pos[0] = Pos[2] - 1;
+            Pos[2] = Temp;
+            break;
+        case Orientation::TwoCW:
+            Pos[0] = -Pos[0] - 1;
+            Pos[2] = -Pos[2] - 1;
+            break;
+        case Orientation::ThreeCW:
+            Temp = Pos[0];
+            Pos[0] = Pos[2];
+            Pos[2] = -Temp - 1;
+            break;
+        default:
+            break;
+        }
         std::vector<int32_t> Updated_pos({Pos[0] + P_.X, Pos[1] + P_.Y, Pos[2] + P_.Z});
         BlockEntityPositions.push_back(Updated_pos);
         BlockEntityIds.push_back(Schem_.BlockEntityIds[i]);
         std::map<std::string, std::string> EntityExtras;
         if (Schem_.BlockEntityIds[i] == "minecraft:sign") {
-            // std::cout<<"inserting schem, find sign"<<std::endl;
+            //std::cout<<"inserting schem, find sign"<<std::endl; ///////////////////////////////////
             std::string text = "{\"text\":\"";
             for (const auto& [key, value] : Schem_.BlockEntityExtras[i]) {
                 if (key == "Text1") {
                     EntityExtras.emplace("Text1", text + Type_ + "\"}");
-                } else if (key == "Text2") {
-                    EntityExtras.emplace("Text2", text + Name_ + "\"}");
+                } else if (key == "Text3") {
+                    EntityExtras.emplace("Text3", text + "\\u00A7c" + Name_ + "\"}");
                 } else {
                     EntityExtras.emplace(key, value);
                 }
@@ -378,7 +398,7 @@ void Schematic::exportSchematic(const std::string& File_) const {
                     BlockEntity.emplace<tag_int>(tag_string(It->first), tag_int(std::stoi(It->second)));
                 } else if (It->first == "Color" || It->first == "Text1" || It->first == "Text2" ||
                            It->first == "Text3" || It->first == "Text4") { // for sign
-                    // std::cout<<"exporting block entity!"<<std::endl;
+                    //std::cout<<"exporting block entity!"<<std::endl;
                     BlockEntity.emplace<tag_string>(tag_string(It->first), tag_string(It->second));
                 }
             }

@@ -3,9 +3,9 @@
 #include <Router.hpp>
 using namespace HDL2Redstone;
 
-Design::Design(const std::string& File_, const CellLibrary& CellLib_, const DesignConstraint& DC_)
-    : Width(std::get<0>(DC_.getDimension())), Height(std::get<1>(DC_.getDimension())),
-      Length(std::get<2>(DC_.getDimension())), CellLib(CellLib_), DC(DC_), MN(File_, CellLib_, DC) {}
+Design::Design(const std::string& File_,
+               const CellLibrary& CellLib_, const DesignConstraint& DC_)
+    : Width(std::get<0>(DC_.getDimension())), Height(std::get<1>(DC_.getDimension())), Length(std::get<2>(DC_.getDimension())), CellLib(CellLib_), DC(DC_), MN(File_, CellLib_, DC) {}
 
 const std::tuple<uint16_t, uint16_t, uint16_t> Design::getSpace() const {
     return std::make_tuple(Width, Height, Length);
@@ -19,9 +19,9 @@ bool Design::doPlaceAndRoute() {
     if (P.place()) {
         return true;
     }
-    std::cout << "Now Routing..." << std::endl;
+    /*std::cout << "Now Routing..." << std::endl;
     Router R(*this);
-    R.route(*this);
+    R.route(*this);*/
     return false;
 }
 
@@ -29,8 +29,14 @@ Schematic Design::exportDesign() const {
     Schematic Schem(Width, Height, Length);
     for (const auto& Component : MN.getComponents()) {
         if (Component->getPlaced()) {
-            Schem.insertSubSchematic(Component->getPlacement(), Component->getSchematic(), Component->getType(), 0,
-                                     Component->getName()); // type and 0 for debug, name argument for port names
+	    //auto names = Component->getPinNames();
+	    //for (auto n : names) std::cout<<n<<std::endl;
+	    /*if (Component->getType() == "INPUT")
+		    std::cout<<"input: "<<(int)Component->getPinFacing("Y")<<std::endl;
+	    else if (Component->getType() == "OUTPUT")
+		    std::cout<<"output "<<(int)Component->getPinFacing("A")<<std::endl;	*/ //for checking port facing
+            Schem.insertSubSchematic(Component->getPlacement(), Component->getSchematic(), Component->getType(),
+                                     0, Component->getName()); // type and 0 for debug, name argument for port names
         }
     }
     for (const auto& Connection : MN.getConnections()) {
