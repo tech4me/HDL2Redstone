@@ -39,9 +39,9 @@ Facing Component::getPinFacing(const std::string& PinName_) const {
     }
     return tempDir;
 }
+
 std::tuple<uint16_t, uint16_t, uint16_t> Component::getPinLocation(const std::string& PinName_) const {
     auto tempLoc = CellPtr->getPinLocation(PinName_);
-    // Facing tempFac = Component::getPinFacing(PinName_);
     if (P.Orient == Orientation::ZeroCW) {
         return std::make_tuple(std::get<0>(tempLoc) + P.X, std::get<1>(tempLoc) + P.Y, std::get<2>(tempLoc) + P.Z);
     } else if (P.Orient == Orientation::OneCW) {
@@ -50,6 +50,27 @@ std::tuple<uint16_t, uint16_t, uint16_t> Component::getPinLocation(const std::st
         return std::make_tuple(-std::get<0>(tempLoc) + P.X, std::get<1>(tempLoc) + P.Y, -std::get<2>(tempLoc) + P.Z);
     } else {
         return std::make_tuple(-std::get<2>(tempLoc) + P.X, std::get<1>(tempLoc) + P.Y, std::get<0>(tempLoc) + P.Z);
+    }
+}
+
+Coordinate Component::getPinLocationWithPlacement(const std::string& PinName_, const Placement& P_) const {
+    auto tempLoc = CellPtr->getPinLocation(PinName_);
+    if (P_.Orient == Orientation::ZeroCW) {
+        return Coordinate{.X = static_cast<uint16_t>(std::get<0>(tempLoc) + P_.X),
+                          .Y = static_cast<uint16_t>(std::get<1>(tempLoc) + P_.Y),
+                          .Z = static_cast<uint16_t>(std::get<2>(tempLoc) + P_.Z)};
+    } else if (P_.Orient == Orientation::OneCW) {
+        return Coordinate{.X = static_cast<uint16_t>(std::get<2>(tempLoc) + P_.X),
+                          .Y = static_cast<uint16_t>(std::get<1>(tempLoc) + P_.Y),
+                          .Z = static_cast<uint16_t>(-std::get<0>(tempLoc) + P_.Z)};
+    } else if (P_.Orient == Orientation::TwoCW) {
+        return Coordinate{.X = static_cast<uint16_t>(-std::get<0>(tempLoc) + P_.X),
+                          .Y = static_cast<uint16_t>(std::get<1>(tempLoc) + P_.Y),
+                          .Z = static_cast<uint16_t>(-std::get<2>(tempLoc) + P_.Z)};
+    } else {
+        return Coordinate{.X = static_cast<uint16_t>(-std::get<2>(tempLoc) + P_.X),
+                          .Y = static_cast<uint16_t>(std::get<1>(tempLoc) + P_.Y),
+                          .Z = static_cast<uint16_t>(std::get<0>(tempLoc) + P_.Z)};
     }
 }
 

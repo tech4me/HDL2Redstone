@@ -1,12 +1,22 @@
 #include <algorithm>
+#include <cmath>
+#include <cstdlib>
+#include <random>
 #include <sstream>
 
 #include <Exception.hpp>
 #include <Placer.hpp>
 
-#define INITIAL_CLEARANCE 10
+#define PLACEMENT_GRID_SIZE 10
 
 using namespace HDL2Redstone;
+
+Placer::Placer(Design& D_) : D(D_), CurrentPlacement(D_) {
+    BestCost = std::numeric_limits<double>::max();
+    PGridW = D.Width / PLACEMENT_GRID_SIZE;
+    PGridH = D.Height / PLACEMENT_GRID_SIZE;
+    PGridL = D.Length / PLACEMENT_GRID_SIZE;
+}
 
 bool Placer::place() {
     if (checkLegality(true)) {
@@ -25,7 +35,6 @@ bool Placer::place() {
         std::cout << "Simulated annealing placement failed!" << std::endl;
         return true;
     }
-    applyCurrentPlacement();
     if (checkLegality()) {
         throw Exception("Illegal simulated annealing placement!");
     }
@@ -42,34 +51,51 @@ bool Placer::initialPlace() {
     std::cout << "Running initial placer..." << std::endl;
     for (auto& CPD : CurrentPlacement.CPDs) {
         const auto& Component = *(CPD.ComponentPtr);
-        // Skip already placed component
+        if (Component.getPlaced()) {
+            auto Place = Component.getPlacement();
+            CPD.setPlacement(Place.X, Place.Y, Place.Z, Place.Orient);
+            CPD.Fixed = true;
+            if (CurrentPlacement.setPlacementGrid(CPD)) {
+                throw Exception("Illegal forced placement!");
+            }
+        }
+    }
+    for (auto& CPD : CurrentPlacement.CPDs) {
+        const auto& Component = *(CPD.ComponentPtr);
+        // Skip placing already placed component
         if (Component.getPlaced()) {
             continue;
         }
 
-        uint16_t X = 0;
-        uint16_t Y = 0;
-        uint16_t Z = 0;
+        uint16_t GridX = 0;
+        uint16_t GridY = 0;
+        uint16_t GridZ = 0;
         while (true) {
-            if (Y >= D.Height) {
+            if (GridY >= D.Height / PLACEMENT_GRID_SIZE) {
                 std::cout << "DEBUG: Placement error: not enough space!" << std::endl;
                 return true;
             }
+            // TODO: Handle cells that requires multiple grid blocks
+            uint16_t CW = CPD.ComponentPtr->getWidth();
+            uint16_t CH = CPD.ComponentPtr->getHeight();
+            uint16_t CL = CPD.ComponentPtr->getLength();
+            uint16_t X = GridX * PLACEMENT_GRID_SIZE + PLACEMENT_GRID_SIZE / 2 - CW / 2;
+            uint16_t Y = GridY * PLACEMENT_GRID_SIZE + PLACEMENT_GRID_SIZE / 2 - CH / 2;
+            uint16_t Z = GridZ * PLACEMENT_GRID_SIZE + PLACEMENT_GRID_SIZE / 2 - CL / 2;
             CPD.setPlacement(X, Y, Z, Orientation::ZeroCW);
-            if (!testInitialPlacement(CPD, INITIAL_CLEARANCE)) {
-                CurrentPlacement.setUsedSpace(CPD);
+            if (!CurrentPlacement.testAndSetPlacementGrid(CPD)) {
                 break;
             }
             // Loop X and Z first
-            ++X;
-            if (X == D.Width) {
-                X = 0;
-                ++Z;
+            ++GridX;
+            if (GridX == D.Width / PLACEMENT_GRID_SIZE) {
+                GridX = 0;
+                ++GridZ;
             }
-            if (Z == D.Length) {
-                X = 0;
-                Z = 0;
-                ++Y;
+            if (GridZ == D.Length / PLACEMENT_GRID_SIZE) {
+                GridX = 0;
+                GridZ = 0;
+                ++GridY;
             }
         }
     }
@@ -78,10 +104,34 @@ bool Placer::initialPlace() {
 
 bool Placer::annealPlace() {
     std::cout << "Running simulated annealing placer..." << std::endl;
-    const int MaxIt = 1;
-    const int MaxStep = 1;
+    const int MaxIt = 100;
+    const int MaxStep = 5000;
 
-    // Create initial state with initial placer result
+    // Prepare swap candidates
+    for (int X = 0; X != PGridW; ++X) {
+        for (int Y = 0; Y != PGridH; ++Y) {
+            for (int Z = 0; Z != PGridL; ++Z) {
+                if (!CurrentPlacement.PGrid[X * PGridW * PGridH + Y * PGridW + Z]) {
+                    auto&& EmptyCPD = std::make_unique<ComponentPlacementData>(ComponentPlacementData{
+                        .ComponentPtr = nullptr, .Fixed = false, .Empty = true, .GridX = X, .GridY = Y, .GridZ = Z});
+                    CurrentPlacement.PGrid[X * PGridW * PGridH + Y * PGridW + Z] = EmptyCPD.get();
+                    CurrentPlacement.EmptyCPDs.push_back(std::move(EmptyCPD));
+                    CurrentPlacement.SwapCandidate2.push_back(
+                        CurrentPlacement.PGrid[X * PGridW * PGridH + Y * PGridW + Z]);
+                } else if (!CurrentPlacement.PGrid[X * PGridW * PGridH + Y * PGridW + Z]->Fixed) {
+                    CurrentPlacement.SwapCandidate1.push_back(
+                        CurrentPlacement.PGrid[X * PGridW * PGridH + Y * PGridW + Z]);
+                    CurrentPlacement.SwapCandidate2.push_back(
+                        CurrentPlacement.PGrid[X * PGridW * PGridH + Y * PGridW + Z]);
+                }
+            }
+        }
+    }
+
+    // Init best cost
+    BestCost = evalCost(CurrentPlacement);
+    int InitialCost = BestCost;
+    double Cost;
 
     int i = 0;
     while (true) {
@@ -89,17 +139,30 @@ bool Placer::annealPlace() {
             std::cout << "Annealer max number of iteration reached!" << std::endl;
             break;
         }
-        /*
         double Tempreture = MaxIt / (i + 1);
         for (int j = 0; j < MaxStep; ++j) {
+            double Cost = evalCost(CurrentPlacement);
+            // TODO: Make it work for cells that takes multiple grid location
             // Generate neighbour solution
-            NewState = annealGenerateNeighbour(State);
-            // Accept probabilistic function
-            if (annealAccept(State, NewState, Tempreture)) {
-                State = NewState;
+            auto [SwapFrom, SwapTo] = annealGenerateSwapNeighbour();
+            annealDoSwap(SwapFrom, SwapTo);
+            double NewCost = evalCost(CurrentPlacement);
+            int Gain = Cost - NewCost;
+            if (Gain > 0) {
+                // Cost improved
+                if (NewCost < BestCost) {
+                    applyCurrentPlacement();
+                    BestCost = NewCost;
+                }
+            } else {
+                // Undo the swap
+                if (static_cast<double>(rand()) / static_cast<double>(RAND_MAX) >= std::exp(Gain / Tempreture)) {
+                    annealDoSwap(SwapFrom, SwapTo);
+                }
             }
         }
-        */
+        std::cout << "Best cost: " << BestCost << " Initial cost: " << InitialCost << " Current cost: " << Cost
+                  << std::endl;
         ++i;
     }
 
@@ -148,50 +211,114 @@ bool Placer::checkLegality(bool SkipUnplaced_) const {
     return false;
 }
 
-bool Placer::testInitialPlacement(const ComponentPlacementData& CPD_, uint16_t Clearance_) const {
-    const auto& ComponentRange = CPD_.ComponentPtr->getRangeWithPlacement(CPD_.Place);
-    const auto& P1 = ComponentRange.first;
-    const auto& P2 = ComponentRange.second;
-    // Define search space
-    uint16_t NewP1X = P1.X - Clearance_;
-    uint16_t NewP1Y = P1.Y - Clearance_;
-    uint16_t NewP1Z = P1.Z - Clearance_;
-    uint16_t NewP2X = P2.X + Clearance_;
-    uint16_t NewP2Y = P2.Y + Clearance_;
-    uint16_t NewP2Z = P2.Z + Clearance_;
-    if (NewP1X >= D.Width || NewP1Y >= D.Height || NewP1Z >= D.Length) {
-        return true;
-    }
-    if (NewP2X >= D.Width || NewP2Y >= D.Height || NewP2Z >= D.Length) {
-        return true;
-    }
-    for (int X = NewP1X; X != NewP2X; ++X) {
-        for (int Y = NewP1Y; Y != NewP2Y; ++Y) {
-            for (int Z = NewP1Z; Z != NewP2Z; ++Z) {
-                if (CurrentPlacement.UsedSpace[X * D.Width * D.Height + Y * D.Width + Z]) {
-                    return true;
-                }
+double Placer::evalCost(const PlacementState& PS_) const {
+    double RetVal = 0;
+    for (const auto& CPD : PS_.CPDs) {
+        for (auto&& [PortName, PortData] : CPD.Ports) {
+            // We only calculate cost from sink input to source output
+            if (PortData.Dir != Direction::Input) {
+                continue;
             }
+            uint16_t X = PortData.Coord.X;
+            uint16_t Y = PortData.Coord.Y;
+            uint16_t Z = PortData.Coord.Z;
+            RetVal += std::pow(X - PortData.ConnectedPort->Coord.X, 2) +
+                      std::pow(Y - PortData.ConnectedPort->Coord.Y, 2) +
+                      std::pow(Z - PortData.ConnectedPort->Coord.Z, 2);
         }
     }
-    return false;
+    return RetVal;
 }
 
-double Placer::evalCost() const { return 0; }
+std::pair<int, int> Placer::annealGenerateSwapNeighbour() const {
+    int From = std::rand() % CurrentPlacement.SwapCandidate1.size();
+    int To = std::rand() % CurrentPlacement.SwapCandidate2.size();
+    int X1 = CurrentPlacement.SwapCandidate1[From]->GridX;
+    int Y1 = CurrentPlacement.SwapCandidate1[From]->GridY;
+    int Z1 = CurrentPlacement.SwapCandidate1[From]->GridZ;
+    int X2 = CurrentPlacement.SwapCandidate2[To]->GridX;
+    int Y2 = CurrentPlacement.SwapCandidate2[To]->GridY;
+    int Z2 = CurrentPlacement.SwapCandidate2[To]->GridZ;
+    return std::make_pair(X1 * PGridW * PGridH + Y1 * PGridW + Z1, X2 * PGridW * PGridH + Y2 * PGridW + Z2);
+}
+
+void Placer::annealDoSwap(int SwapFrom_, int SwapTo_) {
+    auto& From = CurrentPlacement.PGrid[SwapFrom_];
+    int FromOffsetX = 0;
+    int FromOffsetY = 0;
+    int FromOffsetZ = 0;
+    if (!From->Empty) {
+        FromOffsetX = From->Place.X - From->GridX * PLACEMENT_GRID_SIZE;
+        FromOffsetY = From->Place.Y - From->GridY * PLACEMENT_GRID_SIZE;
+        FromOffsetZ = From->Place.Z - From->GridZ * PLACEMENT_GRID_SIZE;
+    }
+
+    auto& To = CurrentPlacement.PGrid[SwapTo_];
+    int ToOffsetX = 0;
+    int ToOffsetY = 0;
+    int ToOffsetZ = 0;
+    if (!To->Empty) {
+        ToOffsetX = To->Place.X - To->GridX * PLACEMENT_GRID_SIZE;
+        ToOffsetY = To->Place.Y - To->GridY * PLACEMENT_GRID_SIZE;
+        ToOffsetZ = To->Place.Z - To->GridZ * PLACEMENT_GRID_SIZE;
+    }
+
+    int FromGridX = From->GridX;
+    int FromGridY = From->GridY;
+    int FromGridZ = From->GridZ;
+    int ToGridX = To->GridX;
+    int ToGridY = To->GridY;
+    int ToGridZ = To->GridZ;
+
+    if (!From->Empty && !To->Empty) {
+        From->setPlacement(ToGridX * PLACEMENT_GRID_SIZE + FromOffsetX, ToGridY * PLACEMENT_GRID_SIZE + FromOffsetY,
+                           ToGridZ * PLACEMENT_GRID_SIZE + FromOffsetZ, From->Place.Orient);
+        To->setPlacement(FromGridX * PLACEMENT_GRID_SIZE + ToOffsetX, FromGridY * PLACEMENT_GRID_SIZE + ToOffsetY,
+                         FromGridZ * PLACEMENT_GRID_SIZE + ToOffsetZ, To->Place.Orient);
+    } else if (!From->Empty && To->Empty) {
+        From->setPlacement(ToGridX * PLACEMENT_GRID_SIZE + FromOffsetX, ToGridY * PLACEMENT_GRID_SIZE + FromOffsetY,
+                           ToGridZ * PLACEMENT_GRID_SIZE + FromOffsetZ, From->Place.Orient);
+        To->setPlacement(FromGridX * PLACEMENT_GRID_SIZE, FromGridY * PLACEMENT_GRID_SIZE,
+                         FromGridZ * PLACEMENT_GRID_SIZE, To->Place.Orient);
+    } else if (From->Empty && !To->Empty) {
+        From->setPlacement(ToGridX * PLACEMENT_GRID_SIZE, ToGridY * PLACEMENT_GRID_SIZE, ToGridZ * PLACEMENT_GRID_SIZE,
+                           From->Place.Orient);
+        To->setPlacement(FromGridX * PLACEMENT_GRID_SIZE + ToOffsetX, FromGridY * PLACEMENT_GRID_SIZE + ToOffsetY,
+                         FromGridZ * PLACEMENT_GRID_SIZE + ToOffsetZ, To->Place.Orient);
+    } else {
+        std::cout << From->ComponentPtr << std::endl;
+        std::cout << To->ComponentPtr << std::endl;
+        throw Exception("Generated useless move.");
+    }
+    std::swap(CurrentPlacement.PGrid[SwapFrom_], CurrentPlacement.PGrid[SwapTo_]);
+}
+
+void Placer::ComponentPlacementData::setPlacement(uint16_t X_, uint16_t Y_, uint16_t Z_, Orientation Orient_) {
+    Place.X = X_;
+    Place.Y = Y_;
+    Place.Z = Z_;
+    Place.Orient = Orient_;
+    for (auto&& [PortName, PortData] : Ports) {
+        PortData.Coord = ComponentPtr->getPinLocationWithPlacement(PortName, Place);
+    }
+    GridX = X_ / PLACEMENT_GRID_SIZE;
+    GridY = Y_ / PLACEMENT_GRID_SIZE;
+    GridZ = Z_ / PLACEMENT_GRID_SIZE;
+};
 
 Placer::PlacementState::PlacementState(Design& D_) : D(D_) {
-    UsedSpace = new int[D.Width * D.Height * D.Width];
-    std::fill(UsedSpace, UsedSpace + D.Width * D.Height * D.Width, 0);
+    int PGridW = D.Width / PLACEMENT_GRID_SIZE;
+    int PGridH = D.Height / PLACEMENT_GRID_SIZE;
+    int PGridL = D.Length / PLACEMENT_GRID_SIZE;
+    PGrid.resize(PGridW * PGridH * PGridL, nullptr);
+
     // Create placement data structures
     const auto& Components = D.MN.getComponents();
     for (const auto& Component : Components) {
-        ComponentPlacementData CPD;
+        ComponentPlacementData CPD{.Fixed = false, .Empty = false};
         CPD.ComponentPtr = Component.get();
-        if (Component->getPlaced()) {
-            CPD.Place = Component->getPlacement();
-        }
         for (const auto& PinName : Component->getPinNames()) {
-            CPD.Ports.emplace(PinName, Port());
+            CPD.Ports.emplace(PinName, Port{.Name = PinName, .Dir = CPD.ComponentPtr->getPinDir(PinName)});
         }
         CPDs.push_back(CPD);
     }
@@ -218,18 +345,9 @@ Placer::PlacementState::PlacementState(Design& D_) : D(D_) {
             throw Exception("Components data and connections data doesn't match.");
         }
     }
-
-    // Read in user placed component and update used space
-    for (const auto& CPD : CPDs) {
-        if (CPD.ComponentPtr->getPlaced()) {
-            setUsedSpace(CPD);
-        }
-    }
 }
 
-Placer::PlacementState::~PlacementState() { delete[] UsedSpace; }
-
-bool Placer::PlacementState::updateUsedSpace(const ComponentPlacementData& CPD_, bool Status_) {
+bool Placer::PlacementState::testAndSetPlacementGrid(ComponentPlacementData& CPD_) {
     const auto& ComponentRange = CPD_.ComponentPtr->getRangeWithPlacement(CPD_.Place);
     const auto& P1 = ComponentRange.first;
     const auto& P2 = ComponentRange.second;
@@ -239,10 +357,51 @@ bool Placer::PlacementState::updateUsedSpace(const ComponentPlacementData& CPD_,
     if (P2.X > D.Width || P2.Y > D.Height || P2.Z > D.Length) {
         return true;
     }
-    for (int X = P1.X; X != P2.X; ++X) {
-        for (int Y = P1.Y; Y != P2.Y; ++Y) {
-            for (int Z = P1.Z; Z != P2.Z; ++Z) {
-                UsedSpace[X * D.Width * D.Height + Y * D.Width + Z] = Status_;
+    int GridX1 = P1.X / PLACEMENT_GRID_SIZE;
+    int GridY1 = P1.Y / PLACEMENT_GRID_SIZE;
+    int GridZ1 = P1.Z / PLACEMENT_GRID_SIZE;
+    int GridX2 = (P2.X - 1) / PLACEMENT_GRID_SIZE + 1;
+    int GridY2 = (P2.Y - 1) / PLACEMENT_GRID_SIZE + 1;
+    int GridZ2 = (P2.Z - 1) / PLACEMENT_GRID_SIZE + 1;
+
+    for (int X = GridX1; X != GridX2; ++X) {
+        for (int Y = GridY1; Y != GridY2; ++Y) {
+            for (int Z = GridZ1; Z != GridZ2; ++Z) {
+                if (PGrid[X * (D.Width / PLACEMENT_GRID_SIZE) * (D.Height / PLACEMENT_GRID_SIZE) +
+                          Y * (D.Width / PLACEMENT_GRID_SIZE) + Z]) {
+                    return true;
+                } else {
+                    PGrid[X * (D.Width / PLACEMENT_GRID_SIZE) * (D.Height / PLACEMENT_GRID_SIZE) +
+                          Y * (D.Width / PLACEMENT_GRID_SIZE) + Z] = &CPD_;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+bool Placer::PlacementState::setPlacementGrid(ComponentPlacementData& CPD_) {
+    const auto& ComponentRange = CPD_.ComponentPtr->getRangeWithPlacement(CPD_.Place);
+    const auto& P1 = ComponentRange.first;
+    const auto& P2 = ComponentRange.second;
+    if (P1.X >= D.Width || P1.Y >= D.Height || P1.Z >= D.Length) {
+        return true;
+    }
+    if (P2.X > D.Width || P2.Y > D.Height || P2.Z > D.Length) {
+        return true;
+    }
+    int GridX1 = P1.X / PLACEMENT_GRID_SIZE;
+    int GridY1 = P1.Y / PLACEMENT_GRID_SIZE;
+    int GridZ1 = P1.Z / PLACEMENT_GRID_SIZE;
+    int GridX2 = (P2.X - 1) / PLACEMENT_GRID_SIZE + 1;
+    int GridY2 = (P2.Y - 1) / PLACEMENT_GRID_SIZE + 1;
+    int GridZ2 = (P2.Z - 1) / PLACEMENT_GRID_SIZE + 1;
+
+    for (int X = GridX1; X != GridX2; ++X) {
+        for (int Y = GridY1; Y != GridY2; ++Y) {
+            for (int Z = GridZ1; Z != GridZ2; ++Z) {
+                PGrid[X * (D.Width / PLACEMENT_GRID_SIZE) * (D.Height / PLACEMENT_GRID_SIZE) +
+                      Y * (D.Width / PLACEMENT_GRID_SIZE) + Z] = &CPD_;
             }
         }
     }

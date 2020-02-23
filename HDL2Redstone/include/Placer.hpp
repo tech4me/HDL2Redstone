@@ -1,7 +1,6 @@
 #pragma once
 
 #include <map>
-#include <unordered_map>
 #include <vector>
 
 #include <Design.hpp>
@@ -9,11 +8,12 @@
 namespace HDL2Redstone {
 class Placer {
   public:
-    Placer(Design& D_) : D(D_), CurrentPlacement(D_){};
+    Placer(Design& D_);
     bool place();
 
   private:
     struct Port {
+        std::string Name;
         Direction Dir;
         Coordinate Coord;
         // Only set this up for input ports
@@ -23,36 +23,42 @@ class Placer {
     struct ComponentPlacementData {
         Component* ComponentPtr;
         Placement Place;
+        bool Fixed;
+        bool Empty;
+        int GridX;
+        int GridY;
+        int GridZ;
         // All the ports belong in this component
         std::map<std::string, Port> Ports;
-        void setPlacement(uint16_t X_, uint16_t Y_, uint16_t Z_, Orientation Orient_) {
-            Place.X = X_;
-            Place.Y = Y_;
-            Place.Z = Z_;
-            Place.Orient = Orient_;
-        };
+        void setPlacement(uint16_t X_, uint16_t Y_, uint16_t Z_, Orientation Orient_);
     };
 
     struct PlacementState {
         Design& D;
         std::vector<ComponentPlacementData> CPDs;
-        // Legality matrix -- for keeping track of all the used space during placement
-        int* UsedSpace;
+        // Placement grid: keep track of which cell is placed at which location
+        std::vector<ComponentPlacementData*> PGrid;
+        std::vector<ComponentPlacementData*> SwapCandidate1;
+        std::vector<ComponentPlacementData*> SwapCandidate2;
+        std::vector<std::unique_ptr<ComponentPlacementData>> EmptyCPDs;
         PlacementState(Design& D_);
-        ~PlacementState();
-        bool updateUsedSpace(const ComponentPlacementData& CPD_, bool Status_);
-        bool setUsedSpace(const ComponentPlacementData& CPD_) { return updateUsedSpace(CPD_, true); }
-        bool clearUsedSpace(const ComponentPlacementData& CPD_) { return updateUsedSpace(CPD_, false); }
+        bool testAndSetPlacementGrid(ComponentPlacementData& CPD_);
+        bool setPlacementGrid(ComponentPlacementData& CPD_);
     };
 
     void applyCurrentPlacement();
     bool initialPlace();
     bool annealPlace();
     bool checkLegality(bool SkipUnplaced_ = 0) const;
-    bool testInitialPlacement(const ComponentPlacementData& CPD_, uint16_t Clearance_) const;
-    double evalCost() const;
+    double evalCost(const PlacementState& PS_) const;
+    std::pair<int, int> annealGenerateSwapNeighbour() const;
+    void annealDoSwap(int SwapFrom_, int SwapTo_);
 
     Design& D;
     PlacementState CurrentPlacement;
+    double BestCost;
+    int PGridW;
+    int PGridH;
+    int PGridL;
 };
 } // namespace HDL2Redstone
