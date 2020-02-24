@@ -108,11 +108,15 @@ Schematic::Schematic(const std::string& File_) {
                 BlockEntityIds.push_back(Entity.at("Id").as<tag_string>().get());
                 std::map<std::string, std::string> EntityExtra;
                 for (auto It = Entity.begin(); It != Entity.end(); ++It) {
+                    // std::cout<<It->first<<" "<<It->second<<std::endl;
                     if ((It->first == "Pos") || (It->first == "Id")) {
                         continue;
                     }
-                    if (It->first == "OutputSignal") {
+                    if (It->first == "OutputSignal") { // for comparator
                         EntityExtra.emplace(It->first, std::to_string(It->second.as<tag_int>()));
+                    } else if (It->first == "Color" || It->first == "Text1" || It->first == "Text2" ||
+                               It->first == "Text3" || It->first == "Text4") { // for sign
+                        EntityExtra.emplace(It->first, It->second);
                     } else {
                         throw Exception("Unkown block entity field: " + It->first);
                     }
@@ -131,7 +135,7 @@ Schematic::Schematic(const std::string& File_) {
 // Type_ is schematic cell type
 // RouterSet_ is whether the block is set by Router or Placer, for debug
 void Schematic::insertSubSchematic(const Placement& P_, const Schematic& Schem_, const std::string& Type_,
-                                   const int32_t& RouterSet_) {
+                                   const int32_t& RouterSet_, const std::string& Name_) {
     // TODO: Add schematic out-of-bound checks here
 
     // 1. Merge sub schematic palette into schematic palette, update palette, create conversion map
@@ -173,7 +177,7 @@ void Schematic::insertSubSchematic(const Placement& P_, const Schematic& Schem_,
                 // std::cout<<"NO matching placement orientation: "<<(int)P_.Orient<<std::endl;
                 break;
             }
-            // redstone_torch or repeater
+            // redstone_torch or repeater, or sign
         } else if (std::regex_search(Str, Fmatch, FaceReg)) {
             std::string Facing = Fmatch.str(2);
             uint32_t FInt = 0, turn = 0;
@@ -245,27 +249,30 @@ void Schematic::insertSubSchematic(const Placement& P_, const Schematic& Schem_,
         int32_t Y = i / (Schem_.Width * Schem_.Length);
         int32_t Z = (i % (Schem_.Width * Schem_.Length)) / Schem_.Width;
         int32_t Temp;
+        // std::cout<<"old:"<<X<<" "<<Y<<" "<<Z<<std::endl;
         switch (P_.Orient) {
         case Orientation::OneCW:
             Temp = X;
-            X = Z;
-            Z = -Temp;
+            X = Z - 1;
+            Z = Temp;
             break;
         case Orientation::TwoCW:
-            X = -X;
-            Z = -Z;
+            X = -X - 1;
+            Z = -Z - 1;
             break;
         case Orientation::ThreeCW:
             Temp = X;
-            X = -Z;
-            Z = Temp;
+            X = Z;
+            Z = -Temp - 1;
             break;
         default:
             break;
         }
+        // std::cout<<"after rot:"<<X<<" "<<Y<<" "<<Z<<std::endl;
         X += P_.X;
         Y += P_.Y;
         Z += P_.Z;
+        // std::cout<<"p added:"<<X<<" "<<Y<<" "<<Z<<std::endl;
         // Bound check
         if (X < 0 || X >= Width || Y < 0 || Y >= Height || Z < 0 || Z >= Length) {
             // TODO: invertPalette.at(i) prob wrong
@@ -295,10 +302,45 @@ void Schematic::insertSubSchematic(const Placement& P_, const Schematic& Schem_,
     }
     for (int32_t i = 0; i < Schem_.BlockEntityPositions.size(); ++i) {
         std::vector<int32_t> Pos = Schem_.BlockEntityPositions[i];
+        int32_t Temp;
+        // rotate entities, code below could be put into a func...
+        switch (P_.Orient) {
+        case Orientation::OneCW:
+            Temp = Pos[0];
+            Pos[0] = Pos[2] - 1;
+            Pos[2] = Temp;
+            break;
+        case Orientation::TwoCW:
+            Pos[0] = -Pos[0] - 1;
+            Pos[2] = -Pos[2] - 1;
+            break;
+        case Orientation::ThreeCW:
+            Temp = Pos[0];
+            Pos[0] = Pos[2];
+            Pos[2] = -Temp - 1;
+            break;
+        default:
+            break;
+        }
         std::vector<int32_t> Updated_pos({Pos[0] + P_.X, Pos[1] + P_.Y, Pos[2] + P_.Z});
         BlockEntityPositions.push_back(Updated_pos);
         BlockEntityIds.push_back(Schem_.BlockEntityIds[i]);
-        BlockEntityExtras.push_back(Schem_.BlockEntityExtras[i]);
+        std::map<std::string, std::string> EntityExtras;
+        if (Schem_.BlockEntityIds[i] == "minecraft:sign") {
+            // std::cout<<"inserting schem, find sign"<<std::endl; ///////////////////////////////////
+            std::string text = "{\"text\":\"";
+            for (const auto& [key, value] : Schem_.BlockEntityExtras[i]) {
+                if (key == "Text1") {
+                    EntityExtras.emplace("Text1", text + Type_ + "\"}");
+                } else if (key == "Text3") {
+                    EntityExtras.emplace("Text3", text + "\\u00A7c" + Name_ + "\"}");
+                } else {
+                    EntityExtras.emplace(key, value);
+                }
+            }
+        }
+        //	for (auto en : EntityExtras) {std::cout<<en.first<<" "<<en.second<<std::endl;}
+        BlockEntityExtras.push_back(EntityExtras);
     }
 }
 
@@ -351,8 +393,12 @@ void Schematic::exportSchematic(const std::string& File_) const {
                 if ((It->first == "Pos") || (It->first == "Id")) {
                     continue;
                 }
-                if (It->first == "OutputSignal") {
+                if (It->first == "OutputSignal") { // for comparator
                     BlockEntity.emplace<tag_int>(tag_string(It->first), tag_int(std::stoi(It->second)));
+                } else if (It->first == "Color" || It->first == "Text1" || It->first == "Text2" ||
+                           It->first == "Text3" || It->first == "Text4") { // for sign
+                    // std::cout<<"exporting block entity!"<<std::endl;
+                    BlockEntity.emplace<tag_string>(tag_string(It->first), tag_string(It->second));
                 }
             }
             BlockEntities.push_back(tag_compound(BlockEntity));

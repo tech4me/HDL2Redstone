@@ -7,7 +7,7 @@
       "Y": {
         "direction": "output",
         "location": [
-          0,
+          1,
           1,
           0
         ],
@@ -24,11 +24,11 @@
       "A": {
         "direction": "input",
         "location": [
-          0,
+          1,
           1,
           0
         ],
-        "facing": "west"
+        "facing": "east"
       }
     },
     "schematic": "output"

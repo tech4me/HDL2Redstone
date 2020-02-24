@@ -1,7 +1,8 @@
+
 {
   "dimension": [
     100,
-    100,
+    50,
     100
   ],
   "forced_placement": {
@@ -69,15 +70,7 @@
       ],
       "input": true
     },
-    "cin": {
-      "location": [
-        0,
-        0,
-        50
-      ],
-      "input": true
-    },
-    "sout[0]": {
+    "result[0]": {
       "location": [
         99,
         0,
@@ -85,35 +78,59 @@
       ],
       "input": false
     },
-    "sout[1]": {
+    "result[1]": {
       "location": [
         99,
         0,
-        20
+        13
       ],
       "input": false
     },
-    "sout[2]": {
+    "result[2]": {
       "location": [
         99,
         0,
-        40
+        26
       ],
       "input": false
     },
-    "sout[3]": {
+    "result[3]": {
       "location": [
         99,
         0,
-        60
+        39
       ],
       "input": false
     },
-    "sout[4]": {
+    "result[4]": {
       "location": [
         99,
         0,
-        80
+        52
+      ],
+      "input": false
+    },
+    "result[5]": {
+      "location": [
+        99,
+        0,
+        65
+      ],
+      "input": false
+    },
+    "result[6]": {
+      "location": [
+        99,
+        0,
+        78
+      ],
+      "input": false
+    },
+    "result[7]": {
+      "location": [
+        99,
+        0,
+        91
       ],
       "input": false
     }

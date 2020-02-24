@@ -21,6 +21,7 @@ void ModuleNetlist::ExtractNetlist::inputs(std::vector<std::string> inputs) {
         if (It != DC.getForcedPlacement().end()) {
             ComponentPtr->setPlacement(It->second.X, It->second.Y, It->second.Z, It->second.Orient);
             ComponentPtr->setForcePlaced();
+            ComponentPtr->setName(input); // set port name to what user specified
         }
         Connections.push_back(std::make_unique<Connection>(input, ComponentPtr.get(), "Y"));
         Components.push_back(std::move(ComponentPtr));
@@ -35,6 +36,7 @@ void ModuleNetlist::ExtractNetlist::outputs(std::vector<std::string> outputs) {
         if (It != DC.getForcedPlacement().end()) {
             ComponentPtr->setPlacement(It->second.X, It->second.Y, It->second.Z, It->second.Orient);
             ComponentPtr->setForcePlaced();
+            ComponentPtr->setName(output);
         }
         Connections.push_back(std::make_unique<Connection>(output, ComponentPtr.get(), "A", false /* Add as sink*/));
         Components.push_back(std::move(ComponentPtr));

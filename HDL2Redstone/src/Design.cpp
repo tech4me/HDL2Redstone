@@ -29,8 +29,14 @@ Schematic Design::exportDesign() const {
     Schematic Schem(Width, Height, Length);
     for (const auto& Component : MN.getComponents()) {
         if (Component->getPlaced()) {
-            Schem.insertSubSchematic(Component->getPlacement(), Component->getSchematic(), Component->getType(),
-                                     0); // last 2 arguments for debug
+            // auto names = Component->getPinNames();
+            // for (auto n : names) std::cout<<n<<std::endl;
+            /*if (Component->getType() == "INPUT")
+                std::cout<<"input: "<<(int)Component->getPinFacing("Y")<<std::endl;
+            else if (Component->getType() == "OUTPUT")
+                std::cout<<"output "<<(int)Component->getPinFacing("A")<<std::endl; */ //for checking port facing
+            Schem.insertSubSchematic(Component->getPlacement(), Component->getSchematic(), Component->getType(), 0,
+                                     Component->getName()); // type and 0 for debug, name argument for port names
         }
     }
     for (const auto& Connection : MN.getConnections()) {

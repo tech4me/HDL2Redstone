@@ -27,6 +27,8 @@ class Component {
         Placed = true;
         ForcePlaced = true;
     }
+    const std::string& getName() const { return Name; }
+    void setName(const std::string& Name_) { Name = Name_; }
 
     void setPlacement(uint16_t X_, uint16_t Y_, uint16_t Z_, Orientation Orient_) {
         P.X = X_;
@@ -52,6 +54,7 @@ class Component {
     const Cell* CellPtr;
     bool Placed;
     bool ForcePlaced;
+    std::string Name; // for i/o set by user
     // Post placement data structure
     Placement P;
     friend std::ostream& operator<<(std::ostream& out, const Component& Component_);

@@ -16,12 +16,12 @@ int main(int argc, char* argv[]) {
             CellLibrary CL(CellLibDir);
             std::cout << "Loading design constraint..." << std::endl;
             DesignConstraint DC;
+
             if (DC.readDCFile("design_constr.json")) {
                 return 1;
             }
             std::cout << "Loading BLIF netlist..." << std::endl;
             Design D("design.blif", CL, DC);
-            std::cout << "Running Place & Route..." << std::endl;
             if (D.doPlaceAndRoute()) {
                 std::cout << "Place & Route failed!!!" << std::endl;
                 return 1;

@@ -26,7 +26,8 @@ class Schematic {
     void setLength(uint16_t Length_) { Length = Length_; }
 
     void insertSubSchematic(const Placement& P_, const Schematic& Schem_, const std::string& Type_,
-                            const int32_t& RouterSet_);
+                            const int32_t& RouterSet_,
+                            const std::string& Name_ = "no name"); // name is for user set ports
     void exportSchematic(const std::string& File_) const;
 
   private:

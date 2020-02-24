@@ -6,7 +6,7 @@
 
 #ifdef NDEBUG
 #define DOUT(...)
-#elif
+#else
 #define DOUT(...) (std::cout __VA_ARGS__)
 #endif
 
