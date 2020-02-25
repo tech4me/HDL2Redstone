@@ -1,7 +1,5 @@
 #include <algorithm>
 #include <cmath>
-#include <cstdlib>
-#include <random>
 #include <sstream>
 
 #include <Exception.hpp>
@@ -11,7 +9,7 @@
 
 using namespace HDL2Redstone;
 
-Placer::Placer(Design& D_) : D(D_), CurrentPlacement(D_) {
+Placer::Placer(Design& D_) : D(D_), CurrentPlacement(D_), RGen(RD()), AcceptGen(0.0, 1.0) {
     BestCost = std::numeric_limits<double>::max();
     PGridW = D.Width / PLACEMENT_GRID_SIZE;
     PGridH = D.Height / PLACEMENT_GRID_SIZE;
@@ -130,7 +128,7 @@ bool Placer::annealPlace() {
 
     // Init best cost
     BestCost = evalCost(CurrentPlacement);
-    int InitialCost = BestCost;
+    double InitialCost = BestCost;
     double Cost;
 
     int i = 0;
@@ -148,17 +146,16 @@ bool Placer::annealPlace() {
             annealDoSwap(SwapFrom, SwapTo);
             double NewCost = evalCost(CurrentPlacement);
             int Gain = Cost - NewCost;
-            if (Gain > 0) {
-                // Cost improved
+            //std::cout << "Gain: " << Gain << "accept rate: " << AcceptGen(RGen) << " #:" << std::exp(Gain / Tempreture) << std::endl;
+            if (std::exp(Gain / Tempreture) >= AcceptGen(RGen)) {
                 if (NewCost < BestCost) {
+                    // Cost improved
                     applyCurrentPlacement();
                     BestCost = NewCost;
                 }
             } else {
                 // Undo the swap
-                if (static_cast<double>(rand()) / static_cast<double>(RAND_MAX) >= std::exp(Gain / Tempreture)) {
-                    annealDoSwap(SwapFrom, SwapTo);
-                }
+                annealDoSwap(SwapFrom, SwapTo);
             }
         }
         std::cout << "Best cost: " << BestCost << " Initial cost: " << InitialCost << " Current cost: " << Cost
@@ -190,10 +187,7 @@ bool Placer::checkLegality(bool SkipUnplaced_) const {
         const auto& ComponentRange = Component->getRange();
         const auto& P1 = ComponentRange.first;
         const auto& P2 = ComponentRange.second;
-        // std::cout << "start:" << std::get<0>(P1) << " " << std::get<1>(P1) << " " << std::get<2>(P1) <<std::endl;
-        // std::cout << "end:" << std::get<0>(P2) << " " << std::get<1>(P2) << " " <<std::get<2>(P2) << std::endl;
         if (std::get<0>(P1) >= D.Width || std::get<1>(P1) >= D.Height || std::get<2>(P1) >= D.Length) {
-            std::cout << "start:" << std::get<0>(P1) << " " << std::get<1>(P1) << " " << std::get<2>(P1) << std::endl;
             return true;
         }
         if (std::get<0>(P2) > D.Width || std::get<1>(P2) > D.Height || std::get<2>(P2) > D.Length) {
@@ -225,23 +219,31 @@ double Placer::evalCost(const PlacementState& PS_) const {
             uint16_t X = PortData.Coord.X;
             uint16_t Y = PortData.Coord.Y;
             uint16_t Z = PortData.Coord.Z;
-            RetVal += std::pow(X - PortData.ConnectedPort->Coord.X, 2) +
-                      std::pow(Y - PortData.ConnectedPort->Coord.Y, 2) +
-                      std::pow(Z - PortData.ConnectedPort->Coord.Z, 2);
+            RetVal += std::hypot(X - PortData.ConnectedPort->Coord.X, Y - PortData.ConnectedPort->Coord.Y, Z - PortData.ConnectedPort->Coord.Z);
         }
     }
     return RetVal;
 }
 
-std::pair<int, int> Placer::annealGenerateSwapNeighbour() const {
-    int From = std::rand() % CurrentPlacement.SwapCandidate1.size();
-    int To = std::rand() % CurrentPlacement.SwapCandidate2.size();
+std::pair<int, int> Placer::annealGenerateSwapNeighbour() {
+    std::uniform_int_distribution<> C1(0, CurrentPlacement.SwapCandidate1.size() - 1);
+    int From = C1(RGen);
     int X1 = CurrentPlacement.SwapCandidate1[From]->GridX;
     int Y1 = CurrentPlacement.SwapCandidate1[From]->GridY;
     int Z1 = CurrentPlacement.SwapCandidate1[From]->GridZ;
-    int X2 = CurrentPlacement.SwapCandidate2[To]->GridX;
-    int Y2 = CurrentPlacement.SwapCandidate2[To]->GridY;
-    int Z2 = CurrentPlacement.SwapCandidate2[To]->GridZ;
+    int X2, Y2, Z2;
+    std::vector<double> Distances(CurrentPlacement.SwapCandidate2.size());
+    for (int i = 0; i < CurrentPlacement.SwapCandidate2.size(); ++i) {
+        X2 = CurrentPlacement.SwapCandidate2[i]->GridX;
+        Y2 = CurrentPlacement.SwapCandidate2[i]->GridY;
+        Z2 = CurrentPlacement.SwapCandidate2[i]->GridZ;
+        Distances[i] = std::hypot(X2 - X1, Y2 - Y1, Z2 - Z1);
+    }
+    std::discrete_distribution<> C2(Distances.begin(), Distances.end());
+    int To = C2(RGen);
+    X2 = CurrentPlacement.SwapCandidate2[To]->GridX;
+    Y2 = CurrentPlacement.SwapCandidate2[To]->GridY;
+    Z2 = CurrentPlacement.SwapCandidate2[To]->GridZ;
     return std::make_pair(X1 * PGridW * PGridH + Y1 * PGridW + Z1, X2 * PGridW * PGridH + Y2 * PGridW + Z2);
 }
 
