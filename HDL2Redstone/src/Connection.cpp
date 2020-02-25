@@ -59,6 +59,16 @@ std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t>> Connection::checkRo
     }
     return IllegalPoints;
 }
+void Connection::wireAlign(uint16_t& x, uint16_t& z, Orientation ori){
+    if(ori == HDL2Redstone::Orientation::OneCW){
+        x++;
+    }else if(ori == HDL2Redstone::Orientation::TwoCW){
+        x++;
+        z++;
+    }else if(ori == HDL2Redstone::Orientation::ThreeCW){
+        z++;
+    }
+}
 
 namespace HDL2Redstone {
 std::ostream& operator<<(std::ostream& out, const Connection& Connection_) {

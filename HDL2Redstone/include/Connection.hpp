@@ -29,21 +29,52 @@ class Connection {
             CellPtr = CellPtr_;
             Ori = Ori_;
         };
+        ConnectionResult(const ConnectionResult& CRx){
+            coord = CRx.coord;
+            CellPtr = CRx.CellPtr;
+            Ori = CRx.Ori;
+        }
         std::tuple<uint16_t, uint16_t, uint16_t> coord;
         const HDL2Redstone::Cell* CellPtr;
         HDL2Redstone::Orientation Ori;
     };
     struct resultcomp {
         bool operator()(const ConnectionResult& lhs, const ConnectionResult& rhs) const {
-            if (std::get<0>(lhs.coord) == std::get<0>(rhs.coord) && std::get<1>(lhs.coord) == std::get<1>(rhs.coord) &&
-                std::get<2>(lhs.coord) == std::get<2>(rhs.coord)) {
+            // if (std::get<0>(lhs.coord) == std::get<0>(rhs.coord) && std::get<1>(lhs.coord) == std::get<1>(rhs.coord) &&
+            //     std::get<2>(lhs.coord) == std::get<2>(rhs.coord)) {
+            //     return false;
+            // }
+            if(std::get<0>(lhs.coord) < std::get<0>(rhs.coord)){
+              return true;
+            }else if(std::get<0>(lhs.coord) > std::get<0>(rhs.coord)){
+              return false;
+            }else{
+              if(std::get<1>(lhs.coord) < std::get<1>(rhs.coord)){
+                return true;
+              }else if(std::get<1>(lhs.coord) > std::get<1>(rhs.coord)){
                 return false;
+              }else{
+                if(std::get<2>(lhs.coord) < std::get<2>(rhs.coord)){
+                  return true;
+                }else if(std::get<2>(lhs.coord) > std::get<2>(rhs.coord)){
+                  return false;
+                }else{
+                  if(lhs.Ori < rhs.Ori){
+                    return true;
+                  }else if(lhs.Ori > rhs.Ori){
+                    return false;
+                  }else{
+                    return false;
+                  }                  
+                } 
+              }
             }
-            return true;
         } // TODO: check repeater is higher level than wire, cant be replaced
     };
     std::set<ConnectionResult, resultcomp> Result;
+    std::set<ConnectionResult, resultcomp> RouteResult;
     Connection(const std::string& Name_, Component* ComponentPtr_, const std::string& PortName_, bool IsSource = true);
+    void wireAlign(uint16_t& x, uint16_t& z, Orientation ori);
     bool getRouted() const { return Routed; }
     void setRouted(bool Routed_) { Routed = Routed_; }
     const std::string& getName() const { return Name; }
@@ -62,7 +93,11 @@ class Connection {
             }
         }
         Result.insert(CR_);
+        ConnectionResult CR_temp(CR_);
+        wireAlign(std::get<0>(CR_temp.coord),std::get<2>(CR_temp.coord), CR_.Ori);
+        RouteResult.insert(CR_temp);
     };
+
     int getUnableRouting() const { return Unable_Routing; }
     void setUnableRouting(int Unable_Routing_) { Unable_Routing = Unable_Routing_; }
     // add component port to sink

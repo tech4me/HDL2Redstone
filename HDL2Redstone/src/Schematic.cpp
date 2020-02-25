@@ -253,7 +253,7 @@ void Schematic::insertSubSchematic(const Placement& P_, const Schematic& Schem_,
         switch (P_.Orient) {
         case Orientation::OneCW:
             Temp = X;
-            X = Z - 1;
+            X = -Z - 1;
             Z = Temp;
             break;
         case Orientation::TwoCW:

@@ -42,7 +42,7 @@ Schematic Design::exportDesign() const {
     for (const auto& Connection : MN.getConnections()) {
         if (Connection->getRouted()) {
             // TODO: Check this once we have something other than wire
-            for (const auto& R : Connection->Result) {
+            for (const auto& R : Connection->RouteResult) {
                 // if(std::get<0>(R.coord)==35&&std::get<1>(R.coord)==11&& std::get<2>(R.coord)==1){
                 //     std::cout<<"FOUND wire name: "<<Connection->getName()<<std::endl;
                 // }

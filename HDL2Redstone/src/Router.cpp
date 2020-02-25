@@ -313,6 +313,7 @@ void Router::route(Design& D) {
             Reconstructor(D);
             FailedWire_SingleRouting->setUnableRouting(2);
             FailedWire_SingleRouting->Result.clear();
+            FailedWire_SingleRouting->RouteResult.clear();
             std::cout << "Try Routing: " << FailedWire_SingleRouting->getName() << " first" << std::endl;
             // reset P_ for routing
             for (int i = 0; i < std::get<0>(Space); i++) {
@@ -513,11 +514,14 @@ int Router::HelperRoutingLastRepeater(Router::Point* RecurP) {
     }
     return -1;
 }
-bool Router::RoutingLastRepeater(Router::Point* CongestionP) {
+bool Router::RoutingLastRepeater(Router::Point* CongestionP) {//TODO need to check the repeater's direction then move the repeater
+                                                            //&& if failed, need to reroute to implement the condition for placing repeater 
     Router::Point* tail = CongestionP;
     bool RetFlag = false;
     while (tail && tail->P && tail->P->P && (tail->length >= 3)) {
-        if ((tail->ori == tail->P->ori) && (tail->P->P->ori == tail->P->ori)) {
+        if ((tail->ori == tail->P->ori) && (tail->P->P->ori == tail->P->ori) && 
+            (tail->Loc.y == tail->P->Loc.y) && (tail->P->P->Loc.y == tail->P->Loc.y)
+            ) {
             tail->P->length = MAX_NUM_OF_WIRE + 1;
             RetFlag = true;
             break;
@@ -722,6 +726,7 @@ bool Router::RegularRoute(Design& D, Connection& C, std::tuple<uint16_t, uint16_
                 C.setUnableRouting(3);
             }
             C.Result.clear();
+            C.RouteResult.clear();
             return retFlag;
         }
     }
@@ -846,6 +851,7 @@ bool Router::HelperReRouteIllegal(Connection& C,
             }
         }
         C.Result.clear();
+        C.RouteResult.clear();
         std::cout << "ReRouting for Illegal: " << rollback_wire_name << std::endl;
         std::set<std::tuple<uint16_t, uint16_t, uint16_t>> RetIllegalPoints;
         bool ReRouteFlag =
@@ -863,6 +869,7 @@ bool Router::HelperReRouteIllegal(Connection& C,
             if (RetIllegalPoints.empty()) {
                 std::cout << "ReRouting for Illegal Failed caused by other reasons: " << rollback_wire_name << std::endl;
                 C.Result.clear();
+                C.RouteResult.clear();
                 return false;
             }
             // for(auto it: local_congestion_points){
@@ -883,6 +890,7 @@ bool Router::HelperReRouteIllegal(Connection& C,
                         if (std::get<3>(*nIterator) == 2) {
                             std::cout << "ReRouting for Illegal Failed caused by start or end pin: " << rollback_wire_name << std::endl;
                             C.Result.clear();
+                            C.RouteResult.clear();
                             return false;
                         }
                         if (UsedSpace[std::get<0>(*nIterator)][std::get<1>(*nIterator)][std::get<2>(*nIterator)] == 3) {
@@ -934,6 +942,7 @@ bool Router::ReRouteIllegal(Connection& C,
                 if(std::get<3>(it)==1){
                     std::cout << "        get it 3 times: rerouting for illegal failed"<< std::endl;
                     C.Result.clear();
+                    C.RouteResult.clear();
                     return false; 
                 }
             }
@@ -980,6 +989,7 @@ bool Router::ReRouteStartRouting(coord congestionPoint, std::tuple<uint16_t, uin
         rollback_wire_name.insert(it->getName());
         std::cout << it->getName() << " is rolling back for ReRouting" << std::endl;
         it->Result.clear();
+        it->RouteResult.clear();
     }
     // roll back congestion wires
     for (int i = 0; i < std::get<0>(Space); i++) {
@@ -1308,6 +1318,7 @@ bool Router::HelperReRouteforIllegalRegularRoute(
                 C.setUnableRouting(3);
             }
             C.Result.clear();
+            C.RouteResult.clear();
             return retFlag;
         }
     }
@@ -1464,6 +1475,7 @@ bool Router::CheckandKeepResult(Connection& C, std::tuple<uint16_t, uint16_t, ui
             }
         }
         C.Result.clear();
+        C.RouteResult.clear();
         //  std::cout<<"\nSTARTFOUND wire status: "<<UsedSpace[12][1][1]<<"   "<<WI[12][1][1].ComponentSpace<<std::endl;
         //  if(!WI[12][1][1].C_ptr.empty()){
         //      for (auto it: WI[12][1][1].C_ptr)
@@ -1516,6 +1528,7 @@ bool Router::CheckKeepOrUpdate(Connection& C, std::tuple<uint16_t, uint16_t, uin
             }
         }
         C.Result.clear();
+        C.RouteResult.clear();
     } else {
         // update usedspace and WI
         updateUsedSpace(C, Space);

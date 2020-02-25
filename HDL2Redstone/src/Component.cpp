@@ -45,7 +45,7 @@ std::tuple<uint16_t, uint16_t, uint16_t> Component::getPinLocation(const std::st
     if (P.Orient == Orientation::ZeroCW) {
         return std::make_tuple(std::get<0>(tempLoc) + P.X, std::get<1>(tempLoc) + P.Y, std::get<2>(tempLoc) + P.Z);
     } else if (P.Orient == Orientation::OneCW) {
-        return std::make_tuple(std::get<2>(tempLoc) - 1 + P.X, std::get<1>(tempLoc) + P.Y, std::get<0>(tempLoc) + P.Z);
+        return std::make_tuple(-std::get<2>(tempLoc) - 1 + P.X, std::get<1>(tempLoc) + P.Y, std::get<0>(tempLoc) + P.Z);
     } else if (P.Orient == Orientation::TwoCW) {
         return std::make_tuple(-std::get<0>(tempLoc) - 1 + P.X, std::get<1>(tempLoc) + P.Y,
                                -std::get<2>(tempLoc) - 1 + P.Z);
@@ -61,7 +61,7 @@ Coordinate Component::getPinLocationWithPlacement(const std::string& PinName_, c
                           .Y = static_cast<uint16_t>(std::get<1>(tempLoc) + P_.Y),
                           .Z = static_cast<uint16_t>(std::get<2>(tempLoc) + P_.Z)};
     } else if (P_.Orient == Orientation::OneCW) {
-        return Coordinate{.X = static_cast<uint16_t>(std::get<2>(tempLoc) - 1 + P_.X),
+        return Coordinate{.X = static_cast<uint16_t>(-std::get<2>(tempLoc) - 1 + P_.X),
                           .Y = static_cast<uint16_t>(std::get<1>(tempLoc) + P_.Y),
                           .Z = static_cast<uint16_t>(std::get<0>(tempLoc) + P_.Z)};
     } else if (P_.Orient == Orientation::TwoCW) {
