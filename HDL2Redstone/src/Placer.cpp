@@ -145,8 +145,9 @@ bool Placer::annealPlace() {
             auto [SwapFrom, SwapTo] = annealGenerateSwapNeighbour();
             annealDoSwap(SwapFrom, SwapTo);
             double NewCost = evalCost(CurrentPlacement);
-            int Gain = Cost - NewCost;
+            double Gain = Cost - NewCost;
             //std::cout << "Gain: " << Gain << "accept rate: " << AcceptGen(RGen) << " #:" << std::exp(Gain / Tempreture) << std::endl;
+            //std::cout << "T: " << Tempreture << " Gain: " << Gain << std::endl;
             if (std::exp(Gain / Tempreture) >= AcceptGen(RGen)) {
                 if (NewCost < BestCost) {
                     // Cost improved
@@ -232,6 +233,7 @@ std::pair<int, int> Placer::annealGenerateSwapNeighbour() {
     int Y1 = CurrentPlacement.SwapCandidate1[From]->GridY;
     int Z1 = CurrentPlacement.SwapCandidate1[From]->GridZ;
     int X2, Y2, Z2;
+#ifdef OPT_NEIGHBOUR
     std::vector<double> Distances(CurrentPlacement.SwapCandidate2.size());
     for (int i = 0; i < CurrentPlacement.SwapCandidate2.size(); ++i) {
         X2 = CurrentPlacement.SwapCandidate2[i]->GridX;
@@ -240,6 +242,9 @@ std::pair<int, int> Placer::annealGenerateSwapNeighbour() {
         Distances[i] = std::hypot(X2 - X1, Y2 - Y1, Z2 - Z1);
     }
     std::discrete_distribution<> C2(Distances.begin(), Distances.end());
+#else
+    std::uniform_int_distribution<> C2(0, CurrentPlacement.SwapCandidate2.size() - 1);
+#endif
     int To = C2(RGen);
     X2 = CurrentPlacement.SwapCandidate2[To]->GridX;
     Y2 = CurrentPlacement.SwapCandidate2[To]->GridY;
