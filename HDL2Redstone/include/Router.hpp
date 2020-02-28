@@ -57,11 +57,13 @@ class Router {
                         std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t, uint16_t>>& congestionPoints_prev);
     bool HelperReRouteIllegal(
         Connection& C, std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t, uint16_t>>& local_congestion_points,
+        std::set<std::tuple<uint16_t, uint16_t, uint16_t>>&inserted_congestion_points,
         std::tuple<uint16_t, uint16_t, uint16_t>& Space, Router::Point***& P_, Design& D);
     bool HelperReRouteforIllegalRegularRoute(
         Design& D, Connection& C, std::tuple<uint16_t, uint16_t, uint16_t>& Space, Router::Point***& P_,
         std::set<std::tuple<uint16_t, uint16_t, uint16_t>>& RetIllegalPoints,
-        std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t, uint16_t>>& congestionPoints);
+        std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t, uint16_t>>& congestionPoints,
+        std::set<std::tuple<uint16_t, uint16_t, uint16_t>>&inserted_congestion_points);
     void Deconstructor(std::tuple<uint16_t, uint16_t, uint16_t>& Space);
     void Reconstructor(const Design& D);
     bool CheckandKeepResult(Connection& C, std::tuple<uint16_t, uint16_t, uint16_t>& Space);

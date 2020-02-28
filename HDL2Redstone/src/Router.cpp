@@ -142,78 +142,24 @@ Router::Router(const Design& D) {
         UsedSpace[i] = new int*[std::get<1>(Space)];
         for (int j = 0; j < std::get<1>(Space); j++) {
             UsedSpace[i][j] = new int[std::get<2>(Space)];
-            for (int k = 0; k < std::get<2>(Space); k++) {
-                UsedSpace[i][j][k] = 0;
-            }
+            // for (int k = 0; k < std::get<2>(Space); k++) {
+            //     UsedSpace[i][j][k] = 0;
+            // }
         }
     }
-
     // add wire info for each block all over the space
     WI = new WireInfo**[std::get<0>(Space)];
     for (int i = 0; i < std::get<0>(Space); i++) {
         WI[i] = new WireInfo*[std::get<1>(Space)];
         for (int j = 0; j < std::get<1>(Space); j++) {
             WI[i][j] = new WireInfo[std::get<2>(Space)];
-            for (int k = 0; k < std::get<2>(Space); k++) {
-                WI[i][j][k].ComponentSpace = 0;
-                WI[i][j][k].C_ptr.clear();
-            }
+            // for (int k = 0; k < std::get<2>(Space); k++) {
+            //     WI[i][j][k].ComponentSpace = 0;
+            //     WI[i][j][k].C_ptr.clear();
+            // }
         }
     }
-
-    auto& Components_ = D.getModuleNetlist().getComponents();
-    auto& Connections_ = D.getModuleNetlist().getConnections();
-    std::vector<std::pair<std::tuple<uint16_t, uint16_t, uint16_t>, std::tuple<uint16_t, uint16_t, uint16_t>>>
-        UsedComponentSpace;
-    std::vector<std::vector<std::tuple<int16_t, int16_t, int16_t>>> UsedConnectionSpace;
-    for (auto const& i : Components_) {
-        UsedComponentSpace.push_back(i->getRange());
-    }
-    for (auto const& i : UsedComponentSpace) {
-        for (uint16_t j = std::get<0>(i.first); j < std::get<0>(i.second); j++) {
-            for (uint16_t k = std::get<1>(i.first); k < std::get<1>(i.second); k++) {
-                for (uint16_t z = std::get<2>(i.first); z < std::get<2>(i.second); z++) {
-                    UsedSpace[j][k][z] = 1;
-                    WI[j][k][z].ComponentSpace = 1;
-                    if (j > 0) {
-                        UsedSpace[j - 1][k][z] = 1; //(UsedSpace[j - 1][k][z] == 1) ? 1 : 2;
-                        WI[j - 1][k][z].ComponentSpace = 1;
-                    }
-                    if (j < std::get<0>(Space) - 1) {
-                        UsedSpace[j + 1][k][z] = 1; //(UsedSpace[j + 1][k][z] == 1) ? 1 : 2;
-                        WI[j + 1][k][z].ComponentSpace = 1;
-                    }
-
-                    if (k > 0) {
-                        UsedSpace[j][k - 1][z] = 1; //(UsedSpace[j][k - 1][z] == 1) ? 1 : 2;
-                        WI[j][k - 1][z].ComponentSpace = 1;
-                    }
-                    if (k < std::get<1>(Space) - 1) {
-                        UsedSpace[j][k + 1][z] = 1; //(UsedSpace[j][k + 1][z] == 1) ? 1 : 2; // TODO veritcal pin maybe possible
-                        WI[j][k + 1][z].ComponentSpace = 1;
-                    }
-
-                    if (z > 0) {
-                        UsedSpace[j][k][z - 1] = 1; //(UsedSpace[j][k][z - 1] == 1) ? 1 : 2;
-                        WI[j][k][z - 1].ComponentSpace = 1;
-                    }
-                    if (z < std::get<2>(Space) - 1) {
-                        UsedSpace[j][k][z + 1] = 1; //(UsedSpace[j][k][z + 1] == 1) ? 1 : 2;
-                        WI[j][k][z + 1].ComponentSpace = 1;
-                    }
-                }
-            }
-        }
-    }
-    for (auto const& j : Connections_) {
-        auto SourcePortConnection_ = j->getSourcePortConnection();
-        InitPortUsedSpace(((SourcePortConnection_).first)->getPinLocation((SourcePortConnection_).second),
-                          ((SourcePortConnection_).first)->getPinFacing((SourcePortConnection_).second),Space);
-        auto SinkPortConnection_ = j->getSinkPortConnections();
-        for (auto const& k : SinkPortConnection_) {
-            InitPortUsedSpace((k.first)->getPinLocation(k.second), (k.first)->getPinFacing(k.second),Space);
-        }
-    }
+    Reconstructor(D);
     FailedWire_SingleRouting = NULL;
 }
 void Router::route(Design& D) {
@@ -289,7 +235,6 @@ void Router::route(Design& D) {
                 std::cout << "Routing: " << it->getName() << std::endl;
                 if (!RegularRoute(D, *it, Space, P_)) {
                     std::cout << "Routing: " << it->getName() << " failed" << std::endl;
-                    ;
                 }
                 //  std::cout<<"\nFOUND wire status: "<<UsedSpace[9][0][24]<<"
                 //  "<<WI[9][0][24].ComponentSpace<<std::endl; if(!WI[9][0][24].C_ptr.empty()){
@@ -332,7 +277,6 @@ void Router::route(Design& D) {
             FailedWire_SingleRouting = NULL;
             if (!RegularRoute(D, *FailedWire_SingleRouting_temp, Space, P_)) {
                 std::cout << "Routing: " << FailedWire_SingleRouting_temp->getName() << " failed" << std::endl;
-                ;
             } else {
                 for (auto& it : Connections_) {
                     if (FailedWire_SingleRouting_temp->getName() != it->getName()) {
@@ -340,10 +284,9 @@ void Router::route(Design& D) {
                     }
                 }
             }
-        } else if (FailedWire_SingleRouting->getUnableRouting() == 3) {
-            std::cout << FailedWire_SingleRouting->getName() << " is unable to route second time, Routing failed"
-                      << std::endl;
-            break;
+            // if(FailedWire_SingleRouting_temp->getName()=="$abc$156$new_n28_"){
+            //     break;
+            // }
         }
         if(i == Connections_.size()-1){
             std::cout << "Routing Times are not enough" << std::endl;
@@ -825,6 +768,7 @@ void Router::updateUsedSpace(Connection& C, std::tuple<uint16_t, uint16_t, uint1
 }
 bool Router::HelperReRouteIllegal(Connection& C,
                                   std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t, uint16_t>>& local_congestion_points,
+                                  std::set<std::tuple<uint16_t, uint16_t, uint16_t>>&inserted_congestion_points,
                                   std::tuple<uint16_t, uint16_t, uint16_t>& Space, Router::Point***& P_, Design& D) {
     std::string rollback_wire_name = C.getName();
     bool break_loop = false;
@@ -855,7 +799,7 @@ bool Router::HelperReRouteIllegal(Connection& C,
         std::cout << "ReRouting for Illegal: " << rollback_wire_name << std::endl;
         std::set<std::tuple<uint16_t, uint16_t, uint16_t>> RetIllegalPoints;
         bool ReRouteFlag =
-            HelperReRouteforIllegalRegularRoute(D, C, Space, P_, RetIllegalPoints, local_congestion_points);
+            HelperReRouteforIllegalRegularRoute(D, C, Space, P_, RetIllegalPoints, local_congestion_points, inserted_congestion_points);
         for (auto it = local_congestion_points.begin(); it != local_congestion_points.end(); ++it) {
             if (UsedSpace[std::get<0>(*it)][std::get<1>(*it)][std::get<2>(*it)] == 3) {
                 //TODO what if original usedspace is 2?
@@ -926,13 +870,14 @@ bool Router::ReRouteIllegal(Connection& C,
     std::string rollback_wire_name = C.getName();
     std::cout << "Wire " << rollback_wire_name << " routing illegal: " << std::endl;
     
-    // if(C.getName() == "$abc$73$new_n11_"){
+    // if(C.getName() == "$abc$156$new_n28_"){
     //     for (auto& test_t: C.Result){
     //         std::cout<<"point list "<<std::get<0>(test_t.coord)<<" "<<std::get<1>(test_t.coord)<<" "<<std::get<2>(test_t.coord)<<std::endl;
     //     }
     // }
     //TODO:can be optimaze its code
     std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t, uint16_t>> local_congestion_points;
+    std::set<std::tuple<uint16_t, uint16_t, uint16_t>> inserted_congestion_points;
     for(auto& i: congestionPoints){
         std::cout << "    " << std::get<0>(i) << ", " << std::get<1>(i) << ", " << std::get<2>(i)
                   << " Type: " << std::get<3>(i) << std::endl;
@@ -956,12 +901,14 @@ bool Router::ReRouteIllegal(Connection& C,
                     }
                     congestionPoints_prev.erase(it);
                     congestionPoints_prev.insert(std::make_tuple(std::get<0>(i),std::get<1>(i), std::get<2>(i), 1, std::get<3>(i)));
+                    inserted_congestion_points.insert(std::make_tuple(std::get<0>(i),std::get<1>(i), std::get<2>(i)));
                     //TODO should not break, need to traverse all points then quit
                     break;
                 }
             }
         }
         if(!temp_flag){
+            inserted_congestion_points.insert(std::make_tuple(std::get<0>(i), std::get<1>(i) + std::get<3>(i) + 1, std::get<2>(i)));
             local_congestion_points.insert(std::make_tuple(std::get<0>(i), std::get<1>(i) + std::get<3>(i) + 1, std::get<2>(i), 0, std::get<3>(i)));
         }
     }
@@ -973,7 +920,7 @@ bool Router::ReRouteIllegal(Connection& C,
     //     std::cout <<"  NOW illegal points  "<<std::get<0>(*it)<<", "<<std::get<1>(*it)<<", "<<std::get<2>(*it)<<" --- "<<std::get<3>(*it)<<" illegal type: "<<std::get<4>(*it)<<std::endl;
     //     std::cout <<"      NOW illegal points Usedspace "<<UsedSpace[std::get<0>(*it)][std::get<1>(*it)][std::get<2>(*it)]<<std::endl;
     // }
-    return HelperReRouteIllegal(C, local_congestion_points, Space, P_, D);
+    return HelperReRouteIllegal(C, local_congestion_points, inserted_congestion_points, Space, P_, D);
 }
 
 bool Router::ReRouteStartRouting(coord congestionPoint, std::tuple<uint16_t, uint16_t, uint16_t>& Space,
@@ -1118,7 +1065,8 @@ bool Router::ReRouteStartRouting(coord congestionPoint, std::tuple<uint16_t, uin
 bool Router::HelperReRouteforIllegalRegularRoute(
     Design& D, Connection& C, std::tuple<uint16_t, uint16_t, uint16_t>& Space, Router::Point***& P_,
     std::set<std::tuple<uint16_t, uint16_t, uint16_t>>& RetIllegalPoints,
-    std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t, uint16_t>>& congestionPoints) {
+    std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t, uint16_t>>& congestionPoints,
+    std::set<std::tuple<uint16_t, uint16_t, uint16_t>>&inserted_congestion_points) {
     bool retFlag = true;
     // implement dijkstra
     Router::coord start;
@@ -1310,6 +1258,7 @@ bool Router::HelperReRouteforIllegalRegularRoute(
         } else {
             std::cout << "FAIL routing from " << start.x << ", " << start.y << ", " << start.z << " to " << it.x << ", "
                       << it.y << ", " << it.z << std::endl;
+            RetIllegalPoints = inserted_congestion_points;
             FailedWire_SingleRouting = &C;
             retFlag = false;
             if (C.getUnableRouting() == 0) {
