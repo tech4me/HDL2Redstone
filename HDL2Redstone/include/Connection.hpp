@@ -24,10 +24,11 @@ class Connection {
     class ConnectionResult {
       public:
         ConnectionResult(std::tuple<uint16_t, uint16_t, uint16_t> coord_, const HDL2Redstone::Cell* CellPtr_,
-                         HDL2Redstone::Orientation Ori_) {
+                         HDL2Redstone::Orientation Ori_, int SinkId_ = -1) {
             coord = coord_;
             CellPtr = CellPtr_;
             Ori = Ori_;
+            SinkId = SinkId_;
         };
         ConnectionResult(const ConnectionResult& CRx){
             coord = CRx.coord;
@@ -37,6 +38,7 @@ class Connection {
         std::tuple<uint16_t, uint16_t, uint16_t> coord;
         const HDL2Redstone::Cell* CellPtr;
         HDL2Redstone::Orientation Ori;
+        int SinkId; // for timing
     };
     struct resultcomp {
         bool operator()(const ConnectionResult& lhs, const ConnectionResult& rhs) const {
@@ -65,14 +67,16 @@ class Connection {
                     return false;
                   }else{
                     return false;
-                  }                  
-                } 
+                  }
+                }
               }
             }
         } // TODO: check repeater is higher level than wire, cant be replaced
     };
     std::set<ConnectionResult, resultcomp> Result;
     std::set<ConnectionResult, resultcomp> RouteResult;
+    void calculateDelay();
+    std::vector<int> getSinkDelays() { return SinkDelays; }
     Connection(const std::string& Name_, Component* ComponentPtr_, const std::string& PortName_, bool IsSource = true);
     void wireAlign(uint16_t& x, uint16_t& z, Orientation ori);
     bool getRouted() const { return Routed; }
@@ -110,6 +114,7 @@ class Connection {
     const std::string Name;
     std::pair<Component*, std::string> SourcePortConnection;
     std::vector<std::pair<Component*, std::string>> SinkPortConnections;
+    std::vector<int> SinkDelays; // for timing purpose
     friend std::ostream& operator<<(std::ostream& out, const Connection& Connection_);
 };
 

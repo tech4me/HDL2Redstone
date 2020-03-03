@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <random>
 #include <vector>
 
 #include <Design.hpp>
@@ -51,7 +52,7 @@ class Placer {
     bool annealPlace();
     bool checkLegality(bool SkipUnplaced_ = 0) const;
     double evalCost(const PlacementState& PS_) const;
-    std::pair<int, int> annealGenerateSwapNeighbour() const;
+    std::pair<int, int> annealGenerateSwapNeighbour();
     void annealDoSwap(int SwapFrom_, int SwapTo_);
 
     Design& D;
@@ -60,5 +61,8 @@ class Placer {
     int PGridW;
     int PGridH;
     int PGridL;
+    std::random_device RD;
+    std::mt19937_64 RGen;
+    std::uniform_real_distribution<> AcceptGen;
 };
 } // namespace HDL2Redstone
