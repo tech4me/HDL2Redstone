@@ -60,6 +60,19 @@ std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t>> Connection::checkRo
     return IllegalPoints;
 }
 
+// calculate delay caused by repeater for path to each sink
+void Connection::calculateDelay() {
+    for (int i = 0; i < SinkPortConnections.size(); i++) {
+        SinkDelays.push_back(0);
+    }
+
+    for (auto Con : Result) {
+        if (Con.SinkId != -1) {
+            SinkDelays[Con.SinkId]++;
+        }
+    }
+}
+
 namespace HDL2Redstone {
 std::ostream& operator<<(std::ostream& out, const Connection& Connection_) {
     out << "Connection Name:" << Connection_.Name << std::endl;

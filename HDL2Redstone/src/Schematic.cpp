@@ -303,9 +303,9 @@ void Schematic::insertSubSchematic(const Placement& P_, const Schematic& Schem_,
     // TODO: not checked against real block entity info!
     for (int32_t i = 0; i < Schem_.BlockEntityPositions.size(); ++i) {
         std::vector<int32_t> Pos = Schem_.BlockEntityPositions[i];
-	int32_t Temp;
-	// rotate entities, code below could be put into a func...
-	switch (P_.Orient) {
+        int32_t Temp;
+        // rotate entities, code below could be put into a func...
+        switch (P_.Orient) {
         case Orientation::OneCW:
             Temp = Pos[0];
             Pos[0] = Pos[2] - 1;
@@ -328,7 +328,7 @@ void Schematic::insertSubSchematic(const Placement& P_, const Schematic& Schem_,
         BlockEntityIds.push_back(Schem_.BlockEntityIds[i]);
         std::map<std::string, std::string> EntityExtras;
         if (Schem_.BlockEntityIds[i] == "minecraft:sign") {
-            //std::cout<<"inserting schem, find sign"<<std::endl; ///////////////////////////////////
+            // std::cout<<"inserting schem, find sign"<<std::endl; ///////////////////////////////////
             std::string text = "{\"text\":\"";
             for (const auto& [key, value] : Schem_.BlockEntityExtras[i]) {
                 if (key == "Text1") {
@@ -398,7 +398,7 @@ void Schematic::exportSchematic(const std::string& File_) const {
                     BlockEntity.emplace<tag_int>(tag_string(It->first), tag_int(std::stoi(It->second)));
                 } else if (It->first == "Color" || It->first == "Text1" || It->first == "Text2" ||
                            It->first == "Text3" || It->first == "Text4") { // for sign
-                    //std::cout<<"exporting block entity!"<<std::endl;
+                    // std::cout<<"exporting block entity!"<<std::endl;
                     BlockEntity.emplace<tag_string>(tag_string(It->first), tag_string(It->second));
                 }
             }

@@ -10,5 +10,6 @@ add_library(hdl2redstone-core
     Placement.cpp
     Placer.cpp
     Router.cpp
-    Schematic.cpp)
+    Schematic.cpp
+    Timing.cpp)
 target_link_libraries(hdl2redstone-core libblifparse nbt++ nlohmann_json)

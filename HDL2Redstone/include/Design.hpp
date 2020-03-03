@@ -31,6 +31,7 @@ class Design {
 
     friend class Placer;
     friend class Router;
+    friend class Timing;
     friend std::ostream& operator<<(std::ostream& out, const Design& Design_);
 };
 } // namespace HDL2Redstone
