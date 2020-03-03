@@ -11,6 +11,9 @@ def create_liberty_lib(json_file, output_file):
         for cell in json_lib:
             if cell["liberty"]:
                 write_line(output_file_f, 1, "cell({cell_name}) {{".format(cell_name=cell["name"]))
+                if "customs" in cell:
+                    for custom_name, custom_data in cell["customs"].items():
+                        write_line(output_file_f, 2, custom_name + " {{ {custom_data} }}".format(custom_data=custom_data))
                 for pin_name, pin_data in cell["pins"].items():
                     write_line(output_file_f, 2, "pin({pin_name}) {{".format(pin_name=pin_name))
                     write_line(output_file_f, 3, "direction: {direction};".format(direction=pin_data["direction"]))

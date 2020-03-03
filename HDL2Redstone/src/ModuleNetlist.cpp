@@ -43,6 +43,41 @@ void ModuleNetlist::ExtractNetlist::outputs(std::vector<std::string> outputs) {
     }
 }
 
+void ModuleNetlist::ExtractNetlist::latch(std::string input, std::string output, blifparse::LatchType type, std::string control, blifparse::LogicValue init) {
+    if (type == LatchType::RISING_EDGE) {
+        if (init == LogicValue::DONT_CARE || init == LogicValue::UNKOWN) {
+            const Cell* CellPtr = CellLib.getCellPtr("DFF");
+            auto ComponentPtr = std::make_unique<Component>(CellPtr);
+            std::string Name = control;
+            auto P = [&Name](const std::unique_ptr<Connection>& ConnectionPtr) -> bool {
+                return ConnectionPtr->getName() == Name;
+            };
+            auto It = std::find_if(Connections.begin(), Connections.end(), P);
+            if (It == Connections.end()) {
+                throw Exception("Clock net not initialized!");
+            }
+            (*It)->addSink(ComponentPtr.get(), "C");
+            Name = input;
+            It = std::find_if(Connections.begin(), Connections.end(), P);
+            if (It == Connections.end()) {
+                throw Exception("Input net not initialized!");
+            }
+            (*It)->addSink(ComponentPtr.get(), "D");
+            Name = output;
+            It = std::find_if(Connections.begin(), Connections.end(), P);
+            if (It == Connections.end()) {
+                throw Exception("Output net not initialized!");
+            }
+            (*It)->addSource(ComponentPtr.get(), "Q");
+            Components.push_back(std::move(ComponentPtr));
+        } else {
+            throw Exception("Latch cannot have initial value!");
+        }
+    } else {
+        throw Exception("Only positive edge triggered FF is supported!");
+    }
+}
+
 void ModuleNetlist::ExtractNetlist::subckt(std::string model, std::vector<std::string> ports,
                                            std::vector<std::string> nets) {
     const Cell* CellPtr = CellLib.getCellPtr(model);
@@ -66,11 +101,7 @@ void ModuleNetlist::ExtractNetlist::subckt(std::string model, std::vector<std::s
             throw Exception("Cell library has unsupported pin direction!");
         }
         auto P = [Net](const std::unique_ptr<Connection>& ConnectionPtr) -> bool {
-            if (ConnectionPtr->getName() == Net) {
-                return true;
-            } else {
-                return false;
-            }
+            return ConnectionPtr->getName() == Net;
         };
         auto It = std::find_if(Connections.begin(), Connections.end(), P);
         if (It != Connections.end()) {

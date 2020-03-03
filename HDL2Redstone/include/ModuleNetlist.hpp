@@ -36,7 +36,7 @@ class ModuleNetlist {
         void names(std::vector<std::string> /*nets*/,
                    std::vector<std::vector<blifparse::LogicValue>> /*so_cover*/) override {}
         void latch(std::string /*input*/, std::string /*output*/, blifparse::LatchType /*type*/,
-                   std::string /*control*/, blifparse::LogicValue /*init*/) override {}
+                   std::string /*control*/, blifparse::LogicValue /*init*/) override;
         void subckt(std::string /*model*/, std::vector<std::string> /*ports*/,
                     std::vector<std::string> /*nets*/) override;
         void blackbox() override {}
