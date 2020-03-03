@@ -1,6 +1,8 @@
 #include <Design.hpp>
 #include <Placer.hpp>
 #include <Router.hpp>
+#include <Timing.hpp>
+
 using namespace HDL2Redstone;
 
 Design::Design(const std::string& File_, const CellLibrary& CellLib_, const DesignConstraint& DC_)
@@ -22,6 +24,10 @@ bool Design::doPlaceAndRoute() {
     std::cout << "Routing..." << std::endl;
     Router R(*this);
     R.route(*this);
+    std::cout << "Analyzing Timing Requirements..." << std::endl;
+    Timing T(*this);
+    double PropDelay = T.computePropDelay();
+    std::cout << "Prop Delay = " << PropDelay << std::endl;
     return false;
 }
 
@@ -34,7 +40,7 @@ Schematic Design::exportDesign() const {
             /*if (Component->getType() == "INPUT")
                 std::cout<<"input: "<<(int)Component->getPinFacing("Y")<<std::endl;
             else if (Component->getType() == "OUTPUT")
-                std::cout<<"output "<<(int)Component->getPinFacing("A")<<std::endl; */ //for checking port facing
+                std::cout<<"output "<<(int)Component->getPinFacing("A")<<std::endl;	*/ //for checking port facing
             Schem.insertSubSchematic(Component->getPlacement(), Component->getSchematic(), Component->getType(), 0,
                                      Component->getName()); // type and 0 for debug, name argument for port names
         }
