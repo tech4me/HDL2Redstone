@@ -34,6 +34,7 @@ class Connection {
             coord = CRx.coord;
             CellPtr = CRx.CellPtr;
             Ori = CRx.Ori;
+            SinkId = CRx.SinkId;
         }
         std::tuple<uint16_t, uint16_t, uint16_t> coord;
         const HDL2Redstone::Cell* CellPtr;
