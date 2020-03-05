@@ -220,7 +220,11 @@ double Placer::evalCost(const PlacementState& PS_) const {
             uint16_t X = PortData.Coord.X;
             uint16_t Y = PortData.Coord.Y;
             uint16_t Z = PortData.Coord.Z;
+#ifdef USE_EUCLIDEAN_DISTANCE
             RetVal += std::hypot(X - PortData.ConnectedPort->Coord.X, Y - PortData.ConnectedPort->Coord.Y, Z - PortData.ConnectedPort->Coord.Z);
+#else
+            RetVal += std::abs(X - PortData.ConnectedPort->Coord.X) + std::abs(Y - PortData.ConnectedPort->Coord.Y) + std::abs(Z - PortData.ConnectedPort->Coord.Z);
+#endif
         }
     }
     return RetVal;
