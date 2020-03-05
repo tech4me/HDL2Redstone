@@ -14,7 +14,7 @@ class Design {
     Design() = delete;
     // Create a design with BLIF file, cell library, and design constraint
     Design(const std::string& File_, const CellLibrary& CellLib_, const DesignConstraint& DC_);
-    const std::tuple<uint16_t, uint16_t, uint16_t> getSpace() const;
+    std::tuple<uint16_t, uint16_t, uint16_t> getSpace() const;
     const ModuleNetlist& getModuleNetlist() const;
     bool doPlaceAndRoute();
 

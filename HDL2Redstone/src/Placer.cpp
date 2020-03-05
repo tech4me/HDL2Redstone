@@ -185,18 +185,16 @@ bool Placer::checkLegality(bool SkipUnplaced_) const {
                 throw Exception(S.str());
             }
         }
-        const auto& ComponentRange = Component->getRange();
-        const auto& P1 = ComponentRange.first;
-        const auto& P2 = ComponentRange.second;
-        if (std::get<0>(P1) >= D.Width || std::get<1>(P1) >= D.Height || std::get<2>(P1) >= D.Length) {
+        const auto& [P1, P2] = Component->getRange();
+        if (P1.X >= D.Width || P1.Y >= D.Height || P1.Z >= D.Length) {
             return true;
         }
-        if (std::get<0>(P2) > D.Width || std::get<1>(P2) > D.Height || std::get<2>(P2) > D.Length) {
+        if (P2.X > D.Width || P2.Y > D.Height || P2.Z > D.Length) {
             return true;
         }
-        for (int X = std::get<0>(P1); X != std::get<0>(P2); ++X) {
-            for (int Y = std::get<1>(P1); Y != std::get<1>(P2); ++Y) {
-                for (int Z = std::get<2>(P1); Z != std::get<2>(P2); ++Z) {
+        for (auto X = P1.X; X != P2.X; ++X) {
+            for (auto Y = P1.Y; Y != P2.Y; ++Y) {
+                for (auto Z = P1.Z; Z != P2.Z; ++Z) {
                     if (OccupiedSpace[X][Y][Z]) {
                         return true;
                     } else {

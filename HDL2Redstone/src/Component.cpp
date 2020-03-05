@@ -75,45 +75,6 @@ Coordinate Component::getPinLocationWithPlacement(const std::string& PinName_, c
     }
 }
 
-std::pair<std::tuple<uint16_t, uint16_t, uint16_t>, std::tuple<uint16_t, uint16_t, uint16_t>>
-Component::getRange() const {
-    uint16_t x1, y1, z1, x2, y2, z2;
-    Schematic S = CellPtr->getSchematic();
-    uint16_t Width = S.getWidth();
-    uint16_t Height = S.getHeight();
-    uint16_t Length = S.getLength();
-    if (P.Orient == Orientation::ZeroCW) {
-        x1 = P.X;
-        y1 = P.Y;
-        z1 = P.Z;
-        x2 = P.X + Width;
-        y2 = P.Y + Height;
-        z2 = P.Z + Length;
-    } else if (P.Orient == Orientation::OneCW) { // TODO: NOT SURE IF ONECW AND 3CW ARE CORRECT
-        x1 = P.X - Length;
-        y1 = P.Y;
-        z1 = P.Z;
-        x2 = P.X;
-        y2 = P.Y + Height;
-        z2 = P.Z + Width;
-    } else if (P.Orient == Orientation::TwoCW) {
-        x1 = P.X - Width;
-        y1 = P.Y;
-        z1 = P.Z - Length;
-        x2 = P.X;
-        y2 = P.Y + Height;
-        z2 = P.Z;
-    } else {
-        x1 = P.X;
-        y1 = P.Y;
-        z1 = P.Z - Width;
-        x2 = P.X + Length;
-        y2 = P.Y + Height;
-        z2 = P.Z;
-    }
-    return std::pair(std::make_tuple(x1, y1, z1), std::make_tuple(x2, y2, z2));
-}
-
 std::pair<Coordinate, Coordinate> Component::getRangeWithPlacement(const Placement& Placement_) const {
     const auto& P = Placement_;
     uint16_t x1, y1, z1, x2, y2, z2;

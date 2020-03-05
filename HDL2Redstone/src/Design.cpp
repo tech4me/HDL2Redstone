@@ -9,7 +9,7 @@ Design::Design(const std::string& File_, const CellLibrary& CellLib_, const Desi
     : Width(std::get<0>(DC_.getDimension())), Height(std::get<1>(DC_.getDimension())),
       Length(std::get<2>(DC_.getDimension())), CellLib(CellLib_), DC(DC_), MN(File_, CellLib_, DC) {}
 
-const std::tuple<uint16_t, uint16_t, uint16_t> Design::getSpace() const {
+std::tuple<uint16_t, uint16_t, uint16_t> Design::getSpace() const {
     return std::make_tuple(Width, Height, Length);
 }
 
@@ -23,7 +23,9 @@ bool Design::doPlaceAndRoute() {
     }
     std::cout << "Routing..." << std::endl;
     Router R(*this);
-    R.route(*this);
+    if (R.route()) {
+        return true;
+    }
     std::cout << "Analyzing Timing Requirements..." << std::endl;
     Timing T(*this);
     double PropDelay = T.computePropDelay();

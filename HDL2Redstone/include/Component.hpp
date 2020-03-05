@@ -44,8 +44,7 @@ class Component {
     // TODO: Make sure they are only called when Placed is true
     const Placement& getPlacement() const { return P; }
 
-    // TODO: Change this function to use the function below
-    std::pair<std::tuple<uint16_t, uint16_t, uint16_t>, std::tuple<uint16_t, uint16_t, uint16_t>> getRange() const;
+    std::pair<Coordinate, Coordinate> getRange() const { return getRangeWithPlacement(P); }
     std::pair<Coordinate, Coordinate> getRangeWithPlacement(const Placement& Placement_) const;
     // Return schematic specified by CellStructName
     const Schematic& getSchematic() const { return CellPtr->getSchematic(); }
