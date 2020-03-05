@@ -9,9 +9,7 @@ Design::Design(const std::string& File_, const CellLibrary& CellLib_, const Desi
     : Width(std::get<0>(DC_.getDimension())), Height(std::get<1>(DC_.getDimension())),
       Length(std::get<2>(DC_.getDimension())), CellLib(CellLib_), DC(DC_), MN(File_, CellLib_, DC) {}
 
-std::tuple<uint16_t, uint16_t, uint16_t> Design::getSpace() const {
-    return std::make_tuple(Width, Height, Length);
-}
+std::tuple<uint16_t, uint16_t, uint16_t> Design::getSpace() const { return std::make_tuple(Width, Height, Length); }
 
 const ModuleNetlist& Design::getModuleNetlist() const { return MN; }
 

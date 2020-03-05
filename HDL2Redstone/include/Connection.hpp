@@ -30,7 +30,7 @@ class Connection {
             Ori = Ori_;
             SinkId = SinkId_;
         };
-        ConnectionResult(const ConnectionResult& CRx){
+        ConnectionResult(const ConnectionResult& CRx) {
             coord = CRx.coord;
             CellPtr = CRx.CellPtr;
             Ori = CRx.Ori;
@@ -43,34 +43,35 @@ class Connection {
     };
     struct resultcomp {
         bool operator()(const ConnectionResult& lhs, const ConnectionResult& rhs) const {
-            // if (std::get<0>(lhs.coord) == std::get<0>(rhs.coord) && std::get<1>(lhs.coord) == std::get<1>(rhs.coord) &&
+            // if (std::get<0>(lhs.coord) == std::get<0>(rhs.coord) && std::get<1>(lhs.coord) == std::get<1>(rhs.coord)
+            // &&
             //     std::get<2>(lhs.coord) == std::get<2>(rhs.coord)) {
             //     return false;
             // }
-            if(std::get<0>(lhs.coord) < std::get<0>(rhs.coord)){
-              return true;
-            }else if(std::get<0>(lhs.coord) > std::get<0>(rhs.coord)){
-              return false;
-            }else{
-              if(std::get<1>(lhs.coord) < std::get<1>(rhs.coord)){
+            if (std::get<0>(lhs.coord) < std::get<0>(rhs.coord)) {
                 return true;
-              }else if(std::get<1>(lhs.coord) > std::get<1>(rhs.coord)){
+            } else if (std::get<0>(lhs.coord) > std::get<0>(rhs.coord)) {
                 return false;
-              }else{
-                if(std::get<2>(lhs.coord) < std::get<2>(rhs.coord)){
-                  return true;
-                }else if(std::get<2>(lhs.coord) > std::get<2>(rhs.coord)){
-                  return false;
-                }else{
-                  if(lhs.Ori < rhs.Ori){
+            } else {
+                if (std::get<1>(lhs.coord) < std::get<1>(rhs.coord)) {
                     return true;
-                  }else if(lhs.Ori > rhs.Ori){
+                } else if (std::get<1>(lhs.coord) > std::get<1>(rhs.coord)) {
                     return false;
-                  }else{
-                    return false;
-                  }
+                } else {
+                    if (std::get<2>(lhs.coord) < std::get<2>(rhs.coord)) {
+                        return true;
+                    } else if (std::get<2>(lhs.coord) > std::get<2>(rhs.coord)) {
+                        return false;
+                    } else {
+                        if (lhs.Ori < rhs.Ori) {
+                            return true;
+                        } else if (lhs.Ori > rhs.Ori) {
+                            return false;
+                        } else {
+                            return false;
+                        }
+                    }
                 }
-              }
             }
         } // TODO: check repeater is higher level than wire, cant be replaced
     };
@@ -99,7 +100,7 @@ class Connection {
         }
         Result.insert(CR_);
         ConnectionResult CR_temp(CR_);
-        wireAlign(std::get<0>(CR_temp.coord),std::get<2>(CR_temp.coord), CR_.Ori);
+        wireAlign(std::get<0>(CR_temp.coord), std::get<2>(CR_temp.coord), CR_.Ori);
         RouteResult.insert(CR_temp);
     };
 

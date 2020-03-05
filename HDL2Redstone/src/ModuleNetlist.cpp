@@ -43,7 +43,8 @@ void ModuleNetlist::ExtractNetlist::outputs(std::vector<std::string> outputs) {
     }
 }
 
-void ModuleNetlist::ExtractNetlist::latch(std::string input, std::string output, blifparse::LatchType type, std::string control, blifparse::LogicValue init) {
+void ModuleNetlist::ExtractNetlist::latch(std::string input, std::string output, blifparse::LatchType type,
+                                          std::string control, blifparse::LogicValue init) {
     if (type == LatchType::RISING_EDGE) {
         if (init == LogicValue::DONT_CARE || init == LogicValue::UNKOWN) {
             const Cell* CellPtr = CellLib.getCellPtr("DFF");

@@ -146,8 +146,8 @@ bool Placer::annealPlace() {
             annealDoSwap(SwapFrom, SwapTo);
             double NewCost = evalCost(CurrentPlacement);
             double Gain = Cost - NewCost;
-            //std::cout << "Gain: " << Gain << "accept rate: " << AcceptGen(RGen) << " #:" << std::exp(Gain / Tempreture) << std::endl;
-            //std::cout << "T: " << Tempreture << " Gain: " << Gain << std::endl;
+            // std::cout << "Gain: " << Gain << "accept rate: " << AcceptGen(RGen) << " #:" << std::exp(Gain /
+            // Tempreture) << std::endl; std::cout << "T: " << Tempreture << " Gain: " << Gain << std::endl;
             if (std::exp(Gain / Tempreture) >= AcceptGen(RGen)) {
                 if (NewCost < BestCost) {
                     // Cost improved
@@ -219,9 +219,11 @@ double Placer::evalCost(const PlacementState& PS_) const {
             uint16_t Y = PortData.Coord.Y;
             uint16_t Z = PortData.Coord.Z;
 #ifdef USE_EUCLIDEAN_DISTANCE
-            RetVal += std::hypot(X - PortData.ConnectedPort->Coord.X, Y - PortData.ConnectedPort->Coord.Y, Z - PortData.ConnectedPort->Coord.Z);
+            RetVal += std::hypot(X - PortData.ConnectedPort->Coord.X, Y - PortData.ConnectedPort->Coord.Y,
+                                 Z - PortData.ConnectedPort->Coord.Z);
 #else
-            RetVal += std::abs(X - PortData.ConnectedPort->Coord.X) + std::abs(Y - PortData.ConnectedPort->Coord.Y) + std::abs(Z - PortData.ConnectedPort->Coord.Z);
+            RetVal += std::abs(X - PortData.ConnectedPort->Coord.X) + std::abs(Y - PortData.ConnectedPort->Coord.Y) +
+                      std::abs(Z - PortData.ConnectedPort->Coord.Z);
 #endif
         }
     }
