@@ -1,3 +1,4 @@
+#include <chrono>
 #include <iostream>
 
 #include <CellLibrary.hpp>
@@ -11,6 +12,7 @@ using namespace HDL2Redstone;
 int main(int argc, char* argv[]) {
     try {
         if (argc > 1) {
+            auto StartTime = std::chrono::system_clock::now();
             std::string CellLibDir(argv[1]);
             std::cout << "Loading cell library..." << std::endl;
             CellLibrary CL(CellLibDir);
@@ -26,7 +28,11 @@ int main(int argc, char* argv[]) {
                 std::cout << "Place & Route failed!!!" << std::endl;
                 return 1;
             }
+            std::cout << "Place & Route success!" << std::endl;
+            std::cout << "Exporting schematic..." << std::endl;
             D.exportDesign().exportSchematic("design.schem");
+            std::chrono::duration<double> Time = std::chrono::system_clock::now() - StartTime;
+            std::cout << "Design compilation finished! Total time: " << Time.count() << "s" << std::endl;
         } else {
             throw Exception("Incorrect number of arguments provided.");
         }

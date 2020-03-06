@@ -1,4 +1,6 @@
+#include <Exception.hpp>
 #include <Timing.hpp>
+
 using namespace HDL2Redstone;
 
 Timing::Timing(Design& D_) {
@@ -76,7 +78,7 @@ double Timing::computePropDelay() {
 
     double PropDelay = -1;
     for (const auto& [k, v] : dist) {
-        std::cout << "comp " << k << " dist:" << v << std::endl;
+        DOUT(<< "comp " << k << " dist:" << v << std::endl);
         if (v > PropDelay) {
             PropDelay = v;
         }

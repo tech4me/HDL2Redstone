@@ -27,7 +27,7 @@ bool Design::doPlaceAndRoute() {
     std::cout << "Analyzing Timing Requirements..." << std::endl;
     Timing T(*this);
     double PropDelay = T.computePropDelay();
-    std::cout << "Prop Delay = " << PropDelay << std::endl;
+    std::cout << "Combinational circuit propagation delay = " << PropDelay << std::endl;
     return false;
 }
 

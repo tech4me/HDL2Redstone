@@ -5,6 +5,7 @@
 
 #include <Component.hpp>
 #include <Connection.hpp>
+#include <Exception.hpp>
 #include <Router.hpp>
 
 using namespace HDL2Redstone;
@@ -84,8 +85,9 @@ bool Router::route() {
                     P.inserted = 0;
                 });
                 std::cout << "Routing: " << it->getName() << std::endl;
+                // DOUT( << "Routing: " << it->getName() << std::endl);
                 if (!regularRoute(*it)) {
-                    std::cout << "Routing: " << it->getName() << " failed" << std::endl;
+                    DOUT(<< "Routing: " << it->getName() << " failed" << std::endl);
                 }
                 //  std::cout<<"\nFOUND wire status: "<<UsedSpace[9][0][24]<<"
                 //  "<<WI[9][0][24].ComponentSpace<<std::endl; if(!WI[9][0][24].CPtrs.empty()){
@@ -100,7 +102,7 @@ bool Router::route() {
             }
         }
         if (!FailedWireSingleRouting) {
-            std::cout << "FUll Routing Success!!!" << std::endl;
+            DOUT(<< "FUll Routing Success!!!" << std::endl);
             break;
         } else if (FailedWireSingleRouting->getUnableRouting() /* == 1*/) {
             // Clear and reinit UsedSpace, WI, Points
@@ -122,11 +124,11 @@ bool Router::route() {
             FailedWireSingleRouting->setUnableRouting(2);
             FailedWireSingleRouting->Result.clear();
             FailedWireSingleRouting->RouteResult.clear();
-            std::cout << "Try Routing: " << FailedWireSingleRouting->getName() << " first" << std::endl;
+            DOUT(<< "Try Routing: " << FailedWireSingleRouting->getName() << " first" << std::endl);
             auto FailedWireSingleRoutingTemp = FailedWireSingleRouting;
             FailedWireSingleRouting = nullptr;
             if (!regularRoute(*FailedWireSingleRoutingTemp)) {
-                std::cout << "Routing: " << FailedWireSingleRoutingTemp->getName() << " failed" << std::endl;
+                DOUT(<< "Routing: " << FailedWireSingleRoutingTemp->getName() << " failed" << std::endl);
             } else {
                 for (auto& it : Connections) {
                     if (FailedWireSingleRoutingTemp->getName() != it->getName()) {
@@ -136,7 +138,7 @@ bool Router::route() {
             }
         }
         if (i == Connections.size() - 1) {
-            std::cout << "Routing Times are not enough" << std::endl;
+            DOUT(<< "Routing Times are not enough" << std::endl);
         }
     }
     return false;
@@ -330,9 +332,9 @@ bool Router::regularRoute(Connection& C) {
             TempY = it.y;
             TempZ = it.z;
             if (getPoint(it.x, it.y, it.z).length >= MAX_NUM_OF_WIRE + 1) {
-                std::cout << "Routing failed: Repeater is placed at the endpin " << TempX << " " << TempY << " "
-                          << TempZ << std::endl;
-                std::cout << "Try Routing the repeater ..." << std::endl;
+                DOUT(<< "Routing failed: Repeater is placed at the endpin " << TempX << " " << TempY << " " << TempZ
+                     << std::endl);
+                DOUT(<< "Try Routing the repeater ..." << std::endl);
                 routingLastRepeater(&getPoint(it.x, it.y, it.z));
             }
             C.setInsert(Connection::ConnectionResult(std::make_tuple(TempX, TempY - 1, TempZ),
@@ -362,8 +364,8 @@ bool Router::regularRoute(Connection& C) {
                 ptr = ptr->P;
             }
         } else {
-            std::cout << "FAIL routing from " << start.x << ", " << start.y << ", " << start.z << " to " << it.x << ", "
-                      << it.y << ", " << it.z << std::endl;
+            DOUT(<< "FAIL routing from " << start.x << ", " << start.y << ", " << start.z << " to " << it.x << ", "
+                 << it.y << ", " << it.z << std::endl);
             FailedWireSingleRouting = &C;
             retFlag = false;
             if (C.getUnableRouting() == 0) {
@@ -417,7 +419,7 @@ bool Router::reRouteIllegal(
     Connection& C, std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t>>& congestionPoints,
     std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t, uint16_t>>& congestionPoints_prev) {
     std::string rollback_wire_name = C.getName();
-    std::cout << "Wire " << rollback_wire_name << " routing illegal: " << std::endl;
+    DOUT(<< "Wire " << rollback_wire_name << " routing illegal: " << std::endl);
     // if(C.getName() == "$abc$156$new_n28_"){
     //     for (auto& test_t: C.Result){
     //         std::cout<<"point list "<<std::get<0>(test_t.coord)<<" "<<std::get<1>(test_t.coord)<<"
@@ -428,8 +430,8 @@ bool Router::reRouteIllegal(
     std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t, uint16_t>> local_congestion_points;
     std::set<std::tuple<uint16_t, uint16_t, uint16_t>> inserted_congestion_points;
     for (auto& i : congestionPoints) {
-        std::cout << "    " << std::get<0>(i) << ", " << std::get<1>(i) << ", " << std::get<2>(i)
-                  << " Type: " << std::get<3>(i) << std::endl;
+        DOUT(<< "    " << std::get<0>(i) << ", " << std::get<1>(i) << ", " << std::get<2>(i)
+             << " Type: " << std::get<3>(i) << std::endl);
         bool temp_flag = false;
         for (auto& it : congestionPoints_prev) {
             if ((std::get<0>(it) == std::get<0>(i)) && (std::get<1>(it) == std::get<1>(i)) &&
@@ -505,7 +507,7 @@ bool Router::reRouteIllegalHelper(
         });
         C.Result.clear();
         C.RouteResult.clear();
-        std::cout << "ReRouting for Illegal: " << rollback_wire_name << std::endl;
+        DOUT(<< "ReRouting for Illegal: " << rollback_wire_name << std::endl);
         std::set<std::tuple<uint16_t, uint16_t, uint16_t>> RetIllegalPoints;
         bool ReRouteFlag = reRouteforIllegalRegularRouteHelper(C, RetIllegalPoints, local_congestion_points,
                                                                inserted_congestion_points);
@@ -516,12 +518,11 @@ bool Router::reRouteIllegalHelper(
             }
         }
         if (ReRouteFlag) {
-            std::cout << "ReRouting for Illegal Success: " << rollback_wire_name << std::endl;
+            DOUT(<< "ReRouting for Illegal Success: " << rollback_wire_name << std::endl);
             return true;
         } else {
             if (RetIllegalPoints.empty()) {
-                std::cout << "ReRouting for Illegal Failed caused by other reasons: " << rollback_wire_name
-                          << std::endl;
+                DOUT(<< "ReRouting for Illegal Failed caused by other reasons: " << rollback_wire_name << std::endl);
                 C.Result.clear();
                 C.RouteResult.clear();
                 return false;
@@ -544,8 +545,8 @@ bool Router::reRouteIllegalHelper(
                         (std::get<1>(*nIterator) == std::get<1>(*mIterator)) &&
                         (std::get<2>(*nIterator) == std::get<2>(*mIterator))) {
                         if (std::get<3>(*nIterator) == 2) {
-                            std::cout << "ReRouting for Illegal Failed caused by start or end pin: "
-                                      << rollback_wire_name << std::endl;
+                            DOUT(<< "ReRouting for Illegal Failed caused by start or end pin: " << rollback_wire_name
+                                 << std::endl);
                             C.Result.clear();
                             C.RouteResult.clear();
                             return false;
@@ -572,7 +573,7 @@ bool Router::reRouteIllegalHelper(
             //     std::cout << "start end pin illegal points: " << std::get<0>(it)<<" "<<std::get<1>(it)<<"
             //     "<<std::get<2>(it)<<" "<<std::get<3>(it)<<" "<<std::get<4>(it)<< std::endl;
             // }
-            std::cout << "ReRouting for Illegal Failed: " << rollback_wire_name << ", Still Trying ..." << std::endl;
+            DOUT(<< "ReRouting for Illegal Failed: " << rollback_wire_name << ", Still Trying ..." << std::endl);
             break_loop = !temp_reroute_flag;
         }
     } while (!break_loop);
@@ -731,10 +732,9 @@ bool Router::reRouteforIllegalRegularRouteHelper(
     // std::cout<<"wire: "<<C.getName()<<" startport name is "<<SourcePortConnection_.second<<std::endl;
     start = Router::updateSinglePortUsedSpace(startPin, SrcFacing, congestionP);
     if (start.x == std::get<0>(startPin) && start.y == std::get<1>(startPin) && start.z == std::get<2>(startPin)) {
-        std::cout << "FAIL routing from " << start.x << ", " << start.y << ", " << start.z
-                  << " because of other wires routing" << std::endl;
-        std::cout << "congestion point is " << congestionP.x << ", " << congestionP.y << ", " << congestionP.z
-                  << std::endl;
+        DOUT(<< "FAIL routing from " << start.x << ", " << start.y << ", " << start.z
+             << " because of other wires routing" << std::endl);
+        DOUT(<< "congestion point is " << congestionP.x << ", " << congestionP.y << ", " << congestionP.z << std::endl);
         // TODO need to check congestionP.y and congestioP.y-1 two points
         if (getUsedSpace(congestionP.x, congestionP.y, congestionP.z) ==
             3) { // Here to check the congestion point is set as non-reachable, it should fail
@@ -762,10 +762,10 @@ bool Router::reRouteforIllegalRegularRouteHelper(
         auto temp_result = Router::updateSinglePortUsedSpace(temp, endFace, congestionP);
         if (temp_result.x == std::get<0>(temp) && temp_result.y == std::get<1>(temp) &&
             temp_result.z == std::get<2>(temp)) {
-            std::cout << "FAIL routing to " << temp_result.x << ", " << temp_result.y << ", " << temp_result.z
-                      << " because of other wires routing" << std::endl;
-            std::cout << "congestion point is " << congestionP.x << ", " << congestionP.y << ", " << congestionP.z
-                      << std::endl;
+            DOUT(<< "FAIL routing to " << temp_result.x << ", " << temp_result.y << ", " << temp_result.z
+                 << " because of other wires routing" << std::endl);
+            DOUT(<< "congestion point is " << congestionP.x << ", " << congestionP.y << ", " << congestionP.z
+                 << std::endl);
             if (getUsedSpace(congestionP.x, congestionP.y, congestionP.z) ==
                 3) { // Here to check the congestion point is set as non-reachable, it should fail
                 RetIllegalPoints.insert(std::make_tuple(congestionP.x, congestionP.y, congestionP.z));
@@ -875,9 +875,9 @@ bool Router::reRouteforIllegalRegularRouteHelper(
             TempY = it.y;
             TempZ = it.z;
             if (getPoint(it.x, it.y, it.z).length >= MAX_NUM_OF_WIRE + 1) {
-                std::cout << "Routing failed: Repeater is placed at the endpin " << TempX << " " << TempY << " "
-                          << TempZ << std::endl;
-                std::cout << "Try Routing the repeater ..." << std::endl;
+                DOUT(<< "Routing failed: Repeater is placed at the endpin " << TempX << " " << TempY << " " << TempZ
+                     << std::endl);
+                DOUT(<< "Try Routing the repeater ..." << std::endl);
                 routingLastRepeater(&getPoint(it.x, it.y, it.z));
             }
             C.setInsert(Connection::ConnectionResult(std::make_tuple(TempX, TempY - 1, TempZ),
@@ -901,8 +901,8 @@ bool Router::reRouteforIllegalRegularRouteHelper(
                 ptr = ptr->P;
             }
         } else {
-            std::cout << "FAIL routing from " << start.x << ", " << start.y << ", " << start.z << " to " << it.x << ", "
-                      << it.y << ", " << it.z << std::endl;
+            DOUT(<< "FAIL routing from " << start.x << ", " << start.y << ", " << start.z << " to " << it.x << ", "
+                 << it.y << ", " << it.z << std::endl);
             RetIllegalPoints = inserted_congestion_points;
             FailedWireSingleRouting = &C;
             retFlag = false;
@@ -1127,10 +1127,10 @@ bool Router::checkKeepOrUpdate(Connection& C) {
             if (getUsedSpace(std::get<0>(R.coord), std::get<1>(R.coord), std::get<2>(R.coord)) == 1 ||
                 getUsedSpace(std::get<0>(R.coord), std::get<1>(R.coord) + 1, std::get<2>(R.coord)) == 1) {
                 getPoint(std::get<0>(R.coord), std::get<1>(R.coord) + 1, std::get<2>(R.coord)).mul_cost++;
-                std::cout << C.getName() << " is reseted. " << std::get<0>(R.coord) << " " << std::get<1>(R.coord)
-                          << " " << std::get<2>(R.coord) << " mul_cost increases to "
-                          << getPoint(std::get<0>(R.coord), std::get<1>(R.coord) + 1, std::get<2>(R.coord)).mul_cost
-                          << std::endl;
+                DOUT(<< C.getName() << " is reseted. " << std::get<0>(R.coord) << " " << std::get<1>(R.coord) << " "
+                     << std::get<2>(R.coord) << " mul_cost increases to "
+                     << getPoint(std::get<0>(R.coord), std::get<1>(R.coord) + 1, std::get<2>(R.coord)).mul_cost
+                     << std::endl);
                 RetFlag = false;
             }
         }
@@ -1386,9 +1386,9 @@ bool Router::routingLastRepeater(
     if (RetFlag) {
         CongestionP->length = -1;
         routingLastRepeaterHelper(CongestionP);
-        std::cout << "Repeater Routing Success!" << std::endl;
+        DOUT(<< "Repeater Routing Success!" << std::endl);
     } else {
-        std::cout << "Repeater Routing Failed!" << std::endl;
+        DOUT(<< "Repeater Routing Failed!" << std::endl);
     }
     return RetFlag;
 }

@@ -223,7 +223,7 @@ void Schematic::insertSubSchematic(const Placement& P_, const Schematic& Schem_,
             Str = std::regex_replace(Str, FaceReg, Facing);
         }
         if (Str != Schem_.InvertPalette.at(i))
-            std::cout << "  changed from " << Schem_.InvertPalette.at(i) << " to " << Str << std::endl;
+            DOUT(<< "  changed from " << Schem_.InvertPalette.at(i) << " to " << Str << std::endl);
 
         int32_t j = 0;
         for (; j < InvertPalette.size(); ++j) {

@@ -4,6 +4,8 @@ project(HDL2Redstone)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED)
 
+#set(CMAKE_CXX_FLAGS_RELEASE "-g -DNDEBUG -Ofast -march=native -flto")
+
 message(STATUS "C++ debug build flags: ${CMAKE_CXX_FLAGS_DEBUG}")
 message(STATUS "C++ release build flags: ${CMAKE_CXX_FLAGS_RELEASE}")
 
