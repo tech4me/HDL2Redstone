@@ -10,13 +10,13 @@
 namespace HDL2Redstone {
 
 enum class Direction { Input, Output, Inout };
-// enum class Orientation { North, South, West, East };
 enum class Facing { Up, Down, North, South, East, West };
 
 struct Pin {
     Direction Dir;
     Facing Face;
     std::tuple<uint16_t, uint16_t, uint16_t> Location;
+    int Power;
 };
 
 class Cell {
@@ -37,6 +37,7 @@ class Cell {
     const std::tuple<uint16_t, uint16_t, uint16_t>& getPinLocation(std::string PinName_) const {
         return Pins.at(PinName_).Location;
     }
+    int getPinPower(const std::string& PinName_) const { return Pins.at(PinName_).Power; }
 
   private:
     std::string Type;

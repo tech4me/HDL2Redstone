@@ -11,7 +11,8 @@
           1,
           0
         ],
-        "facing": "east"
+        "facing": "east",
+        "power": 14
       }
     },
     "schematic": "input"
@@ -28,7 +29,8 @@
           1,
           0
         ],
-        "facing": "east"
+        "facing": "east",
+        "power": 14
       }
     },
     "schematic": "output"
@@ -45,7 +47,8 @@
           1,
           0
         ],
-        "facing": "north"
+        "facing": "north",
+        "power": 2
       },
       "B": {
         "direction": "input",
@@ -54,7 +57,8 @@
           1,
           4
         ],
-        "facing": "south"
+        "facing": "south",
+        "power": 2
       },
       "Y": {
         "direction": "output",
@@ -64,6 +68,7 @@
           2
         ],
         "facing": "east",
+        "power": 15,
         "function": "A*B"
       }
     },
@@ -81,7 +86,8 @@
           1,
           0
         ],
-        "facing": "west"
+        "facing": "west",
+        "power": 1
       },
       "Y": {
         "direction": "output",
@@ -91,6 +97,7 @@
           0
         ],
         "facing": "east",
+        "power": 15,
         "function": "A"
       }
     },
@@ -108,7 +115,8 @@
           1,
           0
         ],
-        "facing": "west"
+        "facing": "west",
+        "power": 2
       },
       "Y": {
         "direction": "output",
@@ -118,6 +126,7 @@
           0
         ],
         "facing": "east",
+        "power": 15,
         "function": "A'"
       }
     },
@@ -135,7 +144,8 @@
           1,
           0
         ],
-        "facing": "north"
+        "facing": "north",
+        "power": 2
       },
       "B": {
         "direction": "input",
@@ -144,7 +154,8 @@
           1,
           4
         ],
-        "facing": "south"
+        "facing": "south",
+        "power": 2
       },
       "Y": {
         "direction": "output",
@@ -154,6 +165,7 @@
           2
         ],
         "facing": "east",
+        "power": 14,
         "function": "(A*B)'"
       }
     },
@@ -171,7 +183,8 @@
           1,
           0
         ],
-        "facing": "north"
+        "facing": "north",
+        "power": 1
       },
       "B": {
         "direction": "input",
@@ -180,7 +193,8 @@
           1,
           0
         ],
-        "facing": "south"
+        "facing": "south",
+        "power": 1
       },
       "Y": {
         "direction": "output",
@@ -190,6 +204,7 @@
           1
         ],
         "facing": "east",
+        "power": 15,
         "function": "(A+B)'"
       }
     },
@@ -207,7 +222,8 @@
           1,
           0
         ],
-        "facing": "north"
+        "facing": "north",
+        "power": 1
       },
       "B": {
         "direction": "input",
@@ -216,7 +232,8 @@
           1,
           2
         ],
-        "facing": "south"
+        "facing": "south",
+        "power": 1
       },
       "Y": {
         "direction": "output",
@@ -226,6 +243,7 @@
           1
         ],
         "facing": "east",
+        "power": 14,
         "function": "A+B"
       }
     },
@@ -243,7 +261,8 @@
           1,
           0
         ],
-        "facing": "west"
+        "facing": "west",
+        "power": 1
       },
       "B": {
         "direction": "input",
@@ -252,7 +271,8 @@
           1,
           3
         ],
-        "facing": "west"
+        "facing": "west",
+        "power": 1
       },
       "Y": {
         "direction": "output",
@@ -262,6 +282,7 @@
           1
         ],
         "facing": "east",
+        "power": 15,
         "function": "(A^B)'"
       }
     },
@@ -279,7 +300,8 @@
           1,
           0
         ],
-        "facing": "west"
+        "facing": "west",
+        "power": 1
       },
       "B": {
         "direction": "input",
@@ -288,7 +310,8 @@
           1,
           3
         ],
-        "facing": "west"
+        "facing": "west",
+        "power": 1
       },
       "Y": {
         "direction": "output",
@@ -298,6 +321,7 @@
           1
         ],
         "facing": "east",
+        "power": 13,
         "function": "A^B"
       }
     },
@@ -318,7 +342,8 @@
           1,
           1
         ],
-        "facing": "west"
+        "facing": "west",
+        "power": 1
       },
       "D": {
         "direction": "input",
@@ -327,7 +352,8 @@
           1,
           1
         ],
-        "facing": "south"
+        "facing": "south",
+        "power": 1
       },
       "Q": {
         "direction": "output",
@@ -337,6 +363,7 @@
           0
         ],
         "facing": "north",
+        "power": 15,
         "function": "IQ"
       }
     },
@@ -354,7 +381,8 @@
           1,
           0
         ],
-        "facing": "west"
+        "facing": "west",
+        "power": -1
       }
     },
     "schematic": "wire"

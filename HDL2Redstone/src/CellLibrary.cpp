@@ -25,6 +25,7 @@ void from_json(const json& J_, Pin& P_) {
     P_.Dir = J_.at("direction").get<Direction>();
     P_.Face = J_.at("facing").get<Facing>();
     J_.at("location").get_to(P_.Location);
+    P_.Power = J_.at("power").get<int>();
 }
 
 } // namespace HDL2Redstone
@@ -44,11 +45,8 @@ CellLibrary::CellLibrary(const std::string& CellLibDir_) {
                 TempPins.emplace(key, value.get<HDL2Redstone::Pin>());
             }
             std::string SchematicDir = CellLibDir_ + (CellData["is_component"] ? "components/" : "connections/");
-            CellInstances.emplace(
-                CellData["name"],
-                // std::make_unique<Cell>(CellData["name"], SchematicDir, std::move(TempPinInfo),
-                // CellData["schematic"]));
-                std::make_unique<Cell>(CellData["name"], SchematicDir, std::move(TempPins), CellData["schematic"]));
+            CellInstances.emplace(CellData["name"], std::make_unique<Cell>(CellData["name"], SchematicDir,
+                                                                           std::move(TempPins), CellData["schematic"]));
         }
     } catch (json::exception& E) {
         throw Exception(E.what());
