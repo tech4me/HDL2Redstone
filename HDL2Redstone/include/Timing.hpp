@@ -19,6 +19,10 @@ class Timing {
     };
 
     double computePropDelay();
+    // return longest path from src to dest, note result is in reverse order (start with dest)
+    std::vector<Component*> findLongestDelay(Component* src, Component* dest);
+    std::vector<Component*> findShortestDelay(Component* src, Component* dest);
+    Component *src = NULL, *dest; // for testing
 
   private:
     void topoHelper(Component* k_, std::map<Component*, bool>& Visited_);

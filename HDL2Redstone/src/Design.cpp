@@ -28,6 +28,14 @@ bool Design::doPlaceAndRoute() {
     Timing T(*this);
     double PropDelay = T.computePropDelay();
     std::cout << "Combinational circuit propagation delay = " << PropDelay << std::endl;
+    // std::cout<<T
+
+    // find longest/shortest path given src and dest, sample usage; T.src and T.dest just used for testing in mux2to1
+    /*std::vector<Component*> Path = T.findShortestDelay(T.src, T.dest);
+    for (auto c : Path) {
+        std::cout<<c<<"<-";
+    }
+    std::cout<<std::endl;*/
     return false;
 }
 
