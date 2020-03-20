@@ -72,7 +72,7 @@ bool Router::route() {
     // }
     auto& Connections = D.getModuleNetlist().getConnections();
     for (int i = 0; i < Connections.size(); i++) {
-        std::cout<<"---- Iter: "<<i<<" ----"<<std::endl;
+        std::cout<<"---- Iteration: "<<i<<" ----"<<std::endl;
         // non = i;
         bool all_routed = false;
         FailedWireSingleRouting = nullptr;
