@@ -1,5 +1,6 @@
 #include <Exception.hpp>
 #include <Timing.hpp>
+#include <limits>
 
 using namespace HDL2Redstone;
 
@@ -48,6 +49,11 @@ void Timing::topoSort() {
 
 double Timing::computePropDelay() {
     topoSort();
+    auto SortedTG_ = SortedTG;
+    // if given a src and a dest, initialize everything to -1, src to 0; then only check those != -1
+    // in the end, just check dist[dest] for longest path from src to dest
+    // consider putting everything below in a func?
+    // make a copy of SortedTG!!!???
 
     // longest dist to each vertex; TODO: Maybe change to member var and make it contain actual longest path
     std::map<Component*, double> dist;
@@ -58,10 +64,10 @@ double Timing::computePropDelay() {
     }
     // dist[SortedTG.top()] = 0;
 
-    while (!SortedTG.empty()) {
-        auto curr = SortedTG.top(); // curr is a component ptr
+    while (!SortedTG_.empty()) {
+        auto curr = SortedTG_.top(); // curr is a component ptr
         // std::cout<<"now doing "<<curr<<std::endl;
-        SortedTG.pop();
+        SortedTG_.pop();
 
         //	if (dist[curr] != -1) {
         for (const auto& v : TG.at(curr)) {
@@ -82,9 +88,106 @@ double Timing::computePropDelay() {
         if (v > PropDelay) {
             PropDelay = v;
         }
+        // for testing shortest and longest path
+        /*if (v == 5)
+            dest = k;
+        if (v == 0 && src==NULL)
+            src = k;*/
     }
 
     return PropDelay;
+}
+
+std::vector<Component*> Timing::findShortestDelay(Component* src, Component* dest) {
+    auto SortedTG_ = SortedTG;
+    std::vector<Component*> Result; // TODO: should it be stack here, so no need to reverse order after done
+
+    // longest dist to each vertex; TODO: Maybe change to member var and make it contain actual path
+    std::map<Component*, double> dist;
+    // contains the longest path to each vertex
+    std::map<Component*, Component*> Path;
+    for (const auto& [k, v] : TG) {
+        dist[k] = std::numeric_limits<double>::infinity();
+        Path[k] = NULL;
+    }
+    dist[src] = 0;
+    // std::cout<<"src"<<src<<" dest:"<<dest<<std::endl;
+    // Path[src] = src;
+
+    while (!SortedTG_.empty()) {
+        auto curr = SortedTG_.top(); // curr is a component ptr
+        // std::cout<<"now doing "<<curr<<std::endl;
+        SortedTG_.pop();
+
+        if (dist[curr] != std::numeric_limits<double>::infinity()) {
+            for (const auto& v : TG.at(curr)) {
+                double temp_dist = dist.at(curr) + v.second;
+                // std::cout<<"dist at u="<<dist.at(curr)<<" w(u,v)="<<v.second<<std::endl;
+                if (dist.at(v.first) > temp_dist) {
+                    dist.at(v.first) = temp_dist;
+                    Path.at(v.first) = curr;
+                    // std::cout<<"dist "<<v.first<<" "<<dist.at(v.first)<<std::endl;
+                }
+            }
+        }
+    }
+
+    Result.push_back(dest);
+    Component* Pred = Path.at(dest);
+    while (Pred != src) {
+        Result.push_back(Pred);
+        Pred = Path.at(Pred);
+    }
+    Result.push_back(src);
+
+    // return dist[dest];
+    return Result;
+}
+
+std::vector<Component*> Timing::findLongestDelay(Component* src, Component* dest) {
+    auto SortedTG_ = SortedTG;
+    std::vector<Component*> Result; // TODO: should it be stack here, so no need to reverse order after done
+
+    // longest dist to each vertex; TODO: Maybe change to member var and make it contain actual path
+    std::map<Component*, double> dist;
+    // contains the longest path to each vertex
+    std::map<Component*, Component*> Path;
+    for (const auto& [k, v] : TG) {
+        dist[k] = -1;
+        Path[k] = NULL;
+    }
+    dist[src] = 0;
+    // std::cout<<"src"<<src<<" dest:"<<dest<<std::endl;
+    // Path[src] = src;
+
+    while (!SortedTG_.empty()) {
+        auto curr = SortedTG_.top(); // curr is a component ptr
+        // std::cout<<"now doing "<<curr<<std::endl;
+        SortedTG_.pop();
+
+        if (dist[curr] != -1) {
+            for (const auto& v : TG.at(curr)) {
+                double temp_dist = dist.at(curr) + v.second;
+                // std::cout<<"dist at u="<<dist.at(curr)<<" w(u,v)="<<v.second<<std::endl;
+                if (dist.at(v.first) < temp_dist) {
+                    dist.at(v.first) = temp_dist;
+                    Path.at(v.first) = curr;
+                    // std::cout<<"dist "<<v.first<<" "<<dist.at(v.first)<<std::endl;
+                }
+            }
+        }
+    }
+
+    Result.push_back(dest);
+    Component* Pred = Path.at(dest);
+    while (Pred != src) {
+        Result.push_back(Pred);
+        Pred = Path.at(Pred);
+    }
+    Result.push_back(src);
+
+    // return dist[dest];
+    return Result;
 }
 
 namespace HDL2Redstone {
