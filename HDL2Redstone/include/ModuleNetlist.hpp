@@ -34,7 +34,7 @@ class ModuleNetlist {
         void inputs(std::vector<std::string> /*inputs*/) override;
         void outputs(std::vector<std::string> /*outputs*/) override;
         void names(std::vector<std::string> /*nets*/,
-                   std::vector<std::vector<blifparse::LogicValue>> /*so_cover*/) override {}
+                   std::vector<std::vector<blifparse::LogicValue>> /*so_cover*/) override;
         void latch(std::string /*input*/, std::string /*output*/, blifparse::LatchType /*type*/,
                    std::string /*control*/, blifparse::LogicValue /*init*/) override;
         void subckt(std::string /*model*/, std::vector<std::string> /*ports*/,
@@ -48,6 +48,23 @@ class ModuleNetlist {
         bool had_error() { return had_error_; }
 
       private:
+        Component* findComponent(const std::string& Name_) const {
+            for (const auto& C : Components) {
+                if (C->getName() == Name_) {
+                    return C.get();
+                }
+            }
+            return nullptr;
+        };
+        Connection* findConnection(const std::string& Name_) const {
+            for (const auto& C : Connections) {
+                if (C->getName() == Name_) {
+                    return C.get();
+                }
+            }
+            return nullptr;
+        }
+
         bool had_error_ = false;
         const CellLibrary& CellLib;
         const DesignConstraint& DC;

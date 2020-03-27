@@ -1,0 +1,33 @@
+{
+  "dimension": [
+    30,
+    30,
+    30
+  ],
+  "forced_placement": {
+    "clk": {
+      "location": [
+        0,
+        0,
+        0
+      ],
+      "input": true
+    },
+    "shift_in": {
+      "location": [
+        0,
+        0,
+        20
+      ],
+      "input": true
+    },
+    "shift_out": {
+      "location": [
+        20,
+        0,
+        0
+      ],
+      "input": false
+    }
+  }
+}

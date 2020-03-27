@@ -16,4 +16,4 @@ clean
 show -format dot -prefix {output_dot_file_name}
 
 # Write design to BLIF file
-write_blif {output_blif_file}
+write_blif -noalias -impltf {output_blif_file}

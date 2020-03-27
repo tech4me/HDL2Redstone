@@ -16,14 +16,14 @@ find_program(CLANG_FORMAT_BIN NAMES ${CLANG_FORMAT_BIN_NAME})
 
 include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(
-    CLANG_FORMAT
+    ClangFormat
     DEFAULT_MSG
     CLANG_FORMAT_BIN)
 
 mark_as_advanced(
     CLANG_FORMAT_BIN)
 
-if(CLANG_FORMAT_FOUND)
+if(ClangFormat_FOUND)
     # A CMake script to find all source files and setup clang-format targets for them
     include(clang-format)
 else()

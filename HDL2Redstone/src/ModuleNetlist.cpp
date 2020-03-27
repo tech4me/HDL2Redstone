@@ -22,6 +22,8 @@ void ModuleNetlist::ExtractNetlist::inputs(std::vector<std::string> inputs) {
             ComponentPtr->setPlacement(It->second.X, It->second.Y, It->second.Z, It->second.Orient);
             ComponentPtr->setForcePlaced();
             ComponentPtr->setName(input); // set port name to what user specified
+        } else {
+            throw Exception("Input: " + input + " doesn't have a forced placement!");
         }
         Connections.push_back(std::make_unique<Connection>(input, ComponentPtr.get(), "Y"));
         Components.push_back(std::move(ComponentPtr));
@@ -37,9 +39,73 @@ void ModuleNetlist::ExtractNetlist::outputs(std::vector<std::string> outputs) {
             ComponentPtr->setPlacement(It->second.X, It->second.Y, It->second.Z, It->second.Orient);
             ComponentPtr->setForcePlaced();
             ComponentPtr->setName(output);
+        } else {
+            throw Exception("Output: " + output + " doesn't have a forced placement!");
         }
         Connections.push_back(std::make_unique<Connection>(output, ComponentPtr.get(), "A", false /* Add as sink*/));
         Components.push_back(std::move(ComponentPtr));
+    }
+}
+
+void ModuleNetlist::ExtractNetlist::names(std::vector<std::string> nets,
+                                          std::vector<std::vector<blifparse::LogicValue>> so_cover) {
+    // FIXME: This currently will only work for names function as alias
+    // Doing the checks
+    if (nets.size() != 2 || so_cover.size() != 1 || so_cover.at(0).at(0) != LogicValue::TRUE ||
+        so_cover.at(0).at(1) != LogicValue::TRUE) {
+        throw Exception("Unsupported names usage in BLIF!");
+    }
+    // See if one of the name is an input or output
+    auto CPtr1 = findComponent(nets.at(0));
+    auto CPtr2 = findComponent(nets.at(1));
+    auto Conn1 = findConnection(nets.at(0));
+    auto Conn2 = findConnection(nets.at(1));
+
+    if (!CPtr1 && !CPtr2) {
+        // If names have no input or output, we merge and use the first name
+        // TODO
+        // Test which connection doesn't have a source
+        throw Exception("Unimplemented feature!");
+    } else if (CPtr1 && CPtr2) {
+        // If names have both input and output, a buffer need to be injected
+        const Cell* CellPtr = CellLib.getCellPtr("BUF");
+        auto ComponentPtr = std::make_unique<Component>(CellPtr);
+        if (CPtr1->getType() == "INPUT" && CPtr2->getType() == "OUTPUT") {
+            Conn1->addSink(ComponentPtr.get(), "A");
+            Conn2->addSource(ComponentPtr.get(), "Y");
+        } else if (CPtr1->getType() == "OUTPUT" && CPtr2->getType() == "INPUT") {
+            Conn1->addSource(ComponentPtr.get(), "Y");
+            Conn2->addSink(ComponentPtr.get(), "A");
+        } else {
+            throw Exception("Unsupported names usage in BLIF!");
+        }
+        Components.push_back(std::move(ComponentPtr));
+    } else if (CPtr1 && !CPtr2) {
+        // If names have input or output, the other name(connection) needs to be merged
+        if (CPtr1->getType() == "INPUT") {
+            for (const auto& C : Conn2->getSinkPortConnections()) {
+                Conn1->addSink(C.first, C.second);
+            }
+        } else {
+            const auto& C = Conn2->getSourcePortConnection();
+            Conn1->addSource(C.first, C.second);
+        }
+        Connections.erase(
+            std::remove_if(Connections.begin(), Connections.end(), [Conn2](const auto& C) { return C.get() == Conn2; }),
+            Connections.end());
+    } else if (!CPtr1 && CPtr2) {
+        // If names have input or output, the other name(connection) needs to be merged
+        if (CPtr2->getType() == "INPUT") {
+            for (const auto& C : Conn1->getSinkPortConnections()) {
+                Conn2->addSink(C.first, C.second);
+            }
+        } else {
+            const auto& C = Conn1->getSourcePortConnection();
+            Conn2->addSource(C.first, C.second);
+        }
+        Connections.erase(
+            std::remove_if(Connections.begin(), Connections.end(), [Conn1](const auto& C) { return C.get() == Conn1; }),
+            Connections.end());
     }
 }
 
@@ -54,22 +120,25 @@ void ModuleNetlist::ExtractNetlist::latch(std::string input, std::string output,
                 return ConnectionPtr->getName() == Name;
             };
             auto It = std::find_if(Connections.begin(), Connections.end(), P);
-            if (It == Connections.end()) {
-                throw Exception("Clock net not initialized!");
+            if (It != Connections.end()) {
+                (*It)->addSink(ComponentPtr.get(), "C");
+            } else {
+                Connections.push_back(std::make_unique<Connection>(Name, ComponentPtr.get(), "C", false));
             }
-            (*It)->addSink(ComponentPtr.get(), "C");
             Name = input;
             It = std::find_if(Connections.begin(), Connections.end(), P);
-            if (It == Connections.end()) {
-                throw Exception("Input net not initialized!");
+            if (It != Connections.end()) {
+                (*It)->addSink(ComponentPtr.get(), "D");
+            } else {
+                Connections.push_back(std::make_unique<Connection>(Name, ComponentPtr.get(), "D", false));
             }
-            (*It)->addSink(ComponentPtr.get(), "D");
             Name = output;
             It = std::find_if(Connections.begin(), Connections.end(), P);
-            if (It == Connections.end()) {
-                throw Exception("Output net not initialized!");
+            if (It != Connections.end()) {
+                (*It)->addSource(ComponentPtr.get(), "Q");
+            } else {
+                Connections.push_back(std::make_unique<Connection>(Name, ComponentPtr.get(), "Q", true));
             }
-            (*It)->addSource(ComponentPtr.get(), "Q");
             Components.push_back(std::move(ComponentPtr));
         } else {
             throw Exception("Latch cannot have initial value!");

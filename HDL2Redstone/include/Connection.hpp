@@ -88,6 +88,8 @@ class Connection {
     const std::vector<std::pair<Component*, std::string>>& getSinkPortConnections() { return SinkPortConnections; }
     // Add component port to source
     void addSource(Component* ComponentPtr_, const std::string& PortName_);
+    // Add component port to sink
+    void addSink(Component* ComponentPtr_, const std::string& PortName_);
     // TODO tempory inset to set, need to correct
     void setInsert(const ConnectionResult& CR_) {
         // if(Result.find(CR_)==Result.end()){
@@ -106,8 +108,6 @@ class Connection {
 
     int getUnableRouting() const { return Unable_Routing; }
     void setUnableRouting(int Unable_Routing_) { Unable_Routing = Unable_Routing_; }
-    // add component port to sink
-    void addSink(Component* ComponentPtr_, const std::string& PortName_);
     std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t>> checkRouteResult();
 
   private:
