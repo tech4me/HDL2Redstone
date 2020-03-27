@@ -24,22 +24,25 @@ class Connection {
     class ConnectionResult {
       public:
         ConnectionResult(std::tuple<uint16_t, uint16_t, uint16_t> coord_, const HDL2Redstone::Cell* CellPtr_,
-                         HDL2Redstone::Orientation Ori_, int SinkId_ = -1) {
+                         HDL2Redstone::Orientation Ori_, int SinkId_ = -1, int PartialNetID_ = -1) {
             coord = coord_;
             CellPtr = CellPtr_;
             Ori = Ori_;
             SinkId = SinkId_;
+            PartialNetID = PartialNetID_;
         };
         ConnectionResult(const ConnectionResult& CRx) {
             coord = CRx.coord;
             CellPtr = CRx.CellPtr;
             Ori = CRx.Ori;
             SinkId = CRx.SinkId;
+            PartialNetID = CRx.PartialNetID;
         }
         std::tuple<uint16_t, uint16_t, uint16_t> coord;
         const HDL2Redstone::Cell* CellPtr;
         HDL2Redstone::Orientation Ori;
         int SinkId; // for timing
+        int PartialNetID;
     };
     struct resultcomp {
         bool operator()(const ConnectionResult& lhs, const ConnectionResult& rhs) const {
@@ -75,8 +78,38 @@ class Connection {
             }
         } // TODO: check repeater is higher level than wire, cant be replaced
     };
+
+    struct congest_pair_cmp {
+        bool operator()(const std::pair<std::tuple<uint16_t, uint16_t, uint16_t>, std::tuple<uint16_t, uint16_t, uint16_t>>& lhs, 
+            const std::pair<std::tuple<uint16_t, uint16_t, uint16_t>, std::tuple<uint16_t, uint16_t, uint16_t>>& rhs) const {
+                if( ((lhs.first == rhs.first) && (lhs.second == rhs.second)) || ((lhs.first == rhs.second) && (lhs.second == rhs.first)) ){
+                    return false;
+                }
+                // if( ((std::get<0>(lhs.first) == std::get<0>(rhs.first) &&
+                // std::get<1>(lhs.first) == std::get<1>(rhs.first) &&
+                // std::get<2>(lhs.first) == std::get<2>(rhs.first) ) && (std::get<0>(lhs.second) == std::get<0>(rhs.second) &&
+                // std::get<1>(lhs.second) == std::get<1>(rhs.second) &&
+                // std::get<2>(lhs.second) == std::get<2>(rhs.second) )) || ((std::get<0>(lhs.first) == std::get<0>(rhs.second) &&
+                // std::get<1>(lhs.first) == std::get<1>(rhs.second) &&
+                // std::get<2>(lhs.first) == std::get<2>(rhs.second) ) && (std::get<0>(lhs.second) == std::get<0>(rhs.first) &&
+                // std::get<1>(lhs.second) == std::get<1>(rhs.first) &&
+                // std::get<2>(lhs.second) == std::get<2>(rhs.first) )) ){
+                //     return false;
+                // }
+                if(lhs.first < rhs.first){
+                    return true;
+                }else if(lhs.first > rhs.first){
+                    return false;
+                }else if(rhs.second < rhs.second){
+                    return true;
+                }else{
+                    return false;
+                }
+        }
+    };
     std::set<ConnectionResult, resultcomp> Result;
     std::set<ConnectionResult, resultcomp> RouteResult;
+    std::vector<std::vector<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t> > > SubResult;
     void calculateDelay();
     std::vector<int> getSinkDelays() { return SinkDelays; }
     Connection(const std::string& Name_, Component* ComponentPtr_, const std::string& PortName_, bool IsSource = true);
@@ -109,6 +142,8 @@ class Connection {
     int getUnableRouting() const { return Unable_Routing; }
     void setUnableRouting(int Unable_Routing_) { Unable_Routing = Unable_Routing_; }
     std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t>> checkRouteResult();
+    std::set<std::pair<std::tuple<uint16_t, uint16_t, uint16_t>, std::tuple<uint16_t, uint16_t, uint16_t>>> checkRouteResult_repeater();
+    void checkRouteResult_repeater_helper(std::set<std::pair<std::tuple<uint16_t, uint16_t, uint16_t>, std::tuple<uint16_t, uint16_t, uint16_t>>>& ret, std::vector<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t>>& possible_congestion);
 
   private:
     int Unable_Routing;
