@@ -62,10 +62,23 @@ void ModuleNetlist::ExtractNetlist::names(std::vector<std::string> nets,
     auto Conn2 = findConnection(nets.at(1));
 
     if (!CPtr1 && !CPtr2) {
-        // If names have no input or output, we merge and use the first name
-        // TODO
+        // If names have no input or output, we merge
         // Test which connection doesn't have a source
-        throw Exception("Unimplemented feature!");
+        if (!Conn1->getSourcePortConnection().first) {
+            for (const auto& C : Conn1->getSinkPortConnections()) {
+                Conn2->addSink(C.first, C.second);
+            }
+            Connections.erase(std::remove_if(Connections.begin(), Connections.end(),
+                                             [Conn1](const auto& C) { return C.get() == Conn1; }),
+                              Connections.end());
+        } else if (!Conn2->getSourcePortConnection().first) {
+            for (const auto& C : Conn2->getSinkPortConnections()) {
+                Conn1->addSink(C.first, C.second);
+            }
+            Connections.erase(std::remove_if(Connections.begin(), Connections.end(),
+                                             [Conn2](const auto& C) { return C.get() == Conn2; }),
+                              Connections.end());
+        }
     } else if (CPtr1 && CPtr2) {
         // If names have both input and output, a buffer need to be injected
         const Cell* CellPtr = CellLib.getCellPtr("BUF");

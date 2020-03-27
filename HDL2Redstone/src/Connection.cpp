@@ -1,19 +1,19 @@
 #include <Connection.hpp>
 
 using namespace HDL2Redstone;
-class SimpleResult{
-    public:
-    SimpleResult(std::tuple<uint16_t, uint16_t, uint16_t> coord_, int PartialNetID_): coord(coord_), PartialNetID(PartialNetID_){};
+class SimpleResult {
+  public:
+    SimpleResult(std::tuple<uint16_t, uint16_t, uint16_t> coord_, int PartialNetID_)
+        : coord(coord_), PartialNetID(PartialNetID_){};
     std::tuple<uint16_t, uint16_t, uint16_t> coord;
     int PartialNetID;
 };
-struct SimpleResultCmp{
+struct SimpleResultCmp {
     bool operator()(const SimpleResult& lhs, const SimpleResult& rhs) const {
-        if(lhs.coord < rhs.coord)
+        if (lhs.coord < rhs.coord)
             return true;
         else
             return false;
-        
     }
 };
 
@@ -75,33 +75,41 @@ std::set<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t>> Connection::checkRo
     return IllegalPoints;
 }
 
-std::set<std::pair<std::tuple<uint16_t, uint16_t, uint16_t>, std::tuple<uint16_t, uint16_t, uint16_t>>> Connection::checkRouteResult_repeater(){//TODO now it assume single wire congestion is diff from multi
+std::set<std::pair<std::tuple<uint16_t, uint16_t, uint16_t>, std::tuple<uint16_t, uint16_t, uint16_t>>>
+Connection::checkRouteResult_repeater() { // TODO now it assume single wire congestion is diff from multi
     std::set<std::pair<std::tuple<uint16_t, uint16_t, uint16_t>, std::tuple<uint16_t, uint16_t, uint16_t>>> ret;
     std::vector<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t>> possible_congestion;
-    if(!SubResult.empty()){
-        for(int i=0; i<SubResult.size();i++){
-            checkRouteResult_repeater_helper(ret,SubResult[i]);
+    if (!SubResult.empty()) {
+        for (int i = 0; i < SubResult.size(); i++) {
+            checkRouteResult_repeater_helper(ret, SubResult[i]);
         }
-        for(int i=0; i<SubResult.size();i++){
-            if(i==SubResult.size()-1) {break;}
-            for(int j=i+1; j<SubResult.size();j++){
+        for (int i = 0; i < SubResult.size(); i++) {
+            if (i == SubResult.size() - 1) {
+                break;
+            }
+            for (int j = i + 1; j < SubResult.size(); j++) {
                 possible_congestion.clear();
                 int start_search;
-                for(start_search = 0; start_search < SubResult[i].size(); start_search++ ){
-                    if(start_search == SubResult[j].size()){break;}
-                    if( (std::get<0>(SubResult[i][start_search])==std::get<0>(SubResult[j][start_search]))&&
-                     (std::get<1>(SubResult[i][start_search])==std::get<1>(SubResult[j][start_search]))&&
-                      (std::get<2>(SubResult[i][start_search])==std::get<2>(SubResult[j][start_search]))
-                    ){
-                        //do nothing
-                    }else{
+                for (start_search = 0; start_search < SubResult[i].size(); start_search++) {
+                    if (start_search == SubResult[j].size()) {
+                        break;
+                    }
+                    if ((std::get<0>(SubResult[i][start_search]) == std::get<0>(SubResult[j][start_search])) &&
+                        (std::get<1>(SubResult[i][start_search]) == std::get<1>(SubResult[j][start_search])) &&
+                        (std::get<2>(SubResult[i][start_search]) == std::get<2>(SubResult[j][start_search]))) {
+                        // do nothing
+                    } else {
                         break;
                     }
                 }
-                if(start_search != SubResult[j].size()) {
-                    for(int prep = start_search; prep < SubResult[i].size(); prep ++){possible_congestion.push_back(SubResult[i][prep]);}
-                    for(int prep = start_search; prep < SubResult[j].size(); prep ++){possible_congestion.push_back(SubResult[j][prep]);}
-                    if(!possible_congestion.empty()){
+                if (start_search != SubResult[j].size()) {
+                    for (int prep = start_search; prep < SubResult[i].size(); prep++) {
+                        possible_congestion.push_back(SubResult[i][prep]);
+                    }
+                    for (int prep = start_search; prep < SubResult[j].size(); prep++) {
+                        possible_congestion.push_back(SubResult[j][prep]);
+                    }
+                    if (!possible_congestion.empty()) {
                         checkRouteResult_repeater_helper(ret, possible_congestion);
                     }
                 }
@@ -119,226 +127,268 @@ std::set<std::pair<std::tuple<uint16_t, uint16_t, uint16_t>, std::tuple<uint16_t
     return ret;
 }
 
-void Connection::checkRouteResult_repeater_helper(std::set<std::pair<std::tuple<uint16_t, uint16_t, uint16_t>, std::tuple<uint16_t, uint16_t, uint16_t> >>& ret, std::vector<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t>>& possible_congestion){
+void Connection::checkRouteResult_repeater_helper(
+    std::set<std::pair<std::tuple<uint16_t, uint16_t, uint16_t>, std::tuple<uint16_t, uint16_t, uint16_t>>>& ret,
+    std::vector<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t>>& possible_congestion) {
     std::set<SimpleResult, SimpleResultCmp> SR;
     for (const auto it : possible_congestion) {
-        //if(it.CellPtr->getType()=="WIRE"){
-            SR.insert(SimpleResult(std::make_tuple(std::get<0>(it),std::get<1>(it),std::get<2>(it)),std::get<3>(it)));
-            // std::cout<<"result "<<
-            // std::get<0>(it.coord)<<" "<<std::get<1>(it.coord)<<" "<<std::get<2>(it.coord)<<std::endl;
+        // if(it.CellPtr->getType()=="WIRE"){
+        SR.insert(SimpleResult(std::make_tuple(std::get<0>(it), std::get<1>(it), std::get<2>(it)), std::get<3>(it)));
+        // std::cout<<"result "<<
+        // std::get<0>(it.coord)<<" "<<std::get<1>(it.coord)<<" "<<std::get<2>(it.coord)<<std::endl;
         //}
     }
     auto tmpptr = SR.end();
     for (const auto& it : SR) {
-        tmpptr = SR.find(SimpleResult(std::make_tuple(std::get<0>(it.coord) + 1,std::get<1>(it.coord),std::get<2>(it.coord)),it.PartialNetID));
-        if(tmpptr!=SR.end() && tmpptr->PartialNetID != it.PartialNetID){
+        tmpptr = SR.find(SimpleResult(
+            std::make_tuple(std::get<0>(it.coord) + 1, std::get<1>(it.coord), std::get<2>(it.coord)), it.PartialNetID));
+        if (tmpptr != SR.end() && tmpptr->PartialNetID != it.PartialNetID) {
             // std::cout<<"find repeater loop "<<
             // std::get<0>(it.coord)<<" "<<std::get<1>(it.coord)<<" "<<std::get<2>(it.coord)
-            // <<" neighbor "<<std::get<0>(tmpptr->coord)<<" "<<std::get<1>(tmpptr->coord)<<" "<<std::get<2>(tmpptr->coord)
+            // <<" neighbor "<<std::get<0>(tmpptr->coord)<<" "<<std::get<1>(tmpptr->coord)<<"
+            // "<<std::get<2>(tmpptr->coord)
             // <<" ID: "<<tmpptr->PartialNetID<<" , "<<it.PartialNetID<<std::endl;
             bool flag = 0;
-            for(auto& i : ret){
-                if(((it.coord == i.first) && (tmpptr->coord == i.second)) || ((tmpptr->coord == i.first) && (it.coord == i.second))){
+            for (auto& i : ret) {
+                if (((it.coord == i.first) && (tmpptr->coord == i.second)) ||
+                    ((tmpptr->coord == i.first) && (it.coord == i.second))) {
                     flag = 1;
                     break;
                 }
             }
-            if(!flag)
-            ret.insert(std::pair(it.coord, tmpptr->coord));
-            //break;
+            if (!flag)
+                ret.insert(std::pair(it.coord, tmpptr->coord));
+            // break;
         }
-        tmpptr = SR.find(SimpleResult(std::make_tuple(std::get<0>(it.coord) - 1,std::get<1>(it.coord),std::get<2>(it.coord)),it.PartialNetID));
-        if(tmpptr!=SR.end() && tmpptr->PartialNetID != it.PartialNetID){
+        tmpptr = SR.find(SimpleResult(
+            std::make_tuple(std::get<0>(it.coord) - 1, std::get<1>(it.coord), std::get<2>(it.coord)), it.PartialNetID));
+        if (tmpptr != SR.end() && tmpptr->PartialNetID != it.PartialNetID) {
             //             std::cout<<"find repeater loop "<<
             // std::get<0>(it.coord)<<" "<<std::get<1>(it.coord)<<" "<<std::get<2>(it.coord)
-            // <<" neighbor "<<std::get<0>(tmpptr->coord)<<" "<<std::get<1>(tmpptr->coord)<<" "<<std::get<2>(tmpptr->coord)
+            // <<" neighbor "<<std::get<0>(tmpptr->coord)<<" "<<std::get<1>(tmpptr->coord)<<"
+            // "<<std::get<2>(tmpptr->coord)
             // <<" ID: "<<tmpptr->PartialNetID<<" , "<<it.PartialNetID<<std::endl;
             bool flag = 0;
-            for(auto& i : ret){
-                if(((it.coord == i.first) && (tmpptr->coord == i.second)) || ((tmpptr->coord == i.first) && (it.coord == i.second))){
+            for (auto& i : ret) {
+                if (((it.coord == i.first) && (tmpptr->coord == i.second)) ||
+                    ((tmpptr->coord == i.first) && (it.coord == i.second))) {
                     flag = 1;
                     break;
                 }
             }
-            if(!flag)
-            ret.insert(std::pair(it.coord, tmpptr->coord));
-            //break;
+            if (!flag)
+                ret.insert(std::pair(it.coord, tmpptr->coord));
+            // break;
         }
-        tmpptr = SR.find(SimpleResult(std::make_tuple(std::get<0>(it.coord),std::get<1>(it.coord),std::get<2>(it.coord) + 1),it.PartialNetID));
-        if(tmpptr!=SR.end() && tmpptr->PartialNetID != it.PartialNetID){
+        tmpptr = SR.find(SimpleResult(
+            std::make_tuple(std::get<0>(it.coord), std::get<1>(it.coord), std::get<2>(it.coord) + 1), it.PartialNetID));
+        if (tmpptr != SR.end() && tmpptr->PartialNetID != it.PartialNetID) {
             //             std::cout<<"find repeater loop "<<
             // std::get<0>(it.coord)<<" "<<std::get<1>(it.coord)<<" "<<std::get<2>(it.coord)
-            // <<" neighbor "<<std::get<0>(tmpptr->coord)<<" "<<std::get<1>(tmpptr->coord)<<" "<<std::get<2>(tmpptr->coord)
+            // <<" neighbor "<<std::get<0>(tmpptr->coord)<<" "<<std::get<1>(tmpptr->coord)<<"
+            // "<<std::get<2>(tmpptr->coord)
             // <<" ID: "<<tmpptr->PartialNetID<<" , "<<it.PartialNetID<<std::endl;
             bool flag = 0;
-            for(auto& i : ret){
-                if(((it.coord == i.first) && (tmpptr->coord == i.second)) || ((tmpptr->coord == i.first) && (it.coord == i.second))){
+            for (auto& i : ret) {
+                if (((it.coord == i.first) && (tmpptr->coord == i.second)) ||
+                    ((tmpptr->coord == i.first) && (it.coord == i.second))) {
                     flag = 1;
                     break;
                 }
             }
-            if(!flag)
-            ret.insert(std::pair(it.coord, tmpptr->coord));
-            //break;
+            if (!flag)
+                ret.insert(std::pair(it.coord, tmpptr->coord));
+            // break;
         }
-        tmpptr = SR.find(SimpleResult(std::make_tuple(std::get<0>(it.coord),std::get<1>(it.coord),std::get<2>(it.coord) - 1),it.PartialNetID));
-        if(tmpptr!=SR.end() && tmpptr->PartialNetID != it.PartialNetID){
+        tmpptr = SR.find(SimpleResult(
+            std::make_tuple(std::get<0>(it.coord), std::get<1>(it.coord), std::get<2>(it.coord) - 1), it.PartialNetID));
+        if (tmpptr != SR.end() && tmpptr->PartialNetID != it.PartialNetID) {
             //             std::cout<<"find repeater loop "<<
             // std::get<0>(it.coord)<<" "<<std::get<1>(it.coord)<<" "<<std::get<2>(it.coord)
-            // <<" neighbor "<<std::get<0>(tmpptr->coord)<<" "<<std::get<1>(tmpptr->coord)<<" "<<std::get<2>(tmpptr->coord)
+            // <<" neighbor "<<std::get<0>(tmpptr->coord)<<" "<<std::get<1>(tmpptr->coord)<<"
+            // "<<std::get<2>(tmpptr->coord)
             // <<" ID: "<<tmpptr->PartialNetID<<" , "<<it.PartialNetID<<std::endl;
             bool flag = 0;
-            for(auto& i : ret){
-                if(((it.coord == i.first) && (tmpptr->coord == i.second)) || ((tmpptr->coord == i.first) && (it.coord == i.second))){
+            for (auto& i : ret) {
+                if (((it.coord == i.first) && (tmpptr->coord == i.second)) ||
+                    ((tmpptr->coord == i.first) && (it.coord == i.second))) {
                     flag = 1;
                     break;
                 }
             }
-            if(!flag)
-            ret.insert(std::pair(it.coord, tmpptr->coord));
-            //break;
-        }
-
-
-
-        tmpptr = SR.find(SimpleResult(std::make_tuple(std::get<0>(it.coord) + 1,std::get<1>(it.coord) + 1,std::get<2>(it.coord)),it.PartialNetID));
-        if(tmpptr!=SR.end() && tmpptr->PartialNetID != it.PartialNetID){
-            //             std::cout<<"find repeater loop "<<
-            // std::get<0>(it.coord)<<" "<<std::get<1>(it.coord)<<" "<<std::get<2>(it.coord)
-            // <<" neighbor "<<std::get<0>(tmpptr->coord)<<" "<<std::get<1>(tmpptr->coord)<<" "<<std::get<2>(tmpptr->coord)
-            // <<" ID: "<<tmpptr->PartialNetID<<" , "<<it.PartialNetID<<std::endl;
-            bool flag = 0;
-            for(auto& i : ret){
-                if(((it.coord == i.first) && (tmpptr->coord == i.second)) || ((tmpptr->coord == i.first) && (it.coord == i.second))){
-                    flag = 1;
-                    break;
-                }
-            }
-            if(!flag)
-            ret.insert(std::pair(it.coord, tmpptr->coord));
-            //break;
-        }
-        tmpptr = SR.find(SimpleResult(std::make_tuple(std::get<0>(it.coord) - 1,std::get<1>(it.coord) + 1,std::get<2>(it.coord)),it.PartialNetID));
-        if(tmpptr!=SR.end() && tmpptr->PartialNetID != it.PartialNetID){
-            //             std::cout<<"find repeater loop "<<
-            // std::get<0>(it.coord)<<" "<<std::get<1>(it.coord)<<" "<<std::get<2>(it.coord)
-            // <<" neighbor "<<std::get<0>(tmpptr->coord)<<" "<<std::get<1>(tmpptr->coord)<<" "<<std::get<2>(tmpptr->coord)
-            // <<" ID: "<<tmpptr->PartialNetID<<" , "<<it.PartialNetID<<std::endl;
-            bool flag = 0;
-            for(auto& i : ret){
-                if(((it.coord == i.first) && (tmpptr->coord == i.second)) || ((tmpptr->coord == i.first) && (it.coord == i.second))){
-                    flag = 1;
-                    break;
-                }
-            }
-            if(!flag)
-            ret.insert(std::pair(it.coord, tmpptr->coord));
-            //break;
-        }
-        tmpptr = SR.find(SimpleResult(std::make_tuple(std::get<0>(it.coord),std::get<1>(it.coord) + 1,std::get<2>(it.coord) + 1),it.PartialNetID));
-        if(tmpptr!=SR.end() && tmpptr->PartialNetID != it.PartialNetID){
-            //             std::cout<<"find repeater loop "<<
-            // std::get<0>(it.coord)<<" "<<std::get<1>(it.coord)<<" "<<std::get<2>(it.coord)
-            // <<" neighbor "<<std::get<0>(tmpptr->coord)<<" "<<std::get<1>(tmpptr->coord)<<" "<<std::get<2>(tmpptr->coord)
-            // <<" ID: "<<tmpptr->PartialNetID<<" , "<<it.PartialNetID<<std::endl;
-            bool flag = 0;
-            for(auto& i : ret){
-                if(((it.coord == i.first) && (tmpptr->coord == i.second)) || ((tmpptr->coord == i.first) && (it.coord == i.second))){
-                    flag = 1;
-                    break;
-                }
-            }
-            if(!flag)
-            ret.insert(std::pair(it.coord, tmpptr->coord));
-            //break;
-        }
-        tmpptr = SR.find(SimpleResult(std::make_tuple(std::get<0>(it.coord),std::get<1>(it.coord) + 1,std::get<2>(it.coord) - 1),it.PartialNetID));
-        if(tmpptr!=SR.end() && tmpptr->PartialNetID != it.PartialNetID){
-            //             std::cout<<"find repeater loop "<<
-            // std::get<0>(it.coord)<<" "<<std::get<1>(it.coord)<<" "<<std::get<2>(it.coord)
-            // <<" neighbor "<<std::get<0>(tmpptr->coord)<<" "<<std::get<1>(tmpptr->coord)<<" "<<std::get<2>(tmpptr->coord)
-            // <<" ID: "<<tmpptr->PartialNetID<<" , "<<it.PartialNetID<<std::endl;
-            bool flag = 0;
-            for(auto& i : ret){
-                if(((it.coord == i.first) && (tmpptr->coord == i.second)) || ((tmpptr->coord == i.first) && (it.coord == i.second))){
-                    flag = 1;
-                    break;
-                }
-            }
-            if(!flag)
-            ret.insert(std::pair(it.coord, tmpptr->coord));
-            //break;
+            if (!flag)
+                ret.insert(std::pair(it.coord, tmpptr->coord));
+            // break;
         }
 
+        tmpptr = SR.find(
+            SimpleResult(std::make_tuple(std::get<0>(it.coord) + 1, std::get<1>(it.coord) + 1, std::get<2>(it.coord)),
+                         it.PartialNetID));
+        if (tmpptr != SR.end() && tmpptr->PartialNetID != it.PartialNetID) {
+            //             std::cout<<"find repeater loop "<<
+            // std::get<0>(it.coord)<<" "<<std::get<1>(it.coord)<<" "<<std::get<2>(it.coord)
+            // <<" neighbor "<<std::get<0>(tmpptr->coord)<<" "<<std::get<1>(tmpptr->coord)<<"
+            // "<<std::get<2>(tmpptr->coord)
+            // <<" ID: "<<tmpptr->PartialNetID<<" , "<<it.PartialNetID<<std::endl;
+            bool flag = 0;
+            for (auto& i : ret) {
+                if (((it.coord == i.first) && (tmpptr->coord == i.second)) ||
+                    ((tmpptr->coord == i.first) && (it.coord == i.second))) {
+                    flag = 1;
+                    break;
+                }
+            }
+            if (!flag)
+                ret.insert(std::pair(it.coord, tmpptr->coord));
+            // break;
+        }
+        tmpptr = SR.find(
+            SimpleResult(std::make_tuple(std::get<0>(it.coord) - 1, std::get<1>(it.coord) + 1, std::get<2>(it.coord)),
+                         it.PartialNetID));
+        if (tmpptr != SR.end() && tmpptr->PartialNetID != it.PartialNetID) {
+            //             std::cout<<"find repeater loop "<<
+            // std::get<0>(it.coord)<<" "<<std::get<1>(it.coord)<<" "<<std::get<2>(it.coord)
+            // <<" neighbor "<<std::get<0>(tmpptr->coord)<<" "<<std::get<1>(tmpptr->coord)<<"
+            // "<<std::get<2>(tmpptr->coord)
+            // <<" ID: "<<tmpptr->PartialNetID<<" , "<<it.PartialNetID<<std::endl;
+            bool flag = 0;
+            for (auto& i : ret) {
+                if (((it.coord == i.first) && (tmpptr->coord == i.second)) ||
+                    ((tmpptr->coord == i.first) && (it.coord == i.second))) {
+                    flag = 1;
+                    break;
+                }
+            }
+            if (!flag)
+                ret.insert(std::pair(it.coord, tmpptr->coord));
+            // break;
+        }
+        tmpptr = SR.find(
+            SimpleResult(std::make_tuple(std::get<0>(it.coord), std::get<1>(it.coord) + 1, std::get<2>(it.coord) + 1),
+                         it.PartialNetID));
+        if (tmpptr != SR.end() && tmpptr->PartialNetID != it.PartialNetID) {
+            //             std::cout<<"find repeater loop "<<
+            // std::get<0>(it.coord)<<" "<<std::get<1>(it.coord)<<" "<<std::get<2>(it.coord)
+            // <<" neighbor "<<std::get<0>(tmpptr->coord)<<" "<<std::get<1>(tmpptr->coord)<<"
+            // "<<std::get<2>(tmpptr->coord)
+            // <<" ID: "<<tmpptr->PartialNetID<<" , "<<it.PartialNetID<<std::endl;
+            bool flag = 0;
+            for (auto& i : ret) {
+                if (((it.coord == i.first) && (tmpptr->coord == i.second)) ||
+                    ((tmpptr->coord == i.first) && (it.coord == i.second))) {
+                    flag = 1;
+                    break;
+                }
+            }
+            if (!flag)
+                ret.insert(std::pair(it.coord, tmpptr->coord));
+            // break;
+        }
+        tmpptr = SR.find(
+            SimpleResult(std::make_tuple(std::get<0>(it.coord), std::get<1>(it.coord) + 1, std::get<2>(it.coord) - 1),
+                         it.PartialNetID));
+        if (tmpptr != SR.end() && tmpptr->PartialNetID != it.PartialNetID) {
+            //             std::cout<<"find repeater loop "<<
+            // std::get<0>(it.coord)<<" "<<std::get<1>(it.coord)<<" "<<std::get<2>(it.coord)
+            // <<" neighbor "<<std::get<0>(tmpptr->coord)<<" "<<std::get<1>(tmpptr->coord)<<"
+            // "<<std::get<2>(tmpptr->coord)
+            // <<" ID: "<<tmpptr->PartialNetID<<" , "<<it.PartialNetID<<std::endl;
+            bool flag = 0;
+            for (auto& i : ret) {
+                if (((it.coord == i.first) && (tmpptr->coord == i.second)) ||
+                    ((tmpptr->coord == i.first) && (it.coord == i.second))) {
+                    flag = 1;
+                    break;
+                }
+            }
+            if (!flag)
+                ret.insert(std::pair(it.coord, tmpptr->coord));
+            // break;
+        }
 
-
-        tmpptr = SR.find(SimpleResult(std::make_tuple(std::get<0>(it.coord) + 1,std::get<1>(it.coord) - 1,std::get<2>(it.coord)),it.PartialNetID));
-        if(tmpptr!=SR.end() && tmpptr->PartialNetID != it.PartialNetID){
+        tmpptr = SR.find(
+            SimpleResult(std::make_tuple(std::get<0>(it.coord) + 1, std::get<1>(it.coord) - 1, std::get<2>(it.coord)),
+                         it.PartialNetID));
+        if (tmpptr != SR.end() && tmpptr->PartialNetID != it.PartialNetID) {
             //             std::cout<<"find repeater loop "<<
             // std::get<0>(it.coord)<<" "<<std::get<1>(it.coord)<<" "<<std::get<2>(it.coord)
-            // <<" neighbor "<<std::get<0>(tmpptr->coord)<<" "<<std::get<1>(tmpptr->coord)<<" "<<std::get<2>(tmpptr->coord)
+            // <<" neighbor "<<std::get<0>(tmpptr->coord)<<" "<<std::get<1>(tmpptr->coord)<<"
+            // "<<std::get<2>(tmpptr->coord)
             // <<" ID: "<<tmpptr->PartialNetID<<" , "<<it.PartialNetID<<std::endl;
             bool flag = 0;
-            for(auto& i : ret){
-                if(((it.coord == i.first) && (tmpptr->coord == i.second)) || ((tmpptr->coord == i.first) && (it.coord == i.second))){
+            for (auto& i : ret) {
+                if (((it.coord == i.first) && (tmpptr->coord == i.second)) ||
+                    ((tmpptr->coord == i.first) && (it.coord == i.second))) {
                     flag = 1;
                     break;
                 }
             }
-            if(!flag)
-            ret.insert(std::pair(it.coord, tmpptr->coord));
-            //break;
+            if (!flag)
+                ret.insert(std::pair(it.coord, tmpptr->coord));
+            // break;
         }
-        tmpptr = SR.find(SimpleResult(std::make_tuple(std::get<0>(it.coord) - 1,std::get<1>(it.coord) - 1,std::get<2>(it.coord)),it.PartialNetID));
-        if(tmpptr!=SR.end() && tmpptr->PartialNetID != it.PartialNetID){
+        tmpptr = SR.find(
+            SimpleResult(std::make_tuple(std::get<0>(it.coord) - 1, std::get<1>(it.coord) - 1, std::get<2>(it.coord)),
+                         it.PartialNetID));
+        if (tmpptr != SR.end() && tmpptr->PartialNetID != it.PartialNetID) {
             //             std::cout<<"find repeater loop "<<
             // std::get<0>(it.coord)<<" "<<std::get<1>(it.coord)<<" "<<std::get<2>(it.coord)
-            // <<" neighbor "<<std::get<0>(tmpptr->coord)<<" "<<std::get<1>(tmpptr->coord)<<" "<<std::get<2>(tmpptr->coord)
+            // <<" neighbor "<<std::get<0>(tmpptr->coord)<<" "<<std::get<1>(tmpptr->coord)<<"
+            // "<<std::get<2>(tmpptr->coord)
             // <<" ID: "<<tmpptr->PartialNetID<<" , "<<it.PartialNetID<<std::endl;
             bool flag = 0;
-            for(auto& i : ret){
-                if(((it.coord == i.first) && (tmpptr->coord == i.second)) || ((tmpptr->coord == i.first) && (it.coord == i.second))){
+            for (auto& i : ret) {
+                if (((it.coord == i.first) && (tmpptr->coord == i.second)) ||
+                    ((tmpptr->coord == i.first) && (it.coord == i.second))) {
                     flag = 1;
                     break;
                 }
             }
-            if(!flag)
-            ret.insert(std::pair(it.coord, tmpptr->coord));
-            //break;
+            if (!flag)
+                ret.insert(std::pair(it.coord, tmpptr->coord));
+            // break;
         }
-        tmpptr = SR.find(SimpleResult(std::make_tuple(std::get<0>(it.coord),std::get<1>(it.coord) - 1,std::get<2>(it.coord) + 1),it.PartialNetID));
-        if(tmpptr!=SR.end() && tmpptr->PartialNetID != it.PartialNetID){
+        tmpptr = SR.find(
+            SimpleResult(std::make_tuple(std::get<0>(it.coord), std::get<1>(it.coord) - 1, std::get<2>(it.coord) + 1),
+                         it.PartialNetID));
+        if (tmpptr != SR.end() && tmpptr->PartialNetID != it.PartialNetID) {
             //             std::cout<<"find repeater loop "<<
             // std::get<0>(it.coord)<<" "<<std::get<1>(it.coord)<<" "<<std::get<2>(it.coord)
-            // <<" neighbor "<<std::get<0>(tmpptr->coord)<<" "<<std::get<1>(tmpptr->coord)<<" "<<std::get<2>(tmpptr->coord)
+            // <<" neighbor "<<std::get<0>(tmpptr->coord)<<" "<<std::get<1>(tmpptr->coord)<<"
+            // "<<std::get<2>(tmpptr->coord)
             // <<" ID: "<<tmpptr->PartialNetID<<" , "<<it.PartialNetID<<std::endl;
             bool flag = 0;
-            for(auto& i : ret){
-                if(((it.coord == i.first) && (tmpptr->coord == i.second)) || ((tmpptr->coord == i.first) && (it.coord == i.second))){
+            for (auto& i : ret) {
+                if (((it.coord == i.first) && (tmpptr->coord == i.second)) ||
+                    ((tmpptr->coord == i.first) && (it.coord == i.second))) {
                     flag = 1;
                     break;
                 }
             }
-            if(!flag)
-            ret.insert(std::pair(it.coord, tmpptr->coord));
-            //break;
+            if (!flag)
+                ret.insert(std::pair(it.coord, tmpptr->coord));
+            // break;
         }
-        tmpptr = SR.find(SimpleResult(std::make_tuple(std::get<0>(it.coord),std::get<1>(it.coord) - 1,std::get<2>(it.coord) - 1),it.PartialNetID));
-        if(tmpptr!=SR.end() && tmpptr->PartialNetID != it.PartialNetID){
+        tmpptr = SR.find(
+            SimpleResult(std::make_tuple(std::get<0>(it.coord), std::get<1>(it.coord) - 1, std::get<2>(it.coord) - 1),
+                         it.PartialNetID));
+        if (tmpptr != SR.end() && tmpptr->PartialNetID != it.PartialNetID) {
             //             std::cout<<"find repeater loop "<<
             // std::get<0>(it.coord)<<" "<<std::get<1>(it.coord)<<" "<<std::get<2>(it.coord)
-            // <<" neighbor "<<std::get<0>(tmpptr->coord)<<" "<<std::get<1>(tmpptr->coord)<<" "<<std::get<2>(tmpptr->coord)
+            // <<" neighbor "<<std::get<0>(tmpptr->coord)<<" "<<std::get<1>(tmpptr->coord)<<"
+            // "<<std::get<2>(tmpptr->coord)
             // <<" ID: "<<tmpptr->PartialNetID<<" , "<<it.PartialNetID<<std::endl;
             bool flag = 0;
-            for(auto& i : ret){
-                if(((it.coord == i.first) && (tmpptr->coord == i.second)) || ((tmpptr->coord == i.first) && (it.coord == i.second))){
+            for (auto& i : ret) {
+                if (((it.coord == i.first) && (tmpptr->coord == i.second)) ||
+                    ((tmpptr->coord == i.first) && (it.coord == i.second))) {
                     flag = 1;
                     break;
                 }
             }
-            if(!flag)
-            ret.insert(std::pair(it.coord, tmpptr->coord));
-            //break;
+            if (!flag)
+                ret.insert(std::pair(it.coord, tmpptr->coord));
+            // break;
         }
     }
 }
