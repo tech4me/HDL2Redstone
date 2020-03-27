@@ -17,8 +17,8 @@ class Placer {
         std::string Name;
         Direction Dir;
         Coordinate Coord;
-        // Only set this up for input ports
-        Port* ConnectedPort;
+        // Only set this up for output/source ports
+        std::vector<Port*> ConnectedPorts;
     };
 
     struct ComponentPlacementData {

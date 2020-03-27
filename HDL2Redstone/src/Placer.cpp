@@ -211,20 +211,27 @@ double Placer::evalCost(const PlacementState& PS_) const {
     double RetVal = 0;
     for (const auto& CPD : PS_.CPDs) {
         for (auto&& [PortName, PortData] : CPD.Ports) {
-            // We only calculate cost from sink input to source output
-            if (PortData.Dir != Direction::Input) {
-                continue;
+            if (PortData.Dir == Direction::Output) {
+                // HPWL method
+                uint16_t XMax = PortData.Coord.X;
+                uint16_t XMin = PortData.Coord.X;
+                uint16_t YMax = PortData.Coord.Y;
+                uint16_t YMin = PortData.Coord.Y;
+                uint16_t ZMax = PortData.Coord.Z;
+                uint16_t ZMin = PortData.Coord.Z;
+                if (PortData.Dir == Direction::Output) {
+                    uint16_t X2, Y2, Z2;
+                    for (const auto& P : PortData.ConnectedPorts) {
+                        XMax = std::max(XMax, P->Coord.X);
+                        XMin = std::min(XMin, P->Coord.X);
+                        YMax = std::max(YMax, P->Coord.Y);
+                        YMin = std::min(YMin, P->Coord.Y);
+                        ZMax = std::max(ZMax, P->Coord.Z);
+                        ZMin = std::min(ZMin, P->Coord.Z);
+                    }
+                    RetVal += XMax - XMin + YMax - YMin + ZMax - ZMin;
+                }
             }
-            uint16_t X = PortData.Coord.X;
-            uint16_t Y = PortData.Coord.Y;
-            uint16_t Z = PortData.Coord.Z;
-#ifdef USE_EUCLIDEAN_DISTANCE
-            RetVal += std::hypot(X - PortData.ConnectedPort->Coord.X, Y - PortData.ConnectedPort->Coord.Y,
-                                 Z - PortData.ConnectedPort->Coord.Z);
-#else
-            RetVal += std::abs(X - PortData.ConnectedPort->Coord.X) + std::abs(Y - PortData.ConnectedPort->Coord.Y) +
-                      std::abs(Z - PortData.ConnectedPort->Coord.Z);
-#endif
         }
     }
     return RetVal;
@@ -349,8 +356,8 @@ Placer::PlacementState::PlacementState(Design& D_) : D(D_) {
                     return CPD.ComponentPtr == SinkPort.first;
                 });
                 if (It2 != CPDs.end()) {
-                    // CHECK: Only add info at the sink side
-                    It2->Ports.at(SinkPort.second).ConnectedPort = &(It1->Ports.at(SourcePort.second));
+                    // Only add info at the source side
+                    It1->Ports.at(SourcePort.second).ConnectedPorts.push_back(&(It2->Ports.at(SinkPort.second)));
                 } else {
                     throw Exception("Components data and connections data doesn't match.");
                 }
