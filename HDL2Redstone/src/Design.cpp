@@ -28,7 +28,16 @@ bool Design::doPlaceAndRoute() {
     Timing T(*this);
     double PropDelay = T.computePropDelay();
     std::cout << "Combinational circuit propagation delay = " << PropDelay << std::endl;
-    // std::cout<<T
+
+    std::cout << "Finding hold violations..." << std::endl;
+    T.findHoldViolations();
+    /*for (const auto& P : T.HoldViolatedPaths) {
+    for (const auto& C : P.CombPath) {
+        std::cout << "(Comp,Conn: "<< C.second << ","<< C.first << ")->";
+    }
+        std::cout << "\n    curr delay:" << P.Delay << ", need to add:" << P.DelayNeeded << std::endl;
+    }*/
+    // std::cout<<T;
 
     // find longest/shortest path given src and dest, sample usage; T.src and T.dest just used for testing in mux2to1
     /*std::vector<Component*> Path = T.findShortestDelay(T.src, T.dest);
