@@ -26,11 +26,13 @@ bool Design::doPlaceAndRoute() {
     }
     std::cout << "Analyzing Timing Requirements..." << std::endl;
     Timing T(*this);
-    double PropDelay = T.computePropDelay();
-    std::cout << "Combinational circuit propagation delay = " << PropDelay << std::endl;
+    // TODO: change sequence of the following
+    int PropDelay = T.computePropDelay();
+    std::cout << "    Combinational propagation delay = " << PropDelay << std::endl;
 
-    std::cout << "Finding hold violations..." << std::endl;
+    std::cout << "    Hold violations..." << std::endl;
     T.findHoldViolations();
+    // find path with hold violations sample usage
     /*for (const auto& P : T.HoldViolatedPaths) {
     for (const auto& C : P.CombPath) {
         std::cout << "(Comp,Conn: "<< C.second << ","<< C.first << ")->";
@@ -38,6 +40,13 @@ bool Design::doPlaceAndRoute() {
         std::cout << "\n    curr delay:" << P.Delay << ", need to add:" << P.DelayNeeded << std::endl;
     }*/
     // std::cout<<T;
+
+    double Fmax = T.computeFmax(*this);
+    if (Fmax) { // won't print if combinational cct
+        std::cout << "    Sequential fmax = " << Fmax << std::endl;
+    } else {
+        std::cout << "    Combinational circuit, no fmax" << std::endl;
+    }
 
     // find longest/shortest path given src and dest, sample usage; T.src and T.dest just used for testing in mux2to1
     /*std::vector<Component*> Path = T.findShortestDelay(T.src, T.dest);

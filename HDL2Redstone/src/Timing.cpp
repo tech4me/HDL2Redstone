@@ -5,7 +5,7 @@
 using namespace HDL2Redstone;
 
 void Timing::RGTreeHelper(Component* Src, Component* Curr, Path& P_) {
-    if (TG.find(Curr) == TG.end()) // TODO:check for those with no connection, do they exist in TG?
+    if (TG.find(Curr) == TG.end() || TG.at(Curr).empty())
         return;
 
     for (const auto& Node : TG[Curr]) {
@@ -14,7 +14,7 @@ void Timing::RGTreeHelper(Component* Src, Component* Curr, Path& P_) {
         P.CombPath.emplace_back(Node.ConnPtr, Node.CompPtr);
         P.Delay += Node.Delay;
 
-        if (Node.CompPtr->getType() == "DFF") { // TODO: verify type!
+        if (Node.CompPtr->getType() == "DFF") {
             std::pair<Component*, Component*> Key(Src, Node.CompPtr);
 
             if (RG.find(Key) != RG.end()) {
@@ -30,7 +30,13 @@ void Timing::RGTreeHelper(Component* Src, Component* Curr, Path& P_) {
     }
 }
 
-Timing::Timing(Design& D_) {
+Timing::Timing(Design& D_) { buildTG(D_); }
+
+void Timing::buildTG(Design& D_) {
+    TG.clear();
+    RG.clear();
+    ClkTree.clear();
+
     for (int j = 0; j < D_.getModuleNetlist().getConnections().size(); j++) {
         D_.getModuleNetlist().getConnections()[j]->calculateDelay();
 
@@ -41,11 +47,8 @@ Timing::Timing(Design& D_) {
             Temp.emplace_back(Sinks[i].first, D_.getModuleNetlist().getConnections()[j].get(),
                               D_.getModuleNetlist().getConnections()[j]->getSinkDelays()[i]);
         }
-        /*for (auto t : Temp) {
-            std::cout<<t.ConnPtr->getName()<<std::endl;
-        }*/
 
-        // find clk tree, TODO:currently name hardcoded
+        // find clk tree
         if (D_.getModuleNetlist().getConnections()[j]->getName().find("clk") != std::string::npos) {
             /*ClkTree.first = D_.getModuleNetlist().getConnections()[j]->getSourcePortConnection().first;
             ClkTree.second = Temp;*/
@@ -151,6 +154,25 @@ void Timing::findHoldViolations() {
             }
         }
     }
+}
+
+double Timing::computeFmax(Design& D_) {
+    if (RG.empty()) {
+        return 0;
+    }
+    buildTG(D_);
+    int Tmin = -1; // min clk period needed
+    for (const auto& [K, V] : RG) {
+        // Tskew calculated as delay at sink - delay at src
+        int Tskew = ClkTree.at(K.second) - ClkTree.at(K.first);
+        for (const auto& P : V) {
+            int Tclk = Tcq + P.Delay + Tsu - Tskew;
+            if (Tclk > Tmin) {
+                Tmin = Tclk;
+            }
+        }
+    }
+    return 1.0 / Tmin;
 }
 
 std::vector<Component*> Timing::findShortestDelay(Component* src, Component* dest) {

@@ -406,6 +406,8 @@ void Connection::wireAlign(uint16_t& x, uint16_t& z, Orientation ori) {
 
 // calculate delay caused by repeater for path to each sink
 void Connection::calculateDelay() {
+    SinkDelays.clear();
+
     for (int i = 0; i < SinkPortConnections.size(); i++) {
         SinkDelays.push_back(0);
     }

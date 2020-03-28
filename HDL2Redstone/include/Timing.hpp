@@ -11,6 +11,7 @@ namespace HDL2Redstone {
 class Timing {
   public:
     Timing(Design& D_);
+    void buildTG(Design& D_);
     //~Timing();
 
     struct TGNode {
@@ -37,6 +38,7 @@ class Timing {
     };
 
     int computePropDelay();
+    double computeFmax(Design& D_);
     // return longest path from src to dest, note result is in reverse order (start with dest)
     std::vector<Component*> findLongestDelay(Component* src, Component* dest);
     std::vector<Component*> findShortestDelay(Component* src, Component* dest);
