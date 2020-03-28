@@ -9,7 +9,8 @@
 
 using namespace HDL2Redstone;
 
-Placer::Placer(Design& D_) : D(D_), CurrentPlacement(D_), RGen(RD()), AcceptGen(0.0, 1.0) {
+Placer::Placer(Design& D_) : D(D_), CurrentPlacement(D_), RGen(D.Seed ? D.Seed : RD()), AcceptGen(0.0, 1.0) {
+    std::cout << D.Seed << std::endl;
     BestCost = std::numeric_limits<double>::max();
     PGridW = D.Width / PLACEMENT_GRID_SIZE;
     PGridH = D.Height / PLACEMENT_GRID_SIZE;
@@ -212,6 +213,7 @@ double Placer::evalCost(const PlacementState& PS_) const {
     for (const auto& CPD : PS_.CPDs) {
         for (auto&& [PortName, PortData] : CPD.Ports) {
             if (PortData.Dir == Direction::Output) {
+#ifdef USE_HPWL
                 // HPWL method
                 uint16_t XMax = PortData.Coord.X;
                 uint16_t XMin = PortData.Coord.X;
@@ -231,6 +233,14 @@ double Placer::evalCost(const PlacementState& PS_) const {
                     }
                     RetVal += XMax - XMin + YMax - YMin + ZMax - ZMin;
                 }
+#else
+                uint16_t X = PortData.Coord.X;
+                uint16_t Y = PortData.Coord.Y;
+                uint16_t Z = PortData.Coord.Z;
+                for (const auto& P : PortData.ConnectedPorts) {
+                    RetVal += std::abs(X - P->Coord.X) + std::abs(Y - P->Coord.Y) + std::abs(Z - P->Coord.Z);
+                }
+#endif
             }
         }
     }

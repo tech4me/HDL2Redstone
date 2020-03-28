@@ -5,9 +5,9 @@
 
 using namespace HDL2Redstone;
 
-Design::Design(const std::string& File_, const CellLibrary& CellLib_, const DesignConstraint& DC_)
+Design::Design(const std::string& File_, const CellLibrary& CellLib_, const DesignConstraint& DC_, int Seed_)
     : Width(std::get<0>(DC_.getDimension())), Height(std::get<1>(DC_.getDimension())),
-      Length(std::get<2>(DC_.getDimension())), CellLib(CellLib_), DC(DC_), MN(File_, CellLib_, DC) {}
+      Length(std::get<2>(DC_.getDimension())), CellLib(CellLib_), DC(DC_), MN(File_, CellLib_, DC), Seed(Seed_) {}
 
 std::tuple<uint16_t, uint16_t, uint16_t> Design::getSpace() const { return std::make_tuple(Width, Height, Length); }
 

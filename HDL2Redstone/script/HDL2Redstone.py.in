@@ -14,9 +14,12 @@ from CreateLibertyLib import create_liberty_lib
 parser = argparse.ArgumentParser(description="HDL2Redstone main excutable.")
 parser.add_argument("verilog_file", help="Input Verilog file")
 parser.add_argument("--output", help="Output directory")
+parser.add_argument("--seed", help="Seed used for random number generation", default=0)
 parser.add_argument("--rr", help="Record rr data", action="store_true")
 parser.add_argument("--perf", help="Record perf data", action="store_true")
 args = parser.parse_args()
+
+arguments = str(args.seed)
 
 with open(os.path.join(source_path, "script/yosys.ys.txt"), "r") as yosys_command_f:
     yosys_command = yosys_command_f.read()
@@ -53,9 +56,9 @@ ret.check_returncode()
 
 # Run HDL2Redstone main executable to generate schematics
 if args.rr:
-    ret = subprocess.run(["rr", "record", os.path.join(file_path, "HDL2Redstone"), os.path.join(source_path, "cell_lib/")])
+    ret = subprocess.run(["rr", "record", os.path.join(file_path, "HDL2Redstone"), arguments, os.path.join(source_path, "cell_lib/")])
 elif args.perf:
-    ret = subprocess.run(["perf", "record", "-o", os.path.join(file_path, "perf.data"), os.path.join(file_path, "HDL2Redstone"), os.path.join(source_path, "cell_lib/")])
+    ret = subprocess.run(["perf", "record", "-o", os.path.join(file_path, "perf.data"), os.path.join(file_path, "HDL2Redstone"), arguments, os.path.join(source_path, "cell_lib/")])
 else:
-    ret = subprocess.run([os.path.join(file_path, "HDL2Redstone"), os.path.join(source_path, "cell_lib/")])
+    ret = subprocess.run([os.path.join(file_path, "HDL2Redstone"), arguments, os.path.join(source_path, "cell_lib/")])
 ret.check_returncode()

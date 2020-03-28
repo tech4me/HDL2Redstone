@@ -13,7 +13,7 @@ int main(int argc, char* argv[]) {
     try {
         if (argc > 1) {
             auto StartTime = std::chrono::system_clock::now();
-            std::string CellLibDir(argv[1]);
+            std::string CellLibDir(argv[2]);
             std::cout << "Loading cell library..." << std::endl;
             CellLibrary CL(CellLibDir);
             std::cout << "Loading design constraint..." << std::endl;
@@ -23,7 +23,7 @@ int main(int argc, char* argv[]) {
                 return 1;
             }
             std::cout << "Loading BLIF netlist..." << std::endl;
-            Design D("design.blif", CL, DC);
+            Design D("design.blif", CL, DC, std::stoi(argv[1]));
             if (D.doPlaceAndRoute()) {
                 std::cout << "Place & Route failed!!!" << std::endl;
                 return 1;

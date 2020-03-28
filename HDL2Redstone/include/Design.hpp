@@ -13,7 +13,7 @@ class Design {
     // Deleted default constructor
     Design() = delete;
     // Create a design with BLIF file, cell library, and design constraint
-    Design(const std::string& File_, const CellLibrary& CellLib_, const DesignConstraint& DC_);
+    Design(const std::string& File_, const CellLibrary& CellLib_, const DesignConstraint& DC_, int Seed_);
     std::tuple<uint16_t, uint16_t, uint16_t> getSpace() const;
     const ModuleNetlist& getModuleNetlist() const;
     bool doPlaceAndRoute();
@@ -28,6 +28,7 @@ class Design {
     const DesignConstraint& DC;
     ModuleNetlist MN;
     std::map<std::string, Placement> ForcedPlacement;
+    unsigned int Seed;
 
     friend class Placer;
     friend class Router;
