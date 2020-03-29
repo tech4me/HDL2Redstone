@@ -3,9 +3,9 @@
 
 using namespace HDL2Redstone;
 
-Cell::Cell(const std::string& Type_, const std::string& CellLibDir_, const std::map<std::string, Pin> Pins_,
+Cell::Cell(const std::string& Type_, const std::string& CellLibDir_, const std::map<std::string, Pin> Pins_, int Delay_,
            const std::string& SchematicName_)
-    : Type(Type_), Schem(CellLibDir_ + SchematicName_ + ".schem"), Pins(Pins_) {}
+    : Type(Type_), Schem(CellLibDir_ + SchematicName_ + ".schem"), Pins(Pins_), Delay(Delay_) {}
 
 std::vector<std::string> Cell::getPinNames() const {
     std::vector<std::string> Ret;

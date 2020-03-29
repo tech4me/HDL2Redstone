@@ -15,7 +15,7 @@ class Component {
     uint16_t getHeight() const { return CellPtr->getHeight(); }
     uint16_t getLength() const { return CellPtr->getLength(); }
     const std::string& getType() const { return CellPtr->getType(); }
-
+    int getDelay() const { return CellPtr->getDelay(); }
     std::vector<std::string> getPinNames() const { return CellPtr->getPinNames(); }
     Direction getPinDir(const std::string& PinName_) const { return CellPtr->getPinDir(PinName_); }
     Facing getPinFacing(const std::string& PinName_) const;

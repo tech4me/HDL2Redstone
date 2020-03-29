@@ -115,10 +115,10 @@ int Timing::computePropDelay() {
         SortedTG_.pop();
 
         for (const auto& Node : TG.at(curr)) {
-            int temp_dist = dist.at(curr) + Node.Delay;
+            int tempDist = dist.at(curr) + Node.Delay;
             // std::cout<<"dist at u="<<dist.at(curr)<<" w(u,v)="<<v.second<<std::endl;
-            if (dist.at(Node.CompPtr) < temp_dist) {
-                dist.at(Node.CompPtr) = temp_dist;
+            if (dist.at(Node.CompPtr) < tempDist) {
+                dist.at(Node.CompPtr) = tempDist + Node.CompPtr->getDelay();
                 // save actual path here if needed
                 // std::cout<<"dist "<<v.first<<" "<<dist.at(v.first)<<std::endl;
             }

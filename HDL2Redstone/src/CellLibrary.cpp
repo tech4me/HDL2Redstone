@@ -41,12 +41,15 @@ CellLibrary::CellLibrary(const std::string& CellLibDir_) {
     try {
         for (const auto& CellData : J) {
             std::map<std::string, Pin> TempPins;
-            for (const auto& [key, value] : CellData["pins"].items()) {
+            for (const auto& [key, value] : CellData.at("pins").items()) {
                 TempPins.emplace(key, value.get<HDL2Redstone::Pin>());
             }
-            std::string SchematicDir = CellLibDir_ + (CellData["is_component"] ? "components/" : "connections/");
-            CellInstances.emplace(CellData["name"], std::make_unique<Cell>(CellData["name"], SchematicDir,
-                                                                           std::move(TempPins), CellData["schematic"]));
+            std::string SchematicDir = CellLibDir_ + (CellData.at("is_component") ? "components/" : "connections/");
+            CellInstances.emplace(
+                CellData.at("name"),
+                std::make_unique<Cell>(CellData.at("name"), SchematicDir, std::move(TempPins),
+                                       CellData.contains("delay") ? CellData.at("delay").get<int>() : 0,
+                                       CellData.at("schematic")));
         }
     } catch (json::exception& E) {
         throw Exception(E.what());

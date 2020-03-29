@@ -51,13 +51,14 @@ class Placer {
     bool initialPlace();
     bool annealPlace();
     bool checkLegality(bool SkipUnplaced_ = 0) const;
-    double evalCost(const PlacementState& PS_) const;
+    int evalCost(const PlacementState& PS_) const;
     std::pair<int, int> annealGenerateSwapNeighbour();
     void annealDoSwap(int SwapFrom_, int SwapTo_);
+    double calculateInitTemperature();
 
     Design& D;
     PlacementState CurrentPlacement;
-    double BestCost;
+    int BestCost;
     int PGridW;
     int PGridH;
     int PGridL;
