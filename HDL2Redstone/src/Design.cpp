@@ -33,14 +33,16 @@ bool Design::doPlaceAndRoute() {
     std::cout << "    Hold violations..." << std::endl;
     T.findHoldViolations();
     // find path with hold violations sample usage
-    /*for (const auto& P : T.HoldViolatedPaths) {
-    for (const auto& C : P.CombPath) {
-        std::cout << "(Comp,Conn: "<< C.second << ","<< C.first << ")->";
-    }
-        std::cout << "\n    curr delay:" << P.Delay << ", need to add:" << P.DelayNeeded << std::endl;
-    }*/
+    // for (const auto& P : T.HoldViolatedPaths) {
+    // for (const auto& C : P.CombPath) {
+    //     std::cout << "(Comp,Conn: "<< C.second << ","<< C.first << ")->";
+    // }
+    //     std::cout << "\n    curr delay:" << P.Delay << ", need to add:" << P.DelayNeeded << std::endl;
+    // }
     // std::cout<<T;
-
+    if(R.ReTiming(T)){
+        return true;
+    }
     double Fmax = T.computeFmax(*this);
     if (Fmax) { // won't print if combinational cct
         std::cout << "    Sequential fmax = " << Fmax << std::endl;

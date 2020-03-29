@@ -4,6 +4,7 @@
 
 #include <Design.hpp>
 #include <Placement.hpp>
+#include <Timing.hpp>
 
 #define MAX_NUM_OF_WIRE 12
 #define MUL_COST_INC 1
@@ -14,7 +15,7 @@ class Router {
   public:
     Router(Design& D_);
     bool route();
-
+    bool ReTiming(Timing& T);
   private:
     typedef struct {
         uint16_t x;
@@ -69,10 +70,8 @@ class Router {
     void updateSinglePortUsedSpaceHelper(const Coordinate& Coord);
     bool routingLastRepeater(Router::Point* CongestionP);
     int routingLastRepeaterHelper(Router::Point* RecurP);
-    bool reRouteNextIllegal(
-        Connection& C,
-        std::set<std::pair<std::tuple<uint16_t, uint16_t, uint16_t>, std::tuple<uint16_t, uint16_t, uint16_t>>>&
-            next_congest);
+    bool reRouteNextIllegal(Connection& C, std::set<std::pair<std::tuple<uint16_t, uint16_t, uint16_t>, std::tuple<uint16_t, uint16_t, uint16_t>>>& next_congest);
+    bool regularRoute_next(Connection& C);
     inline int& getUsedSpace(uint16_t X_, uint16_t Y_, uint16_t Z_) {
         return UsedSpace[((X_ * D.Height) + Y_) * D.Width + Z_];
     }
@@ -82,7 +81,7 @@ class Router {
     inline Point& getPoint(uint16_t X_, uint16_t Y_, uint16_t Z_) {
         return Points[((X_ * D.Height) + Y_) * D.Width + Z_];
     }
-
+    void LocalReTiming(Connection& C, std::set<std::tuple<uint16_t, uint16_t, uint16_t>>& repeater_location);
     Design& D;
     std::vector<int> UsedSpace;
     std::vector<WireInfo> WI;
