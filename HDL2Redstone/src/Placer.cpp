@@ -1,17 +1,18 @@
 #include <algorithm>
 #include <cmath>
+#include <limits>
 #include <sstream>
 
 #include <Exception.hpp>
 #include <Placer.hpp>
 
 #define PLACEMENT_GRID_SIZE 10
+#define MAX_INITIAL_TEMPERATURE_MOVE 10000
 
 using namespace HDL2Redstone;
 
 Placer::Placer(Design& D_) : D(D_), CurrentPlacement(D_), RGen(D.Seed ? D.Seed : RD()), AcceptGen(0.0, 1.0) {
-    std::cout << D.Seed << std::endl;
-    BestCost = std::numeric_limits<double>::max();
+    BestCost = std::numeric_limits<int>::max();
     PGridW = D.Width / PLACEMENT_GRID_SIZE;
     PGridH = D.Height / PLACEMENT_GRID_SIZE;
     PGridL = D.Length / PLACEMENT_GRID_SIZE;
@@ -103,7 +104,7 @@ bool Placer::initialPlace() {
 
 bool Placer::annealPlace() {
     std::cout << "Running simulated annealing placer..." << std::endl;
-    const int MaxIt = 100;
+    const int MaxIt = 1000;
     const int MaxStep = 5000;
 
     // Prepare swap candidates
@@ -127,29 +128,31 @@ bool Placer::annealPlace() {
         }
     }
 
+    double Temperature = calculateInitTemperature();
     // Init best cost
     BestCost = evalCost(CurrentPlacement);
-    double InitialCost = BestCost;
-    double Cost;
+    int InitialCost = BestCost;
+    int Cost;
+    std::cout << "Annealer initial cost: " << InitialCost << std::endl;
 
     int i = 0;
     while (true) {
-        if (i == MaxIt) {
+        if (Temperature < 0.1) {
+            std::cout << "Annealer cold temperature reached!" << std::endl;
+            break;
+        } else if (i == MaxIt) {
             std::cout << "Annealer max number of iteration reached!" << std::endl;
             break;
         }
-        double Tempreture = MaxIt / (i + 1);
         for (int j = 0; j < MaxStep; ++j) {
             Cost = evalCost(CurrentPlacement);
             // TODO: Make it work for cells that takes multiple grid location
             // Generate neighbour solution
             auto [SwapFrom, SwapTo] = annealGenerateSwapNeighbour();
             annealDoSwap(SwapFrom, SwapTo);
-            double NewCost = evalCost(CurrentPlacement);
-            double Gain = Cost - NewCost;
-            // std::cout << "Gain: " << Gain << "accept rate: " << AcceptGen(RGen) << " #:" << std::exp(Gain /
-            // Tempreture) << std::endl; std::cout << "T: " << Tempreture << " Gain: " << Gain << std::endl;
-            if (std::exp(Gain / Tempreture) >= AcceptGen(RGen)) {
+            int NewCost = evalCost(CurrentPlacement);
+            int Gain = Cost - NewCost;
+            if (std::exp(Gain / Temperature) >= AcceptGen(RGen)) {
                 if (NewCost < BestCost) {
                     // Cost improved
                     applyCurrentPlacement();
@@ -160,8 +163,8 @@ bool Placer::annealPlace() {
                 annealDoSwap(SwapFrom, SwapTo);
             }
         }
-        std::cout << "Best cost: " << BestCost << " Initial cost: " << InitialCost << " Current cost: " << Cost
-                  << std::endl;
+        std::cout << "Best cost: " << BestCost << " Iteration: " << i << " Temperature: " << Temperature << std::endl;
+        Temperature *= 0.95;
         ++i;
     }
 
@@ -208,8 +211,8 @@ bool Placer::checkLegality(bool SkipUnplaced_) const {
     return false;
 }
 
-double Placer::evalCost(const PlacementState& PS_) const {
-    double RetVal = 0;
+int Placer::evalCost(const PlacementState& PS_) const {
+    int RetVal = 0;
     for (const auto& CPD : PS_.CPDs) {
         for (auto&& [PortName, PortData] : CPD.Ports) {
             if (PortData.Dir == Direction::Output) {
@@ -322,6 +325,24 @@ void Placer::annealDoSwap(int SwapFrom_, int SwapTo_) {
         throw Exception("Generated useless move.");
     }
     std::swap(CurrentPlacement.PGrid[SwapFrom_], CurrentPlacement.PGrid[SwapTo_]);
+}
+
+double Placer::calculateInitTemperature() {
+    int MinCost = std::numeric_limits<int>::max();
+    int MaxCost = std::numeric_limits<int>::min();
+    for (int i = 0; i < MAX_INITIAL_TEMPERATURE_MOVE; ++i) {
+        auto [SwapFrom, SwapTo] = annealGenerateSwapNeighbour();
+        annealDoSwap(SwapFrom, SwapTo);
+        int NewCost = evalCost(CurrentPlacement);
+        if (NewCost < MinCost) {
+            MinCost = NewCost;
+        } else if (NewCost > MaxCost) {
+            MaxCost = NewCost;
+        }
+        // Undo changes
+        annealDoSwap(SwapFrom, SwapTo);
+    }
+    return MaxCost - MinCost;
 }
 
 void Placer::ComponentPlacementData::setPlacement(uint16_t X_, uint16_t Y_, uint16_t Z_, Orientation Orient_) {

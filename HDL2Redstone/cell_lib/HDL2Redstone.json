@@ -72,6 +72,7 @@
         "function": "A*B"
       }
     },
+    "delay": 2,
     "schematic": "and2"
   },
   {
@@ -101,6 +102,7 @@
         "function": "A"
       }
     },
+    "delay": 1,
     "schematic": "buf"
   },
   {
@@ -130,6 +132,7 @@
         "function": "A'"
       }
     },
+    "delay": 1,
     "schematic": "inv"
   },
   {
@@ -169,6 +172,7 @@
         "function": "(A*B)'"
       }
     },
+    "delay": 1,
     "schematic": "nand2"
   },
   {
@@ -208,6 +212,7 @@
         "function": "(A+B)'"
       }
     },
+    "delay": 1,
     "schematic": "nor2"
   },
   {
@@ -247,6 +252,7 @@
         "function": "A+B"
       }
     },
+    "delay": 1,
     "schematic": "or2"
   },
   {
@@ -286,6 +292,7 @@
         "function": "(A^B)'"
       }
     },
+    "delay": 3,
     "schematic": "xnor2"
   },
   {
@@ -325,6 +332,7 @@
         "function": "A^B"
       }
     },
+    "delay": 2,
     "schematic": "xor2"
   },
   {
