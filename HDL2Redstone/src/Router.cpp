@@ -1745,7 +1745,7 @@ bool Router::regularRoute_next(Connection& C) {
             std::reverse(result_vec.begin(),result_vec.end());
             C.SubResult.push_back(result_vec);
         } else {
-            (std::cout<< "NEXT FAIL routing from " << start.x << ", " << start.y << ", " << start.z << " to " << it.x << ", "
+            DOUT(<< "NEXT FAIL routing from " << start.x << ", " << start.y << ", " << start.z << " to " << it.x << ", "
                  << it.y << ", " << it.z << std::endl);
             FailedWireSingleRouting = &C;
             retFlag = false;
