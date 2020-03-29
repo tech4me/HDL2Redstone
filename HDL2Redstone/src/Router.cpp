@@ -109,23 +109,21 @@ bool Router::route() {
                 auto next_congest = it->checkRouteResult_repeater();
                 auto local_tmp = next_congest;
                 int next_times = 0;
-                while (!local_tmp.empty() && next_times <= REPEATER_FIXING_TIMES) {
-                    reRouteNextIllegal(*it, next_congest);
+                int next_pass_flag = true;
+                while (!local_tmp.empty() && next_times <= REPEATER_FIXING_TIMES && next_pass_flag) {
+                    next_pass_flag = reRouteNextIllegal(*it, next_congest);
                     local_tmp = it->checkRouteResult_repeater();
                     for (auto& next_iter_cong : local_tmp) {
                         next_congest.insert(next_iter_cong);
                     }
                     next_times++;
                 }
-                if(next_times > REPEATER_FIXING_TIMES){
+                if(next_times > REPEATER_FIXING_TIMES || (!next_pass_flag)){
                     std::cout<<"Repeater self loop cannot be fixed: "<<it->getName()<<std::endl;
                     it->Result = result_tmp;
                     it->RouteResult = routeresult_tmp;
-                }else{
-                    if (FailedWireSingleRouting) {
-                        break;
-                    }
                 }
+                FailedWireSingleRouting = nullptr;
                 updateUsedSpace(*it);
             }
             // break; // this break is for debugging
@@ -153,7 +151,7 @@ bool Router::route() {
             FailedWireSingleRouting->setUnableRouting(2);
             FailedWireSingleRouting->Result.clear();
             FailedWireSingleRouting->RouteResult.clear();
-            DOUT(<< "Try Routing: " << FailedWireSingleRouting->getName() << " first" << std::endl);
+            (std::cout<< "Try Routing: " << FailedWireSingleRouting->getName() << " first" << std::endl);
             auto FailedWireSingleRoutingTemp = FailedWireSingleRouting;
             FailedWireSingleRouting = nullptr;
             if (!regularRoute(*FailedWireSingleRoutingTemp)) {
@@ -163,25 +161,31 @@ bool Router::route() {
             } else {
                 auto next_congest = FailedWireSingleRoutingTemp->checkRouteResult_repeater();
                 auto local_tmp = next_congest;
-                bool next_routing_flag = true;
-                while (!local_tmp.empty()) {
-                    next_routing_flag = reRouteNextIllegal(*FailedWireSingleRoutingTemp, next_congest);
+                auto result_tmp = FailedWireSingleRoutingTemp->Result;
+                auto routeresult_tmp = FailedWireSingleRoutingTemp->RouteResult;
+                int next_times = 0;
+                int next_pass_flag = true;
+                while (!local_tmp.empty() && next_times <= REPEATER_FIXING_TIMES && next_pass_flag) {
+                    next_pass_flag = reRouteNextIllegal(*FailedWireSingleRoutingTemp, next_congest);
                     local_tmp = FailedWireSingleRoutingTemp->checkRouteResult_repeater();
                     for (auto& next_iter_cong : local_tmp) {
                         next_congest.insert(next_iter_cong);
                     }
+                    next_times++;
                 }
-                if (!next_routing_flag) {
-                    DOUT(<< "Routing: " << FailedWireSingleRoutingTemp->getName() << " failed" << std::endl);
-                } else {
-                    updateUsedSpace(*FailedWireSingleRoutingTemp);
-                    for (auto& it : Connections) {
-                        if (FailedWireSingleRoutingTemp->getName() != it->getName()) {
-                            checkKeepOrUpdate(*it);
-                        }
+                if(next_times > REPEATER_FIXING_TIMES || (!next_pass_flag)){
+                    std::cout<<"Repeater self loop cannot be fixed: "<<FailedWireSingleRoutingTemp->getName()<<std::endl;
+                    FailedWireSingleRoutingTemp->Result = result_tmp;
+                    FailedWireSingleRoutingTemp->RouteResult = routeresult_tmp;
+                }
+                updateUsedSpace(*FailedWireSingleRoutingTemp);
+                for (auto& it : Connections) {
+                    if (FailedWireSingleRoutingTemp->getName() != it->getName()) {
+                        checkKeepOrUpdate(*it);
                     }
-                }
+                }                
             }
+            FailedWireSingleRouting = nullptr;
         }
         if (i == Connections.size() - 1) {
             std::cout<< "Routing Times are not enough OR Some wire cannot be routed" << std::endl;
