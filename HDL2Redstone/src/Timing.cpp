@@ -107,7 +107,7 @@ int Timing::computePropDelay() {
     // longest dist to each vertex
     std::map<Component*, int> dist;
     for (const auto& [k, v] : TG) {
-        dist[k] = 0;
+        dist[k] = k->getDelay(); // account for delay in cell
     }
 
     while (!SortedTG_.empty()) {
@@ -118,7 +118,7 @@ int Timing::computePropDelay() {
             int tempDist = dist.at(curr) + Node.Delay;
             // std::cout<<"dist at u="<<dist.at(curr)<<" w(u,v)="<<v.second<<std::endl;
             if (dist.at(Node.CompPtr) < tempDist) {
-                dist.at(Node.CompPtr) = tempDist + Node.CompPtr->getDelay();
+                dist.at(Node.CompPtr) = tempDist;
                 // save actual path here if needed
                 // std::cout<<"dist "<<v.first<<" "<<dist.at(v.first)<<std::endl;
             }
@@ -184,7 +184,7 @@ std::vector<Component*> Timing::findShortestDelay(Component* src, Component* des
     // contains the longest path to each vertex
     std::map<Component*, Component*> Path;
     for (const auto& [k, v] : TG) {
-        dist[k] = std::numeric_limits<int>::infinity();
+        dist[k] = std::numeric_limits<int>::max();
         Path[k] = NULL;
     }
     dist[src] = 0;
@@ -196,7 +196,7 @@ std::vector<Component*> Timing::findShortestDelay(Component* src, Component* des
         // std::cout<<"now doing "<<curr<<std::endl;
         SortedTG_.pop();
 
-        if (dist[curr] != std::numeric_limits<int>::infinity()) {
+        if (dist[curr] != std::numeric_limits<int>::max()) {
             for (const auto& Node : TG.at(curr)) {
                 int temp_dist = dist.at(curr) + Node.Delay;
                 // std::cout<<"dist at u="<<dist.at(curr)<<" w(u,v)="<<v.second<<std::endl;
@@ -272,7 +272,7 @@ std::ostream& operator<<(std::ostream& out, const Timing& T_) {
     auto TG = T_.TG;
     out << "Timing Graph:" << std::endl;
     for (const auto& [k, v] : TG) {
-        out << "    Component " << k->getType() << " " << k << ": ";
+        out << "    Component " << k->getType() << " " << k << ": " << k->getDelay();
         for (const auto& sink : v) {
             out << "(" << sink.CompPtr << ", " << sink.ConnPtr << ", " << sink.Delay << "), ";
         }
