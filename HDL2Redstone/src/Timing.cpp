@@ -114,7 +114,7 @@ int Timing::computePropDelay() {
         auto curr = SortedTG_.top(); // curr is a component ptr
         SortedTG_.pop();
 
-        for (const auto& Node : TG.at(curr)) {
+        for (const auto& Node : TG.at(curr)) { // TODO: NOT CORRECT
             int tempDist = dist.at(curr) + Node.Delay;
             // std::cout<<"dist at u="<<dist.at(curr)<<" w(u,v)="<<v.second<<std::endl;
             if (dist.at(Node.CompPtr) < tempDist) {
@@ -184,7 +184,7 @@ std::vector<Component*> Timing::findShortestDelay(Component* src, Component* des
     // contains the longest path to each vertex
     std::map<Component*, Component*> Path;
     for (const auto& [k, v] : TG) {
-        dist[k] = std::numeric_limits<int>::infinity();
+        dist[k] = std::numeric_limits<int>::max();
         Path[k] = NULL;
     }
     dist[src] = 0;
@@ -196,7 +196,7 @@ std::vector<Component*> Timing::findShortestDelay(Component* src, Component* des
         // std::cout<<"now doing "<<curr<<std::endl;
         SortedTG_.pop();
 
-        if (dist[curr] != std::numeric_limits<int>::infinity()) {
+        if (dist[curr] != std::numeric_limits<int>::max()) {
             for (const auto& Node : TG.at(curr)) {
                 int temp_dist = dist.at(curr) + Node.Delay;
                 // std::cout<<"dist at u="<<dist.at(curr)<<" w(u,v)="<<v.second<<std::endl;

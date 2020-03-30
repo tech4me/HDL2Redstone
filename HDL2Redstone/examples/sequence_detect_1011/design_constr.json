@@ -1,0 +1,41 @@
+{
+  "dimension": [
+    50,
+    50,
+    50
+  ],
+  "forced_placement": {
+    "clk": {
+      "location": [
+        0,
+        0,
+        0
+      ],
+      "input": true
+    },
+    "sequence_in": {
+      "location": [
+        0,
+        0,
+        20
+      ],
+      "input": true
+    },
+    "reset": {
+      "location": [
+        0,
+        0,
+        40
+      ],
+      "input": true
+    },
+    "detector_out": {
+      "location": [
+        20,
+        0,
+        0
+      ],
+      "input": false
+    }
+  }
+}
