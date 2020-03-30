@@ -107,18 +107,18 @@ int Timing::computePropDelay() {
     // longest dist to each vertex
     std::map<Component*, int> dist;
     for (const auto& [k, v] : TG) {
-        dist[k] = 0;
+        dist[k] = k->getDelay(); // account for delay in cell
     }
 
     while (!SortedTG_.empty()) {
         auto curr = SortedTG_.top(); // curr is a component ptr
         SortedTG_.pop();
 
-        for (const auto& Node : TG.at(curr)) { // TODO: NOT CORRECT
+        for (const auto& Node : TG.at(curr)) {
             int tempDist = dist.at(curr) + Node.Delay;
             // std::cout<<"dist at u="<<dist.at(curr)<<" w(u,v)="<<v.second<<std::endl;
             if (dist.at(Node.CompPtr) < tempDist) {
-                dist.at(Node.CompPtr) = tempDist + Node.CompPtr->getDelay();
+                dist.at(Node.CompPtr) = tempDist;
                 // save actual path here if needed
                 // std::cout<<"dist "<<v.first<<" "<<dist.at(v.first)<<std::endl;
             }
@@ -272,7 +272,7 @@ std::ostream& operator<<(std::ostream& out, const Timing& T_) {
     auto TG = T_.TG;
     out << "Timing Graph:" << std::endl;
     for (const auto& [k, v] : TG) {
-        out << "    Component " << k->getType() << " " << k << ": ";
+        out << "    Component " << k->getType() << " " << k << ": " << k->getDelay();
         for (const auto& sink : v) {
             out << "(" << sink.CompPtr << ", " << sink.ConnPtr << ", " << sink.Delay << "), ";
         }
