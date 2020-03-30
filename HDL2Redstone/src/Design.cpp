@@ -40,7 +40,7 @@ bool Design::doPlaceAndRoute() {
     //     std::cout << "\n    curr delay:" << P.Delay << ", need to add:" << P.DelayNeeded << std::endl;
     // }
     // std::cout<<T;
-    if(R.ReTiming(T)){
+    if (R.ReTiming(T)) {
         return true;
     }
     double Fmax = T.computeFmax(*this);

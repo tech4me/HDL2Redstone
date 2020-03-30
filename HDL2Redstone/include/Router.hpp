@@ -16,6 +16,7 @@ class Router {
     Router(Design& D_);
     bool route();
     bool ReTiming(Timing& T);
+
   private:
     typedef struct {
         uint16_t x;
@@ -70,7 +71,10 @@ class Router {
     void updateSinglePortUsedSpaceHelper(const Coordinate& Coord);
     bool routingLastRepeater(Router::Point* CongestionP);
     int routingLastRepeaterHelper(Router::Point* RecurP);
-    bool reRouteNextIllegal(Connection& C, std::set<std::pair<std::tuple<uint16_t, uint16_t, uint16_t>, std::tuple<uint16_t, uint16_t, uint16_t>>>& next_congest);
+    bool reRouteNextIllegal(
+        Connection& C,
+        std::set<std::pair<std::tuple<uint16_t, uint16_t, uint16_t>, std::tuple<uint16_t, uint16_t, uint16_t>>>&
+            next_congest);
     bool regularRoute_next(Connection& C);
     inline int& getUsedSpace(uint16_t X_, uint16_t Y_, uint16_t Z_) {
         return UsedSpace[((X_ * D.Height) + Y_) * D.Width + Z_];

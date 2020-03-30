@@ -50,9 +50,23 @@ void ModuleNetlist::ExtractNetlist::outputs(std::vector<std::string> outputs) {
 void ModuleNetlist::ExtractNetlist::names(std::vector<std::string> nets,
                                           std::vector<std::vector<blifparse::LogicValue>> so_cover) {
     // FIXME: This currently will only work for names function as alias
-    // Doing the checks
-    if (nets.size() != 2 || so_cover.size() != 1 || so_cover.at(0).at(0) != LogicValue::TRUE ||
-        so_cover.at(0).at(1) != LogicValue::TRUE) {
+    // Construct nets for $false, $true, and $undef
+    if (nets.size() == 1) {
+        const Cell* CellPtr;
+        if (nets.at(0) == "$false") {
+            CellPtr = CellLib.getCellPtr("FALSE");
+        } else if (nets.at(0) == "$true") {
+            CellPtr = CellLib.getCellPtr("TRUE");
+        } else if (nets.at(0) == "$undef") {
+            // $undef is just $false???
+            CellPtr = CellLib.getCellPtr("FALSE");
+        } else {
+            throw Exception("Unsupported names usage in BLIF!");
+        }
+        auto ComponentPtr = std::make_unique<Component>(CellPtr);
+        Connections.push_back(std::make_unique<Connection>(nets.at(0), ComponentPtr.get(), "Y"));
+    } else if (nets.size() != 2 || so_cover.size() != 1 || so_cover.at(0).at(0) != LogicValue::TRUE ||
+               so_cover.at(0).at(1) != LogicValue::TRUE) {
         throw Exception("Unsupported names usage in BLIF!");
     }
     // See if one of the name is an input or output
@@ -211,6 +225,26 @@ ModuleNetlist::ModuleNetlist(const std::string& File_, const CellLibrary& CellLi
     blif_parse_filename(File_, EN);
     if (EN.had_error()) {
         throw Exception("BLIF parsing failed.");
+    }
+    // Cleanup unused $false, $true, and $undef
+    if (Connection* Conn = EN.findConnection("$false")) {
+        if (!Conn->getSinkPortConnections().size()) {
+            EN.Connections.erase(std::remove_if(EN.Connections.begin(), EN.Connections.end(),
+                                                [Conn](const auto& C) { return C.get() == Conn; }),
+                                 EN.Connections.end());
+        }
+    } else if (Connection* Conn = EN.findConnection("$true")) {
+        if (!Conn->getSinkPortConnections().size()) {
+            EN.Connections.erase(std::remove_if(EN.Connections.begin(), EN.Connections.end(),
+                                                [Conn](const auto& C) { return C.get() == Conn; }),
+                                 EN.Connections.end());
+        }
+    } else if (Connection* Conn = EN.findConnection("$undef")) {
+        if (!Conn->getSinkPortConnections().size()) {
+            EN.Connections.erase(std::remove_if(EN.Connections.begin(), EN.Connections.end(),
+                                                [Conn](const auto& C) { return C.get() == Conn; }),
+                                 EN.Connections.end());
+        }
     }
     // Move all our internal data structure
     Components = std::move(EN.Components);

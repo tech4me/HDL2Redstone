@@ -1,0 +1,97 @@
+{
+  "dimension": [
+    50,
+    50,
+    50
+  ],
+  "forced_placement": {
+    "x[0]": {
+      "location": [
+        0,
+        0,
+        0
+      ],
+      "input": true
+    },
+    "x[1]": {
+      "location": [
+        0,
+        0,
+        10
+      ],
+      "input": true
+    },
+    "x[2]": {
+      "location": [
+        0,
+        0,
+        20
+      ],
+      "input": true
+    },
+    "x[3]": {
+      "location": [
+        0,
+        0,
+        30
+      ],
+      "input": true
+    },
+    "z[0]": {
+      "location": [
+        49,
+        0,
+        0
+      ],
+      "input": false
+    },
+    "z[1]": {
+      "location": [
+        49,
+        0,
+        5
+      ],
+      "input": false
+    },
+    "z[2]": {
+      "location": [
+        49,
+        0,
+        10
+      ],
+      "input": false
+    },
+    "z[3]": {
+      "location": [
+        49,
+        0,
+        15
+      ],
+      "input": false
+    },
+    "z[4]": {
+      "location": [
+        49,
+        0,
+        20
+      ],
+      "input": false
+    },
+    "z[5]": {
+      "location": [
+        49,
+        0,
+        25
+      ],
+      "input": false
+    },
+    "z[6]": {
+      "location": [
+        49,
+        0,
+        30
+      ],
+      "input": false
+    }
+  }
+}
