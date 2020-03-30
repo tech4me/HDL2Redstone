@@ -68,8 +68,8 @@ class Timing {
     std::map<std::pair<Component*, Component*>, std::vector<Path>> RG;
 
     // TODO: To be read from JSON
-    int Tcq = 2;
-    int Thold = 5;
+    int Tcq = 3;
+    int Thold = 0;
     int Tsu = 1;
 
     friend std::ostream& operator<<(std::ostream& out, const Timing& T_);

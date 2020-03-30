@@ -203,9 +203,9 @@
       "Y": {
         "direction": "output",
         "location": [
-          0,
           1,
-          1
+          1,
+          0
         ],
         "facing": "east",
         "power": 15,
@@ -351,7 +351,7 @@
           1
         ],
         "facing": "west",
-        "power": 1
+        "power": 2
       },
       "D": {
         "direction": "input",
