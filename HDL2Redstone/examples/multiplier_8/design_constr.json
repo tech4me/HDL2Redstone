@@ -1,0 +1,265 @@
+{
+  "dimension": [
+    200,
+    30,
+    200
+  ],
+  "forced_placement": {
+    "a[0]": {
+      "location": [
+        0,
+        0,
+        0
+      ],
+      "input": true
+    },
+    "a[1]": {
+      "location": [
+        0,
+        0,
+        10
+      ],
+      "input": true
+    },
+    "a[2]": {
+      "location": [
+        0,
+        0,
+        20
+      ],
+      "input": true
+    },
+    "a[3]": {
+      "location": [
+        0,
+        0,
+        30
+      ],
+      "input": true
+    },
+    "a[4]": {
+      "location": [
+        0,
+        0,
+        40
+      ],
+      "input": true
+    },
+    "a[5]": {
+      "location": [
+        0,
+        0,
+        50
+      ],
+      "input": true
+    },
+    "a[6]": {
+      "location": [
+        0,
+        0,
+        60
+      ],
+      "input": true
+    },
+    "a[7]": {
+      "location": [
+        0,
+        0,
+        70
+      ],
+      "input": true
+    },
+    "b[0]": {
+      "location": [
+        0,
+        0,
+        80
+      ],
+      "input": true
+    },
+    "b[1]": {
+      "location": [
+        0,
+        0,
+        90
+      ],
+      "input": true
+    },
+    "b[2]": {
+      "location": [
+        0,
+        0,
+        100
+      ],
+      "input": true
+    },
+    "b[3]": {
+      "location": [
+        0,
+        0,
+        110
+      ],
+      "input": true
+    },
+    "b[4]": {
+      "location": [
+        0,
+        0,
+        120
+      ],
+      "input": true
+    },
+    "b[5]": {
+      "location": [
+        0,
+        0,
+        130
+      ],
+      "input": true
+    },
+    "b[6]": {
+      "location": [
+        0,
+        0,
+        140
+      ],
+      "input": true
+    },
+    "b[7]": {
+      "location": [
+        0,
+        0,
+        150
+      ],
+      "input": true
+    },
+    "result[0]": {
+      "location": [
+        199,
+        0,
+        0
+      ],
+      "input": false
+    },
+    "result[1]": {
+      "location": [
+        199,
+        0,
+        10
+      ],
+      "input": false
+    },
+    "result[2]": {
+      "location": [
+        199,
+        0,
+        20
+      ],
+      "input": false
+    },
+    "result[3]": {
+      "location": [
+        199,
+        0,
+        30
+      ],
+      "input": false
+    },
+    "result[4]": {
+      "location": [
+        199,
+        0,
+        40
+      ],
+      "input": false
+    },
+    "result[5]": {
+      "location": [
+        199,
+        0,
+        50
+      ],
+      "input": false
+    },
+    "result[6]": {
+      "location": [
+        199,
+        0,
+        60
+      ],
+      "input": false
+    },
+    "result[7]": {
+      "location": [
+        199,
+        0,
+        70
+      ],
+      "input": false
+    },
+    "result[8]": {
+      "location": [
+        199,
+        0,
+        80
+      ],
+      "input": false
+    },
+    "result[9]": {
+      "location": [
+        199,
+        0,
+        90
+      ],
+      "input": false
+    },
+    "result[10]": {
+      "location": [
+        199,
+        0,
+        100
+      ],
+      "input": false
+    },
+    "result[11]": {
+      "location": [
+        199,
+        0,
+        110
+      ],
+      "input": false
+    },
+    "result[12]": {
+      "location": [
+        199,
+        0,
+        120
+      ],
+      "input": false
+    },
+    "result[13]": {
+      "location": [
+        199,
+        0,
+        130
+      ],
+      "input": false
+    },
+    "result[14]": {
+      "location": [
+        199,
+        0,
+        140
+      ],
+      "input": false
+    },
+    "result[15]": {
+      "location": [
+        199,
+        0,
+        150
+      ],
+    "input": false
+    }
+  }
+}

@@ -111,18 +111,20 @@ bool Placer::annealPlace() {
     for (int X = 0; X != PGridW; ++X) {
         for (int Y = 0; Y != PGridH; ++Y) {
             for (int Z = 0; Z != PGridL; ++Z) {
-                if (!CurrentPlacement.PGrid[X * PGridW * PGridH + Y * PGridW + Z]) {
+                if (!CurrentPlacement.PGrid[X * PGridH * PGridL + Y * PGridL + Z]) {
                     auto&& EmptyCPD = std::make_unique<ComponentPlacementData>(ComponentPlacementData{
                         .ComponentPtr = nullptr, .Fixed = false, .Empty = true, .GridX = X, .GridY = Y, .GridZ = Z});
-                    CurrentPlacement.PGrid[X * PGridW * PGridH + Y * PGridW + Z] = EmptyCPD.get();
+                    CurrentPlacement.PGrid[X * PGridH * PGridL + Y * PGridL + Z] = EmptyCPD.get();
+                    //std::cout << "SET " << X << " " << Y << " " << Z << " " << EmptyCPD.get() << std::endl;
                     CurrentPlacement.EmptyCPDs.push_back(std::move(EmptyCPD));
                     CurrentPlacement.SwapCandidate2.push_back(
-                        CurrentPlacement.PGrid[X * PGridW * PGridH + Y * PGridW + Z]);
-                } else if (!CurrentPlacement.PGrid[X * PGridW * PGridH + Y * PGridW + Z]->Fixed) {
+                        CurrentPlacement.PGrid[X * PGridH * PGridL + Y * PGridL + Z]);
+                } else if (!CurrentPlacement.PGrid[X * PGridH * PGridL + Y * PGridL + Z]->Fixed) {
+                    //std::cout << X << " " << Y << " " << Z << " " << CurrentPlacement.PGrid[X * PGridH * PGridL + Y * PGridL + Z] << std::endl;
                     CurrentPlacement.SwapCandidate1.push_back(
-                        CurrentPlacement.PGrid[X * PGridW * PGridH + Y * PGridW + Z]);
+                        CurrentPlacement.PGrid[X * PGridH * PGridL + Y * PGridL + Z]);
                     CurrentPlacement.SwapCandidate2.push_back(
-                        CurrentPlacement.PGrid[X * PGridW * PGridH + Y * PGridW + Z]);
+                        CurrentPlacement.PGrid[X * PGridH * PGridL + Y * PGridL + Z]);
                 }
             }
         }
@@ -273,7 +275,7 @@ std::pair<int, int> Placer::annealGenerateSwapNeighbour() {
     X2 = CurrentPlacement.SwapCandidate2[To]->GridX;
     Y2 = CurrentPlacement.SwapCandidate2[To]->GridY;
     Z2 = CurrentPlacement.SwapCandidate2[To]->GridZ;
-    return std::make_pair(X1 * PGridW * PGridH + Y1 * PGridW + Z1, X2 * PGridW * PGridH + Y2 * PGridW + Z2);
+    return std::make_pair(X1 * PGridH * PGridL + Y1 * PGridL + Z1, X2 * PGridH * PGridL + Y2 * PGridL + Z2);
 }
 
 void Placer::annealDoSwap(int SwapFrom_, int SwapTo_) {
@@ -418,12 +420,12 @@ bool Placer::PlacementState::testAndSetPlacementGrid(ComponentPlacementData& CPD
     for (int X = GridX1; X != GridX2; ++X) {
         for (int Y = GridY1; Y != GridY2; ++Y) {
             for (int Z = GridZ1; Z != GridZ2; ++Z) {
-                if (PGrid[X * (D.Width / PLACEMENT_GRID_SIZE) * (D.Height / PLACEMENT_GRID_SIZE) +
-                          Y * (D.Width / PLACEMENT_GRID_SIZE) + Z]) {
+                if (PGrid[X * (D.Height / PLACEMENT_GRID_SIZE) * (D.Length / PLACEMENT_GRID_SIZE) +
+                          Y * (D.Length / PLACEMENT_GRID_SIZE) + Z]) {
                     return true;
                 } else {
-                    PGrid[X * (D.Width / PLACEMENT_GRID_SIZE) * (D.Height / PLACEMENT_GRID_SIZE) +
-                          Y * (D.Width / PLACEMENT_GRID_SIZE) + Z] = &CPD_;
+                    PGrid[X * (D.Height / PLACEMENT_GRID_SIZE) * (D.Length / PLACEMENT_GRID_SIZE) +
+                          Y * (D.Length / PLACEMENT_GRID_SIZE) + Z] = &CPD_;
                 }
             }
         }
@@ -451,8 +453,8 @@ bool Placer::PlacementState::setPlacementGrid(ComponentPlacementData& CPD_) {
     for (int X = GridX1; X != GridX2; ++X) {
         for (int Y = GridY1; Y != GridY2; ++Y) {
             for (int Z = GridZ1; Z != GridZ2; ++Z) {
-                PGrid[X * (D.Width / PLACEMENT_GRID_SIZE) * (D.Height / PLACEMENT_GRID_SIZE) +
-                      Y * (D.Width / PLACEMENT_GRID_SIZE) + Z] = &CPD_;
+                PGrid[X * (D.Height / PLACEMENT_GRID_SIZE) * (D.Length / PLACEMENT_GRID_SIZE) +
+                      Y * (D.Length / PLACEMENT_GRID_SIZE) + Z] = &CPD_;
             }
         }
     }

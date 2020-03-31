@@ -1,0 +1,409 @@
+{
+  "dimension": [
+    50,
+    50,
+    200
+  ],
+  "forced_placement": {
+    "a[0]": {
+      "location": [
+        0,
+        0,
+        0
+      ],
+      "input": true
+    },
+    "a[1]": {
+      "location": [
+        0,
+        0,
+        12
+      ],
+      "input": true
+    },
+    "a[2]": {
+      "location": [
+        0,
+        0,
+        24
+      ],
+      "input": true
+    },
+    "a[3]": {
+      "location": [
+        0,
+        0,
+        36
+      ],
+      "input": true
+    },
+    "a[4]": {
+      "location": [
+        0,
+        0,
+        48
+      ],
+      "input": true
+    },
+    "a[5]": {
+      "location": [
+        0,
+        0,
+        60
+      ],
+      "input": true
+    },
+    "a[6]": {
+      "location": [
+        0,
+        0,
+        72
+      ],
+      "input": true
+    },
+    "a[7]": {
+      "location": [
+        0,
+        0,
+        84
+      ],
+      "input": true
+    },
+    "a[8]": {
+      "location": [
+        0,
+        0,
+        96
+      ],
+      "input": true
+    },
+    "a[9]": {
+      "location": [
+        0,
+        0,
+        108
+      ],
+      "input": true
+    },
+    "a[10]": {
+      "location": [
+        0,
+        0,
+        120
+      ],
+      "input": true
+    },
+    "a[11]": {
+      "location": [
+        0,
+        0,
+        132
+      ],
+      "input": true
+    },
+    "a[12]": {
+      "location": [
+        0,
+        0,
+        148
+      ],
+      "input": true
+    },
+    "a[13]": {
+      "location": [
+        0,
+        0,
+        160
+      ],
+      "input": true
+    },
+    "a[14]": {
+      "location": [
+        0,
+        0,
+        172
+      ],
+      "input": true
+    },
+    "a[15]": {
+      "location": [
+        0,
+        0,
+        184
+      ],
+      "input": true
+    },
+    "b[0]": {
+      "location": [
+        0,
+        10,
+        0
+      ],
+      "input": true
+    },
+    "b[1]": {
+      "location": [
+        0,
+        10,
+        12
+      ],
+      "input": true
+    },
+    "b[2]": {
+      "location": [
+        0,
+        10,
+        24
+      ],
+      "input": true
+    },
+    "b[3]": {
+      "location": [
+        0,
+        10,
+        36
+      ],
+      "input": true
+    },
+    "b[4]": {
+      "location": [
+        0,
+        10,
+        48
+      ],
+      "input": true
+    },
+    "b[5]": {
+      "location": [
+        0,
+        10,
+        60
+      ],
+      "input": true
+    },
+    "b[6]": {
+      "location": [
+        0,
+        10,
+        72
+      ],
+      "input": true
+    },
+    "b[7]": {
+      "location": [
+        0,
+        10,
+        84
+      ],
+      "input": true
+    },
+    "b[8]": {
+      "location": [
+        0,
+        10,
+        96
+      ],
+      "input": true
+    },
+    "b[9]": {
+      "location": [
+        0,
+        10,
+        108
+      ],
+      "input": true
+    },
+    "b[10]": {
+      "location": [
+        0,
+        10,
+        120
+      ],
+      "input": true
+    },
+    "b[11]": {
+      "location": [
+        0,
+        10,
+        132
+      ],
+      "input": true
+    },
+    "b[12]": {
+      "location": [
+        0,
+        10,
+        148
+      ],
+      "input": true
+    },
+    "b[13]": {
+      "location": [
+        0,
+        10,
+        160
+      ],
+      "input": true
+    },
+    "b[14]": {
+      "location": [
+        0,
+        10,
+        172
+      ],
+      "input": true
+    },
+    "b[15]": {
+      "location": [
+        0,
+        10,
+        184
+      ],
+      "input": true
+    },
+    "cin": {
+      "location": [
+        0,
+        20,
+        0
+      ],
+      "input": true
+    },
+    "sout[0]": {
+      "location": [
+        49,
+        0,
+        0
+      ],
+      "input": false
+    },
+    "sout[1]": {
+      "location": [
+        49,
+        0,
+        12
+      ],
+      "input": false
+    },
+    "sout[2]": {
+      "location": [
+        49,
+        0,
+        24
+      ],
+      "input": false
+    },
+    "sout[3]": {
+      "location": [
+        49,
+        0,
+        36
+      ],
+      "input": false
+    },
+    "sout[4]": {
+      "location": [
+        49,
+        0,
+        48
+      ],
+      "input": false
+    },
+    "sout[5]": {
+      "location": [
+        49,
+        0,
+        60
+      ],
+      "input": false
+    },
+    "sout[6]": {
+      "location": [
+        49,
+        0,
+        72
+      ],
+      "input": false
+    },
+    "sout[7]": {
+      "location": [
+        49,
+        0,
+        84
+      ],
+      "input": false
+    },
+    "sout[8]": {
+      "location": [
+        49,
+        0,
+        96
+      ],
+      "input": false
+    },
+    "sout[9]": {
+      "location": [
+        49,
+        0,
+        108
+      ],
+      "input": false
+    },
+    "sout[10]": {
+      "location": [
+        49,
+        0,
+        120
+      ],
+      "input": false
+    },
+    "sout[11]": {
+      "location": [
+        49,
+        0,
+        132
+      ],
+      "input": false
+    },
+    "sout[12]": {
+      "location": [
+        49,
+        0,
+        148
+      ],
+      "input": false
+    },
+    "sout[13]": {
+      "location": [
+        49,
+        0,
+        160
+      ],
+      "input": false
+    },
+    "sout[14]": {
+      "location": [
+        49,
+        0,
+        172
+      ],
+      "input": false
+    },
+    "sout[15]": {
+      "location": [
+        49,
+        0,
+        184
+      ],
+      "input": false
+    },
+    "sout[16]": {
+      "location": [
+        49,
+        0,
+        196
+      ],
+      "input": false
+    }
+  }
+}

@@ -36,7 +36,7 @@ bool DesignConstraint::readDCFile(const std::string& File_) {
             bool y = V["location"][1] == 0 ? 1 : (V["location"][1] == std::get<1>(Dimension) - 2 ? 1 : 0);
             bool z = V["location"][2] == 0 ? 1 : (V["location"][2] == std::get<2>(Dimension) - 1 ? 1 : 0);
 
-            if (x & y || x & z || y & z) {
+            if (x || x & y || z & y || z) {
                 uint16_t new_x = V["location"][0];
                 uint16_t new_y = V["location"][1];
                 uint16_t new_z = V["location"][2];
@@ -61,8 +61,7 @@ bool DesignConstraint::readDCFile(const std::string& File_) {
                     K, {/*V["location"][0], V["location"][1], V["location"][2], V["orientation"].get<Orientation>()*/
                         new_x, new_y, new_z, ori});
             } else {
-                std::cout << "Port placement too interior, consider changing your port location selection!"
-                          << std::endl;
+                std::cout << K << " port cannot be set in the interior!" << std::endl;
                 return true;
             }
         }

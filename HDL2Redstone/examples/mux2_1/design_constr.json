@@ -1,8 +1,8 @@
 {
   "dimension": [
-    50,
-    50,
-    50
+    30,
+    30,
+    30
   ],
   "forced_placement": {
     "a": {
@@ -17,7 +17,7 @@
       "location": [
         0,
         0,
-        20
+        15
       ],
       "input": true
     },
@@ -25,15 +25,15 @@
       "location": [
         0,
         0,
-        40
+        29
       ],
       "input": true
     },
     "dout": {
       "location": [
-        49,
+        29,
         0,
-        30
+        15
       ],
       "input": false
     }
