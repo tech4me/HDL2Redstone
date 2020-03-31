@@ -65,6 +65,7 @@ void ModuleNetlist::ExtractNetlist::names(std::vector<std::string> nets,
         }
         auto ComponentPtr = std::make_unique<Component>(CellPtr);
         Connections.push_back(std::make_unique<Connection>(nets.at(0), ComponentPtr.get(), "Y"));
+        return;
     } else if (nets.size() != 2 || so_cover.size() != 1 || so_cover.at(0).at(0) != LogicValue::TRUE ||
                so_cover.at(0).at(1) != LogicValue::TRUE) {
         throw Exception("Unsupported names usage in BLIF!");
@@ -233,13 +234,15 @@ ModuleNetlist::ModuleNetlist(const std::string& File_, const CellLibrary& CellLi
                                                 [Conn](const auto& C) { return C.get() == Conn; }),
                                  EN.Connections.end());
         }
-    } else if (Connection* Conn = EN.findConnection("$true")) {
+    }
+    if (Connection* Conn = EN.findConnection("$true")) {
         if (!Conn->getSinkPortConnections().size()) {
             EN.Connections.erase(std::remove_if(EN.Connections.begin(), EN.Connections.end(),
                                                 [Conn](const auto& C) { return C.get() == Conn; }),
                                  EN.Connections.end());
         }
-    } else if (Connection* Conn = EN.findConnection("$undef")) {
+    }
+    if (Connection* Conn = EN.findConnection("$undef")) {
         if (!Conn->getSinkPortConnections().size()) {
             EN.Connections.erase(std::remove_if(EN.Connections.begin(), EN.Connections.end(),
                                                 [Conn](const auto& C) { return C.get() == Conn; }),

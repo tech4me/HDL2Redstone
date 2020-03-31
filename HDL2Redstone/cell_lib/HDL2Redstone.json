@@ -2,6 +2,42 @@
   {
     "is_component": true,
     "liberty": false,
+    "name": "FALSE",
+    "pins": {
+      "Y": {
+        "direction": "output",
+        "location": [
+          0,
+          1,
+          0
+        ],
+        "facing": "east",
+        "power": 15
+      }
+    },
+    "schematic": "false"
+  },
+  {
+    "is_component": true,
+    "liberty": false,
+    "name": "TRUE",
+    "pins": {
+      "Y": {
+        "direction": "output",
+        "location": [
+          0,
+          1,
+          0
+        ],
+        "facing": "east",
+        "power": 15
+      }
+    },
+    "schematic": "true"
+  },
+  {
+    "is_component": true,
+    "liberty": false,
     "name": "INPUT",
     "pins": {
       "Y": {
@@ -188,24 +224,24 @@
           0
         ],
         "facing": "north",
-        "power": 1
+        "power": 2
       },
       "B": {
         "direction": "input",
         "location": [
           0,
           1,
-          0
+          2
         ],
         "facing": "south",
-        "power": 1
+        "power": 2
       },
       "Y": {
         "direction": "output",
         "location": [
           1,
           1,
-          0
+          1
         ],
         "facing": "east",
         "power": 15,

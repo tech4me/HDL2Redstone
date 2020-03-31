@@ -11,8 +11,7 @@ namespace HDL2Redstone {
 class Timing {
   public:
     Timing(Design& D_);
-    void buildTG(Design& D_);
-    //~Timing();
+    void buildTG();
 
     struct TGNode {
         Component* CompPtr;
@@ -37,8 +36,9 @@ class Timing {
         TG.at(Key_).insert(TG.at(Key_).end(), Val_.begin(), Val_.end());
     };
 
+    bool isCombinational() const {return RG.empty(); }
     int computePropDelay();
-    double computeFmax(Design& D_);
+    int computeTmin();
     // return longest path from src to dest, note result is in reverse order (start with dest)
     std::vector<Component*> findLongestDelay(Component* src, Component* dest);
     std::vector<Component*> findShortestDelay(Component* src, Component* dest);
@@ -51,6 +51,8 @@ class Timing {
   private:
     void topoHelper(Component* k_, std::map<Component*, bool>& Visited_);
     void topoSort();
+
+    Design& D;
     // Timing graph, key=components, value=list of components connected to key, with their cost
     std::map<Component*, std::vector<TGNode>> TG;
     // topologically sorted graph

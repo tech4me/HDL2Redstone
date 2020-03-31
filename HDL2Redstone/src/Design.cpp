@@ -26,36 +26,21 @@ bool Design::doPlaceAndRoute() {
     }
     std::cout << "Analyzing Timing Requirements..." << std::endl;
     Timing T(*this);
-    // TODO: change sequence of the following
-    int PropDelay = T.computePropDelay();
-    std::cout << "    Combinational propagation delay = " << PropDelay << std::endl;
 
-    std::cout << "    Hold violations..." << std::endl;
-    T.findHoldViolations();
-    // find path with hold violations sample usage
-    // for (const auto& P : T.HoldViolatedPaths) {
-    // for (const auto& C : P.CombPath) {
-    //     std::cout << "(Comp,Conn: "<< C.second << ","<< C.first << ")->";
-    // }
-    //     std::cout << "\n    curr delay:" << P.Delay << ", need to add:" << P.DelayNeeded << std::endl;
-    // }
-    // std::cout<<T;
-    if (R.ReTiming(T)) {
-        return true;
-    }
-    double Fmax = T.computeFmax(*this);
-    if (Fmax) { // won't print if combinational cct
-        std::cout << "    Sequential fmax = " << Fmax << std::endl;
+    if (T.isCombinational()) {
+        std::cout << "Circuit is combinational!" << std::endl;
+        int PropDelay = T.computePropDelay();
+        std::cout << "    Worst case propagation delay: " << PropDelay << " ticks" << std::endl;
     } else {
-        std::cout << "    Combinational circuit, no fmax" << std::endl;
+        std::cout << "Circuit is sequential!" << std::endl;
+        T.findHoldViolations();
+        if (R.ReTiming(T)) {
+            return true;
+        }
+        int Tmin = T.computeTmin();
+        std::cout << "    Tmin: " << Tmin << " ticks" << std::endl;
+        std::cout << "    Fmax: " << 10 / static_cast<double>(Tmin) << " Hz" << std::endl;
     }
-
-    // find longest/shortest path given src and dest, sample usage; T.src and T.dest just used for testing in mux2to1
-    /*std::vector<Component*> Path = T.findShortestDelay(T.src, T.dest);
-    for (auto c : Path) {
-        std::cout<<c<<"<-";
-    }
-    std::cout<<std::endl;*/
     return false;
 }
 

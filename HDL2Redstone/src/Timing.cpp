@@ -30,39 +30,39 @@ void Timing::RGTreeHelper(Component* Src, Component* Curr, Path& P_) {
     }
 }
 
-Timing::Timing(Design& D_) { buildTG(D_); }
+Timing::Timing(Design& D_) : D(D_) { buildTG(); }
 
-void Timing::buildTG(Design& D_) {
+void Timing::buildTG() {
     TG.clear();
     RG.clear();
     ClkTree.clear();
 
-    for (int j = 0; j < D_.getModuleNetlist().getConnections().size(); j++) {
-        D_.getModuleNetlist().getConnections()[j]->calculateDelay();
+    for (int j = 0; j < D.getModuleNetlist().getConnections().size(); j++) {
+        D.getModuleNetlist().getConnections()[j]->calculateDelay();
 
-        const auto& Sinks = D_.getModuleNetlist().getConnections()[j]->getSinkPortConnections();
+        const auto& Sinks = D.getModuleNetlist().getConnections()[j]->getSinkPortConnections();
         std::vector<TGNode> Temp;
         // grouping sink with their delays together
         for (int i = 0; i < Sinks.size(); i++) {
-            Temp.emplace_back(Sinks[i].first, D_.getModuleNetlist().getConnections()[j].get(),
-                              D_.getModuleNetlist().getConnections()[j]->getSinkDelays()[i]);
+            Temp.emplace_back(Sinks[i].first, D.getModuleNetlist().getConnections()[j].get(),
+                              D.getModuleNetlist().getConnections()[j]->getSinkDelays()[i]);
         }
 
         // find clk tree
-        if (D_.getModuleNetlist().getConnections()[j]->getName().find("clk") != std::string::npos) {
+        if (D.getModuleNetlist().getConnections()[j]->getName().find("clk") != std::string::npos) {
             /*ClkTree.first = D_.getModuleNetlist().getConnections()[j]->getSourcePortConnection().first;
             ClkTree.second = Temp;*/
-            ClkSrc = D_.getModuleNetlist().getConnections()[j]->getSourcePortConnection().first;
+            ClkSrc = D.getModuleNetlist().getConnections()[j]->getSourcePortConnection().first;
             for (const auto& Node : Temp) {
                 ClkTree.emplace(Node.CompPtr, Node.Delay);
             }
         } else { // regular connection
             // insert into timing graph, using source as starting node
-            auto it = TG.find(D_.getModuleNetlist().getConnections()[j]->getSourcePortConnection().first);
+            auto it = TG.find(D.getModuleNetlist().getConnections()[j]->getSourcePortConnection().first);
             if (it != TG.end()) { // update what's connected to this node
                 setTG(it->first, Temp);
             } else { // insert into map
-                TG.emplace(D_.getModuleNetlist().getConnections()[j]->getSourcePortConnection().first, Temp);
+                TG.emplace(D.getModuleNetlist().getConnections()[j]->getSourcePortConnection().first, Temp);
             }
         }
     }
@@ -115,7 +115,7 @@ int Timing::computePropDelay() {
         SortedTG_.pop();
 
         for (const auto& Node : TG.at(curr)) {
-            int tempDist = dist.at(curr) + Node.Delay;
+            int tempDist = dist.at(curr) + Node.Delay + Node.CompPtr->getDelay();
             // std::cout<<"dist at u="<<dist.at(curr)<<" w(u,v)="<<v.second<<std::endl;
             if (dist.at(Node.CompPtr) < tempDist) {
                 dist.at(Node.CompPtr) = tempDist;
@@ -156,11 +156,11 @@ void Timing::findHoldViolations() {
     }
 }
 
-double Timing::computeFmax(Design& D_) {
+int Timing::computeTmin() {
     if (RG.empty()) {
         return 0;
     }
-    buildTG(D_);
+    buildTG();
     int Tmin = -1; // min clk period needed
     for (const auto& [K, V] : RG) {
         // Tskew calculated as delay at sink - delay at src
@@ -172,7 +172,7 @@ double Timing::computeFmax(Design& D_) {
             }
         }
     }
-    return 1.0 / Tmin;
+    return Tmin;
 }
 
 std::vector<Component*> Timing::findShortestDelay(Component* src, Component* dest) {
