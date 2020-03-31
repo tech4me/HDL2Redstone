@@ -216,7 +216,7 @@ int Placer::evalCost(const PlacementState& PS_) const {
     for (const auto& CPD : PS_.CPDs) {
         for (auto&& [PortName, PortData] : CPD.Ports) {
             if (PortData.Dir == Direction::Output) {
-#ifdef USE_HPWL
+#ifndef USE_HPWL
                 // HPWL method
                 uint16_t XMax = PortData.Coord.X;
                 uint16_t XMin = PortData.Coord.X;
@@ -328,21 +328,20 @@ void Placer::annealDoSwap(int SwapFrom_, int SwapTo_) {
 }
 
 double Placer::calculateInitTemperature() {
-    int MinCost = std::numeric_limits<int>::max();
-    int MaxCost = std::numeric_limits<int>::min();
+    int DeltaE = std::numeric_limits<int>::min();
+    int CurrentCost = evalCost(CurrentPlacement);
     for (int i = 0; i < MAX_INITIAL_TEMPERATURE_MOVE; ++i) {
         auto [SwapFrom, SwapTo] = annealGenerateSwapNeighbour();
         annealDoSwap(SwapFrom, SwapTo);
         int NewCost = evalCost(CurrentPlacement);
-        if (NewCost < MinCost) {
-            MinCost = NewCost;
-        } else if (NewCost > MaxCost) {
-            MaxCost = NewCost;
+        int TempDeltaE = std::abs(NewCost - CurrentCost);
+        if (TempDeltaE > DeltaE) {
+            DeltaE = TempDeltaE;
         }
         // Undo changes
         annealDoSwap(SwapFrom, SwapTo);
     }
-    return MaxCost - MinCost;
+    return DeltaE;
 }
 
 void Placer::ComponentPlacementData::setPlacement(uint16_t X_, uint16_t Y_, uint16_t Z_, Orientation Orient_) {
