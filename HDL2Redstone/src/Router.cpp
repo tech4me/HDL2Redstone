@@ -9,9 +9,24 @@
 #include <Router.hpp>
 #include <Timing.hpp>
 
-#define REPEATER_FIXING_TIMES 20
-
 using namespace HDL2Redstone;
+
+#define REPEATER_FIXING_TIMES 20
+#define CHECKUPDATEGRAPH(x, y, z, TempP) \
+    if (!getUsedSpace(x, y, z) && !getUsedSpace(x, y - 1, z)) { \
+        if ((getPoint(x, y, z).cost >= (1 + getPoint(x, y, z).base_cost) * getPoint(x, y, z).mul_cost + TempP->cost)) { \
+            if (checkUpdateGraphHelper(TempP, &getPoint(x, y, z))) { \
+                getPoint(x, y, z).cost = \
+                    (1 + getPoint(x, y, z).base_cost) * getPoint(x, y, z).mul_cost + TempP->cost; \
+                getPoint(x, y, z).P = TempP; \
+                if (!getPoint(x, y, z).visited && !getPoint(x, y, z).inserted) { \
+                    getPoint(x, y, z).inserted = 1; \
+                    Q.push(&getPoint(x, y, z)); \
+                } \
+            } \
+        } \
+    }
+
 int non = 0;
 Router::Router(Design& D_)
     : D(D_), UsedSpace(D.Width * D.Height * D.Length, 0), WI(D.Width * D.Height * D.Length),
@@ -386,7 +401,8 @@ bool Router::regularRoute(Connection& C) {
     }
 
     std::vector<Router::coord> endTemp = end;
-    std::priority_queue<Router::Point*, std::vector<Router::Point*>, Router::PointCompare> Q;
+    auto cmp = [this, &endTemp](const Point* lhs, const Point* rhs){return (lhs->cost + this->heuristic(endTemp, lhs)) > (rhs->cost + this->heuristic(endTemp, rhs));};
+    std::priority_queue<Router::Point*, std::vector<Router::Point*>, decltype(cmp)> Q(cmp);
     getPoint(start.x, start.y, start.z).cost = 0;
     getPoint(start.x, start.y, start.z).length = 1;
     getPoint(start.x, start.y, start.z).inserted = 1;
@@ -395,6 +411,9 @@ bool Router::regularRoute(Connection& C) {
     while (!Q.empty()) {
         Router::Point* TempP = Q.top();
         Q.pop();
+        // if(TempP->Loc.x==11 && TempP->Loc.y==1 && TempP->Loc.z==8){
+        //     std::cout<<"hi reach here"<<std::endl;
+        // }        
         TempP->visited = 1;
         for (auto it = endTemp.begin(); it != endTemp.end(); ++it) {
             if ((TempP->Loc.x == it->x) && (TempP->Loc.y == it->y) && (TempP->Loc.z == it->z)) {
@@ -408,52 +427,52 @@ bool Router::regularRoute(Connection& C) {
 
         if (TempP->Loc.x /*&& (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::OneCW)*/ &&
             (TempP->Loc.y) % 2 == 1) {
-            Router::checkUpdateGraph(TempP->Loc.x - 1, TempP->Loc.y, TempP->Loc.z, Q, TempP);
+            CHECKUPDATEGRAPH(TempP->Loc.x - 1, TempP->Loc.y, TempP->Loc.z, TempP);
         }
         if (TempP->Loc.x < D.Width - 1 /*&&
             (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::ThreeCW)*/
             && (TempP->Loc.y) % 2 == 1) {
-            Router::checkUpdateGraph(TempP->Loc.x + 1, TempP->Loc.y, TempP->Loc.z, Q, TempP);
+            CHECKUPDATEGRAPH(TempP->Loc.x + 1, TempP->Loc.y, TempP->Loc.z, TempP);
         }
         if (TempP->Loc.z /*&& (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::TwoCW)*/ &&
             (TempP->Loc.y) % 2 == 1) {
-            Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y, TempP->Loc.z - 1, Q, TempP);
+            CHECKUPDATEGRAPH(TempP->Loc.x, TempP->Loc.y, TempP->Loc.z - 1, TempP);
         }
         if (TempP->Loc.z < D.Length - 1 /*&&
             (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::ZeroCW)*/
             && (TempP->Loc.y) % 2 == 1) {
-            Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y, TempP->Loc.z + 1, Q, TempP);
+            CHECKUPDATEGRAPH(TempP->Loc.x, TempP->Loc.y, TempP->Loc.z + 1, TempP);
         }
 
         if (TempP->Loc.x && (TempP->Loc.y > 1) /*&& (TempP->length <= MAX_NUM_OF_WIRE)*/) {
-            Router::checkUpdateGraph(TempP->Loc.x - 1, TempP->Loc.y - 1, TempP->Loc.z, Q, TempP);
+            CHECKUPDATEGRAPH(TempP->Loc.x - 1, TempP->Loc.y - 1, TempP->Loc.z, TempP);
         }
         if (TempP->Loc.x && (TempP->Loc.y < D.Height - 1)/* &&
             (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::OneCW)*/) {
-            Router::checkUpdateGraph(TempP->Loc.x - 1, TempP->Loc.y + 1, TempP->Loc.z, Q, TempP);
+            CHECKUPDATEGRAPH(TempP->Loc.x - 1, TempP->Loc.y + 1, TempP->Loc.z, TempP);
         }
 
         if ((TempP->Loc.x < D.Width - 1) && (TempP->Loc.y > 1) /*&& (TempP->length <= MAX_NUM_OF_WIRE)*/) {
-            Router::checkUpdateGraph(TempP->Loc.x + 1, TempP->Loc.y - 1, TempP->Loc.z, Q, TempP);
+            CHECKUPDATEGRAPH(TempP->Loc.x + 1, TempP->Loc.y - 1, TempP->Loc.z, TempP);
         }
         if ((TempP->Loc.x < D.Width - 1) && (TempP->Loc.y < D.Height - 1) /*&&
             (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::ThreeCW)*/) {
-            Router::checkUpdateGraph(TempP->Loc.x + 1, TempP->Loc.y + 1, TempP->Loc.z, Q, TempP);
+            CHECKUPDATEGRAPH(TempP->Loc.x + 1, TempP->Loc.y + 1, TempP->Loc.z, TempP);
         }
         if (TempP->Loc.z && (TempP->Loc.y > 1) /* && (TempP->length <= MAX_NUM_OF_WIRE)*/) {
-            Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y - 1, TempP->Loc.z - 1, Q, TempP);
+            CHECKUPDATEGRAPH(TempP->Loc.x, TempP->Loc.y - 1, TempP->Loc.z - 1, TempP);
         }
         if (TempP->Loc.z && (TempP->Loc.y < D.Height - 1) /*&&
             (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::TwoCW)*/) {
-            Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y + 1, TempP->Loc.z - 1, Q, TempP);
+            CHECKUPDATEGRAPH(TempP->Loc.x, TempP->Loc.y + 1, TempP->Loc.z - 1, TempP);
         }
 
         if ((TempP->Loc.z < D.Length - 1) && (TempP->Loc.y > 1) /* && (TempP->length <= MAX_NUM_OF_WIRE)*/) {
-            Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y - 1, TempP->Loc.z + 1, Q, TempP);
+            CHECKUPDATEGRAPH(TempP->Loc.x, TempP->Loc.y - 1, TempP->Loc.z + 1, TempP);
         }
         if ((TempP->Loc.z < D.Length - 1) && (TempP->Loc.y < D.Height - 1)/* &&
             (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::ZeroCW)*/) {
-            Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y + 1, TempP->Loc.z + 1, Q, TempP);
+            CHECKUPDATEGRAPH(TempP->Loc.x, TempP->Loc.y + 1, TempP->Loc.z + 1, TempP);
         }
     }
     C.setRouted(0);
@@ -940,7 +959,8 @@ bool Router::reRouteforIllegalRegularRouteHelper(
     }
 
     std::vector<Router::coord> endTemp = end;
-    std::priority_queue<Router::Point*, std::vector<Router::Point*>, Router::PointCompare> Q;
+    auto cmp = [this, &endTemp](const Point* lhs, const Point* rhs){return (lhs->cost + this->heuristic(endTemp, lhs)) > (rhs->cost + this->heuristic(endTemp, rhs));};
+    std::priority_queue<Router::Point*, std::vector<Router::Point*>, decltype(cmp)> Q(cmp);
     getPoint(start.x, start.y, start.z).cost = 0;
     getPoint(start.x, start.y, start.z).length = 1;
     getPoint(start.x, start.y, start.z).inserted = 1;
@@ -964,52 +984,52 @@ bool Router::reRouteforIllegalRegularRouteHelper(
 
         if (TempP->Loc.x /*&& (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::OneCW)*/ &&
             (TempP->Loc.y) % 2 == 1) {
-            Router::checkUpdateGraph(TempP->Loc.x - 1, TempP->Loc.y, TempP->Loc.z, Q, TempP);
+            CHECKUPDATEGRAPH(TempP->Loc.x - 1, TempP->Loc.y, TempP->Loc.z, TempP);
         }
         if (TempP->Loc.x < D.Width - 1 /*&&
             (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::ThreeCW)*/
             && (TempP->Loc.y) % 2 == 1) {
-            Router::checkUpdateGraph(TempP->Loc.x + 1, TempP->Loc.y, TempP->Loc.z, Q, TempP);
+            CHECKUPDATEGRAPH(TempP->Loc.x + 1, TempP->Loc.y, TempP->Loc.z, TempP);
         }
         if (TempP->Loc.z /*&& (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::TwoCW)*/ &&
             (TempP->Loc.y) % 2 == 1) {
-            Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y, TempP->Loc.z - 1, Q, TempP);
+            CHECKUPDATEGRAPH(TempP->Loc.x, TempP->Loc.y, TempP->Loc.z - 1, TempP);
         }
         if (TempP->Loc.z < D.Length - 1 /*&&
             (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::ZeroCW)*/
             && (TempP->Loc.y) % 2 == 1) {
-            Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y, TempP->Loc.z + 1, Q, TempP);
+            CHECKUPDATEGRAPH(TempP->Loc.x, TempP->Loc.y, TempP->Loc.z + 1, TempP);
         }
 
         if (TempP->Loc.x && (TempP->Loc.y > 1) /*&& (TempP->length <= MAX_NUM_OF_WIRE)*/) {
-            Router::checkUpdateGraph(TempP->Loc.x - 1, TempP->Loc.y - 1, TempP->Loc.z, Q, TempP);
+            CHECKUPDATEGRAPH(TempP->Loc.x - 1, TempP->Loc.y - 1, TempP->Loc.z, TempP);
         }
         if (TempP->Loc.x && (TempP->Loc.y < D.Height - 1)/* &&
             (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::OneCW)*/) {
-            Router::checkUpdateGraph(TempP->Loc.x - 1, TempP->Loc.y + 1, TempP->Loc.z, Q, TempP);
+            CHECKUPDATEGRAPH(TempP->Loc.x - 1, TempP->Loc.y + 1, TempP->Loc.z, TempP);
         }
 
         if ((TempP->Loc.x < D.Width - 1) && (TempP->Loc.y > 1) /*&& (TempP->length <= MAX_NUM_OF_WIRE)*/) {
-            Router::checkUpdateGraph(TempP->Loc.x + 1, TempP->Loc.y - 1, TempP->Loc.z, Q, TempP);
+            CHECKUPDATEGRAPH(TempP->Loc.x + 1, TempP->Loc.y - 1, TempP->Loc.z, TempP);
         }
         if ((TempP->Loc.x < D.Width - 1) && (TempP->Loc.y < D.Height - 1) /*&&
             (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::ThreeCW)*/) {
-            Router::checkUpdateGraph(TempP->Loc.x + 1, TempP->Loc.y + 1, TempP->Loc.z, Q, TempP);
+            CHECKUPDATEGRAPH(TempP->Loc.x + 1, TempP->Loc.y + 1, TempP->Loc.z, TempP);
         }
         if (TempP->Loc.z && (TempP->Loc.y > 1) /* && (TempP->length <= MAX_NUM_OF_WIRE)*/) {
-            Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y - 1, TempP->Loc.z - 1, Q, TempP);
+            CHECKUPDATEGRAPH(TempP->Loc.x, TempP->Loc.y - 1, TempP->Loc.z - 1, TempP);
         }
         if (TempP->Loc.z && (TempP->Loc.y < D.Height - 1) /*&&
             (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::TwoCW)*/) {
-            Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y + 1, TempP->Loc.z - 1, Q, TempP);
+            CHECKUPDATEGRAPH(TempP->Loc.x, TempP->Loc.y + 1, TempP->Loc.z - 1, TempP);
         }
 
         if ((TempP->Loc.z < D.Length - 1) && (TempP->Loc.y > 1) /* && (TempP->length <= MAX_NUM_OF_WIRE)*/) {
-            Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y - 1, TempP->Loc.z + 1, Q, TempP);
+            CHECKUPDATEGRAPH(TempP->Loc.x, TempP->Loc.y - 1, TempP->Loc.z + 1, TempP);
         }
         if ((TempP->Loc.z < D.Length - 1) && (TempP->Loc.y < D.Height - 1)/* &&
             (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::ZeroCW)*/) {
-            Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y + 1, TempP->Loc.z + 1, Q, TempP);
+            CHECKUPDATEGRAPH(TempP->Loc.x, TempP->Loc.y + 1, TempP->Loc.z + 1, TempP);
         }
     }
     C.setRouted(0);
@@ -1148,7 +1168,11 @@ bool Router::checkUpdateGraphHelper(Router::Point* Parent, Router::Point* Curren
     } else if (Parent->Loc.z < Current->Loc.z) {
         ori_ = HDL2Redstone::Orientation::OneCW;
     }
-
+    if(Current->length == MAX_NUM_OF_WIRE + 1 && (Current->ori != ori_ || Parent->Loc.y != Current->Loc.y)){
+        //std::cout<<"reach here "<<Current->Loc.x<<" "<<Current->Loc.y<<" "<<Current->Loc.z<<std::endl;
+        RetFlag = false;
+    }else
+    {
     if (Parent->length == MAX_NUM_OF_WIRE + 1) {
         if (Parent->ori != ori_) {
             RetFlag = false;
@@ -1217,9 +1241,17 @@ bool Router::checkUpdateGraphHelper(Router::Point* Parent, Router::Point* Curren
             Current->length = Parent->length + 1;
         }
     }
+
+    }
     if (RetFlag) {
         Current->ori = ori_;
     }
+        // if(Parent->Loc.x==11 && Parent->Loc.y==1 && Parent->Loc.z==8){
+        //     std::cout<<"reach here "<<RetFlag<<" "<<Current->Loc.x<<" "<<Current->Loc.y<<" "<<Current->Loc.z<<std::endl;
+        // }
+        // if(Current->Loc.x==11 && Current->Loc.y==1 && Current->Loc.z==8){
+        //     std::cout<<"okokokreach here "<<RetFlag<<" "<<Parent->Loc.x<<" "<<Parent->Loc.y<<" "<<Parent->Loc.z<<std::endl;
+        // }
     return RetFlag;
 }
 
@@ -1631,7 +1663,8 @@ bool Router::regularRoute_next(Connection& C) {
     }
 
     std::vector<Router::coord> endTemp = end;
-    std::priority_queue<Router::Point*, std::vector<Router::Point*>, Router::PointCompare> Q;
+    auto cmp = [this, &endTemp](const Point* lhs, const Point* rhs){return (lhs->cost + this->heuristic(endTemp, lhs)) > (rhs->cost + this->heuristic(endTemp, rhs));};
+    std::priority_queue<Router::Point*, std::vector<Router::Point*>, decltype(cmp)> Q(cmp);
     getPoint(start.x, start.y, start.z).cost = 0;
     getPoint(start.x, start.y, start.z).length = 1;
     getPoint(start.x, start.y, start.z).inserted = 1;
@@ -1653,52 +1686,52 @@ bool Router::regularRoute_next(Connection& C) {
 
         if (TempP->Loc.x /*&& (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::OneCW)*/ &&
             (TempP->Loc.y) % 2 == 1) {
-            Router::checkUpdateGraph(TempP->Loc.x - 1, TempP->Loc.y, TempP->Loc.z, Q, TempP);
+            CHECKUPDATEGRAPH(TempP->Loc.x - 1, TempP->Loc.y, TempP->Loc.z, TempP);
         }
         if (TempP->Loc.x < D.Width - 1 /*&&
             (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::ThreeCW)*/
             && (TempP->Loc.y) % 2 == 1) {
-            Router::checkUpdateGraph(TempP->Loc.x + 1, TempP->Loc.y, TempP->Loc.z, Q, TempP);
+            CHECKUPDATEGRAPH(TempP->Loc.x + 1, TempP->Loc.y, TempP->Loc.z, TempP);
         }
         if (TempP->Loc.z /*&& (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::TwoCW)*/ &&
             (TempP->Loc.y) % 2 == 1) {
-            Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y, TempP->Loc.z - 1, Q, TempP);
+            CHECKUPDATEGRAPH(TempP->Loc.x, TempP->Loc.y, TempP->Loc.z - 1, TempP);
         }
         if (TempP->Loc.z < D.Length - 1 /*&&
             (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::ZeroCW)*/
             && (TempP->Loc.y) % 2 == 1) {
-            Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y, TempP->Loc.z + 1, Q, TempP);
+            CHECKUPDATEGRAPH(TempP->Loc.x, TempP->Loc.y, TempP->Loc.z + 1, TempP);
         }
 
         if (TempP->Loc.x && (TempP->Loc.y > 1) /*&& (TempP->length <= MAX_NUM_OF_WIRE)*/) {
-            Router::checkUpdateGraph(TempP->Loc.x - 1, TempP->Loc.y - 1, TempP->Loc.z, Q, TempP);
+            CHECKUPDATEGRAPH(TempP->Loc.x - 1, TempP->Loc.y - 1, TempP->Loc.z, TempP);
         }
         if (TempP->Loc.x && (TempP->Loc.y < D.Height - 1)/* &&
             (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::OneCW)*/) {
-            Router::checkUpdateGraph(TempP->Loc.x - 1, TempP->Loc.y + 1, TempP->Loc.z, Q, TempP);
+            CHECKUPDATEGRAPH(TempP->Loc.x - 1, TempP->Loc.y + 1, TempP->Loc.z, TempP);
         }
 
         if ((TempP->Loc.x < D.Width - 1) && (TempP->Loc.y > 1) /*&& (TempP->length <= MAX_NUM_OF_WIRE)*/) {
-            Router::checkUpdateGraph(TempP->Loc.x + 1, TempP->Loc.y - 1, TempP->Loc.z, Q, TempP);
+            CHECKUPDATEGRAPH(TempP->Loc.x + 1, TempP->Loc.y - 1, TempP->Loc.z, TempP);
         }
         if ((TempP->Loc.x < D.Width - 1) && (TempP->Loc.y < D.Height - 1) /*&&
             (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::ThreeCW)*/) {
-            Router::checkUpdateGraph(TempP->Loc.x + 1, TempP->Loc.y + 1, TempP->Loc.z, Q, TempP);
+            CHECKUPDATEGRAPH(TempP->Loc.x + 1, TempP->Loc.y + 1, TempP->Loc.z, TempP);
         }
         if (TempP->Loc.z && (TempP->Loc.y > 1) /* && (TempP->length <= MAX_NUM_OF_WIRE)*/) {
-            Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y - 1, TempP->Loc.z - 1, Q, TempP);
+            CHECKUPDATEGRAPH(TempP->Loc.x, TempP->Loc.y - 1, TempP->Loc.z - 1, TempP);
         }
         if (TempP->Loc.z && (TempP->Loc.y < D.Height - 1) /*&&
             (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::TwoCW)*/) {
-            Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y + 1, TempP->Loc.z - 1, Q, TempP);
+            CHECKUPDATEGRAPH(TempP->Loc.x, TempP->Loc.y + 1, TempP->Loc.z - 1, TempP);
         }
 
         if ((TempP->Loc.z < D.Length - 1) && (TempP->Loc.y > 1) /* && (TempP->length <= MAX_NUM_OF_WIRE)*/) {
-            Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y - 1, TempP->Loc.z + 1, Q, TempP);
+            CHECKUPDATEGRAPH(TempP->Loc.x, TempP->Loc.y - 1, TempP->Loc.z + 1, TempP);
         }
         if ((TempP->Loc.z < D.Length - 1) && (TempP->Loc.y < D.Height - 1)/* &&
             (TempP->length <= MAX_NUM_OF_WIRE || TempP->ori == HDL2Redstone::Orientation::ZeroCW)*/) {
-            Router::checkUpdateGraph(TempP->Loc.x, TempP->Loc.y + 1, TempP->Loc.z + 1, Q, TempP);
+            CHECKUPDATEGRAPH(TempP->Loc.x, TempP->Loc.y + 1, TempP->Loc.z + 1, TempP);
         }
     }
     C.setRouted(0);
@@ -1890,4 +1923,16 @@ void Router::LocalReTiming(Connection& C, std::set<std::tuple<uint16_t, uint16_t
             }
         }
     }
+}
+int Router::heuristic(std::vector<Router::coord>& Goals, const Point*& Curr_Node){
+    int ret;
+    if(Goals.empty()){
+        return 0;
+    }else{
+        ret = std::abs(Goals[0].x-Curr_Node->Loc.x) + std::abs(Goals[0].y-Curr_Node->Loc.y) + std::abs(Goals[0].z-Curr_Node->Loc.z);
+        for(auto&it : Goals){
+            ret = std::min(ret, std::abs(it.x-Curr_Node->Loc.x) + std::abs(it.y-Curr_Node->Loc.y) + std::abs(it.z-Curr_Node->Loc.z));
+        }
+    }
+    return ret;
 }
