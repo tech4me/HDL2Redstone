@@ -1,7 +1,12 @@
-module counter_4_sevenseg(input clk, output reg [6:0] z);
+module counter_4_sevenseg(input clk, input reset, input enable, output reg [6:0] z);
     reg [3:0] count;
     always@(posedge clk) begin
-        count <= count + 1;
+        if (reset) begin
+            count <= 0;
+        end
+        else if (enable) begin
+            count <= count + 1;
+        end
     end
 
 always @(*) begin

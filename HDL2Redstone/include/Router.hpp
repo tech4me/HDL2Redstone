@@ -6,7 +6,7 @@
 #include <Placement.hpp>
 #include <Timing.hpp>
 
-#define MAX_NUM_OF_WIRE 12
+#define MAX_NUM_OF_WIRE 11
 #define MUL_COST_INC 1
 #define BASE_COST_INC 1
 
@@ -86,7 +86,6 @@ class Router {
         return Points[((X_ * D.Height) + Y_) * D.Width + Z_];
     }
     void LocalReTiming(Connection& C, std::set<std::tuple<uint16_t, uint16_t, uint16_t>>& repeater_location);
-    int heuristic(std::vector<Router::coord>& Goals, const Point*& Curr_Node);
     Design& D;
     std::vector<int> UsedSpace;
     std::vector<WireInfo> WI;

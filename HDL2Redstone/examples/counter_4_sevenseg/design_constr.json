@@ -13,6 +13,22 @@
       ],
       "input": true
     },
+    "reset": {
+      "location": [
+        49,
+        0,
+        49
+      ],
+      "input": true
+    },
+    "enable": {
+      "location": [
+        49,
+        0,
+        40
+      ],
+      "input": true
+    },
     "z[0]": {
       "location": [
         49,
